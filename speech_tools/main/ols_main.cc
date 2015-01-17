@@ -241,7 +241,7 @@ static void load_ols_data(EST_FMatrix &X, EST_FMatrix &Y, WDataSet &d)
     X.resize(d.length(),d.width());
     Y.resize(d.length(),1);
 
-    for (n=0,p=d.head(); p != 0; p=next(p),n++)
+    for (n=0,p=d.head(); p != 0; p=p->next(),n++)
     {
 	Y.a_no_check(n,0) = d(p)->get_flt_val(0);
 	X.a_no_check(n,0) = 1;

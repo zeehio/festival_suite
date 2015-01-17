@@ -83,7 +83,7 @@ EST_WFST_State::EST_WFST_State(const EST_WFST_State &state)
     p_name = state.p_name;
     p_type = state.p_type;
     p_tag = p_tag;
-    for (p=state.transitions.head(); p != 0; p=next(p))
+    for (p=state.transitions.head(); p != 0; p=p->next())
 	transitions.append(new EST_WFST_Transition(*state.transitions(p)));
 }
 
@@ -91,7 +91,7 @@ EST_WFST_State::~EST_WFST_State()
 {
     EST_Litem *p;
 
-    for (p=transitions.head(); p != 0; p=next(p))
+    for (p=transitions.head(); p != 0; p=p->next())
 	delete transitions(p);
 
 }
@@ -203,7 +203,7 @@ void EST_WFST::transduce(int state,int in,wfst_translist &out) const
     EST_WFST_State *s = p_states(state);
     EST_Litem *i;
 
-    for (i=s->transitions.head(); i != 0; i=next(i))
+    for (i=s->transitions.head(); i != 0; i=i->next())
     {
 	if (in == s->transitions(i)->in_symbol())
 	{
@@ -221,7 +221,7 @@ int EST_WFST::transduce(int state,int in,int &out) const
     EST_WFST_State *s = p_states(state);
     EST_Litem *i;
 
-    for (i=s->transitions.head(); i != 0; i=next(i))
+    for (i=s->transitions.head(); i != 0; i=i->next())
     {
 	if (in == s->transitions(i)->in_symbol())
 	{
@@ -270,7 +270,7 @@ EST_WFST_Transition *EST_WFST::find_transition(int state,int in, int out) const
     EST_WFST_State *s = p_states(state);
     EST_Litem *i;
 
-    for (i=s->transitions.head(); i != 0; i=next(i))
+    for (i=s->transitions.head(); i != 0; i=i->next())
     {
 	if ((in == s->transitions(i)->in_symbol()) &&
 	    (out == s->transitions(i)->out_symbol()))
@@ -321,7 +321,7 @@ EST_write_status EST_WFST::save_binary(FILE *fd)
 	else
 	    type = WFST_ERROR;
 	fwrite(&type,4,1,fd);
-	for (j=p_states[i]->transitions.head(); j != 0; j=next(j))
+	for (j=p_states[i]->transitions.head(); j != 0; j=j->next())
 	{
 	    in = p_states[i]->transitions(j)->in_symbol();
 	    out = p_states[i]->transitions(j)->out_symbol();
@@ -399,7 +399,7 @@ EST_write_status EST_WFST::save(const EST_String &filename,
 		fprintf(ofd,"error ");
 	    }
 	    fprintf(ofd,"%d)\n",s->num_transitions());
-	    for (j=s->transitions.head(); j != 0; j=next(j))
+	    for (j=s->transitions.head(); j != 0; j=j->next())
 	    {
 		EST_String in = p_in_symbols.name(s->transitions(j)->in_symbol());
 		EST_String out=p_out_symbols.name(s->transitions(j)->out_symbol());
@@ -677,7 +677,7 @@ void EST_WFST::start_cumulate(void)
     for (i=0; i < p_num_states; i++)
     {
 	EST_WFST_State *s=p_states[i];
-	for (j=s->transitions.head(); j !=0; j=next(j))
+	for (j=s->transitions.head(); j !=0; j=j->next())
 	    s->transitions(j)->set_weight(0);
     }
 }
@@ -692,10 +692,10 @@ void EST_WFST::stop_cumulate(void)
     for (i=0; i < p_num_states; i++)
     {
 	EST_WFST_State *s=p_states[i];
-	for (t=0,j=s->transitions.head(); j !=0; j=next(j))
+	for (t=0,j=s->transitions.head(); j !=0; j=j->next())
 	    t += s->transitions(j)->weight();
 	if (t > 0)
-	    for (j=s->transitions.head(); j !=0; j=next(j))
+	    for (j=s->transitions.head(); j !=0; j=j->next())
 		s->transitions(j)->set_weight(s->transitions(j)->weight()/t);
     }
 }

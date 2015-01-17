@@ -48,7 +48,7 @@ EST_TVector<T> &set(EST_TVector<T> &v, const EST_TList<T> &in)
   v.resize(in.length(), FALSE);
   EST_Litem *p;
   int i = 0;
-  for (p = in.head(); p!= 0; p = next(p), ++i)
+  for (p = in.head(); p!= 0; p = p->next(), ++i)
     v.a_no_check(i) = in.item(p);
   
   return v;
@@ -59,7 +59,7 @@ template<class T> EST_TVector<T> &copy(EST_TVector<T> a,const EST_TList<T> &in)
     a.resize(in.length(), FALSE);
     EST_Litem *p;
     int i = 0;
-    for (p = in.head(); p!= 0; p = next(p), ++i)
+    for (p = in.head(); p!= 0; p = p->next(), ++i)
 	a[i] = in.item(p);
 
     return a;

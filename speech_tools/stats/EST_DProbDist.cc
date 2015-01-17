@@ -165,7 +165,7 @@ void EST_DiscreteProbDistribution::cumulate(const EST_String &s,double count)
     }
     else // its a (slow) string type 
     {
-	for (p=scounts.list.head(); p != 0; p=next(p))
+	for (p=scounts.list.head(); p != 0; p=p->next())
 	{
 	    if (scounts.list(p).k == s)
 	    {
@@ -209,7 +209,7 @@ const EST_String &EST_DiscreteProbDistribution::most_probable(double *prob) cons
     else
     {
 	t = 0;
-	for (p=scounts.list.head(); p != 0; p=next(p))
+	for (p=scounts.list.head(); p != 0; p=p->next())
 	    if (scounts.list(p).v > max)
 	    {
 		t = p;
@@ -354,7 +354,7 @@ double EST_DiscreteProbDistribution::entropy() const
     }
     else
     {
-	for (p=scounts.list.head(); p != 0; p=next(p))
+	for (p=scounts.list.head(); p != 0; p=p->next())
 	{
 	    double prob = scounts.list(p).v/num_samples;
 	    if (prob != 0.0)
@@ -388,7 +388,7 @@ EST_Litem *EST_DiscreteProbDistribution::item_next(EST_Litem *idx) const
     if (type == tprob_discrete)
 	return (EST_Litem *)(((unsigned char *)idx)+1);
     else
-	return next(idx);
+	return idx->next();
 }
 
 const EST_String &EST_DiscreteProbDistribution::item_name(EST_Litem *idx) const

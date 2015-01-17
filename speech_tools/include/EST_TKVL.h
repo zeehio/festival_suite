@@ -149,7 +149,7 @@ template<class K, class V> class EST_TKVL {
     
     friend ostream& operator << (ostream& s, EST_TKVL<K,V> const &l)
     {EST_Litem *p; 
-        for (p = l.list.head(); p ; p = next(p)) 
+        for (p = l.list.head(); p ; p = p->next()) 
             s << l.list(p).k << "\t" << l.list(p).v << endl; 
         return s;
     } 
@@ -167,7 +167,7 @@ protected:
   struct IPointer {  EST_Litem *p; };
 
   void point_to_first(IPointer &ip) const { ip.p = list.head(); }
-  void move_pointer_forwards(IPointer &ip) const { ip.p = next(ip.p); }
+  void move_pointer_forwards(IPointer &ip) const { ip.p = ip.p->next(); }
   bool points_to_something(const IPointer &ip) const { return ip.p != NULL; }
   EST_TKVI<K, V> &points_at(const IPointer &ip) { return list(ip.p); }
 
@@ -187,7 +187,7 @@ protected:
   struct IPointer_k {  EST_Litem *p; };
 
   void point_to_first(IPointer_k &ip) const { ip.p = list.head(); }
-  void move_pointer_forwards(IPointer_k &ip) const { ip.p = next(ip.p); }
+  void move_pointer_forwards(IPointer_k &ip) const { ip.p = ip.p->next(); }
   bool points_to_something(const IPointer_k &ip) const { return ip.p != NULL; }
   K &points_at(const IPointer_k &ip) { return list(ip.p).k; }
 

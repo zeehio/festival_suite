@@ -172,7 +172,7 @@ LISP EST_SCFG::get_rules()
     EST_Litem *p;
     LISP r;
 
-    for (r=NIL,p=rules.head(); p != 0; p=next(p))
+    for (r=NIL,p=rules.head(); p != 0; p=p->next())
     {
 	if (rules(p).type() == est_scfg_unary_rule)
 	    r = cons(cons(flocons(rules(p).prob()),
@@ -257,7 +257,7 @@ void EST_SCFG::set_rule_prob_cache()
 {
     EST_Litem *pp;
 
-    for (pp=rules.head(); pp != 0; pp = next(pp))
+    for (pp=rules.head(); pp != 0; pp = pp->next())
     {
 	if (rules(pp).type() == est_scfg_binary_rule)
 	{

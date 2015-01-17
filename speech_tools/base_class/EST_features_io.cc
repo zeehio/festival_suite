@@ -66,7 +66,7 @@ void EST_Features::save_fpair(ostream &outf,
 	}
 	else
 	    for (EST_Litem *q=f->features->list.head(); 
-		 q != 0; q=next(q) )
+		 q != 0; q=q->next() )
 		save_fpair(outf,
 			   fname+"."+f->features->list(q).k,
 			   f->features->list(q).v);
@@ -114,7 +114,7 @@ EST_write_status EST_Features::save(ostream &outf) const
     if (features->list.head() == 0)
 	outf << "()";
     else
-	for (EST_Litem *p=features->list.head(); p != 0; p=next(p) )
+	for (EST_Litem *p=features->list.head(); p != 0; p=p->next() )
 	    save_fpair(outf,
 		       features->list(p).k,
 		       features->list(p).v);
@@ -126,7 +126,7 @@ EST_write_status EST_Features::save_sexpr(ostream &outf) const
 {
     // Save features as an sexpression
     outf << "(";
-    for (EST_Litem *p=features->list.head(); p != 0; p=next(p) )
+    for (EST_Litem *p=features->list.head(); p != 0; p=p->next() )
     {
 	const EST_String &fname = features->list(p).k;
 	const EST_Val &fvalue = features->list(p).v;
@@ -168,7 +168,7 @@ EST_write_status EST_Features::save_sexpr(ostream &outf) const
 	else
 	    outf << quote_string(fvalue.string());
 	outf << ")";
-	if (next(p))
+	if (p->next())
 	    outf << " ";
     }
     outf << ")";

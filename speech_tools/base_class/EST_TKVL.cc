@@ -57,7 +57,7 @@ EST_Litem *EST_TKVL<K, V>::find_pair_key(const K &key) const
 {
     EST_Litem *ptr;
 
-    for (ptr = list.head(); ptr != 0; ptr= next(ptr))
+    for (ptr = list.head(); ptr != 0; ptr= ptr->next())
 	if (list.item(ptr).k == key)
 	    return ptr;
     return 0;
@@ -70,7 +70,7 @@ EST_Litem *EST_TKVL<K, V>::find_pair_val(const V &val) const
 
 ///    cout << "function list\n" << endl;
 
-    for (ptr = list.head(); ptr != 0; ptr= next(ptr))
+    for (ptr = list.head(); ptr != 0; ptr= ptr->next())
     {
 //	cout << "ff: " << list.item(ptr).k << endl;
 	if (list.item(ptr).v == val)
@@ -233,7 +233,7 @@ template<class K, class V>
 void EST_TKVL<K,V>::map(void (*func)(K&, V&))
 {
     EST_Litem *p;
-    for(p=list.head(); p; p=next(p))
+    for(p=list.head(); p; p=p->next())
     {
 	EST_TKVI<K,V> item = list.item(p);
 	(*func)(item.k, item.v);

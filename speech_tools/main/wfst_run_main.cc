@@ -145,7 +145,7 @@ static int wfst_run_main(int argc, char **argv)
     if (al.present("-cumulate_into"))
 	wfst.start_cumulate();
 
-    for (f=files.head(); f != 0; f=next(f))
+    for (f=files.head(); f != 0; f=f->next())
     {
 	if (files(f) == "-")
 	    ts.open(stdin,FALSE);

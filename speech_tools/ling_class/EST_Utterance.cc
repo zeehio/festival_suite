@@ -118,7 +118,7 @@ static EST_Item *item_id(EST_Item *p, const EST_String &n)
     if ((p == 0) || (p->S("id","0") == n))
 	return p;
 
-    for (s = daughter1(p); s; s = next(s))
+    for (s = daughter1(p); s; s = s->next())
     {
 	t = item_id(s, n);
 	if (t != 0)
@@ -179,7 +179,7 @@ bool EST_Utterance::relation_present(const EST_String name) const
 
 bool EST_Utterance::relation_present(EST_StrList &names) const
 {
-    for (EST_Litem *p = names.head(); p ; p = next(p))
+    for (EST_Litem *p = names.head(); p ; p = p->next())
 	if (!relations.present(names(p)))
 	    return false;
     return true;
@@ -390,7 +390,7 @@ static void clear_up_sisilist(EST_TKVL<EST_Item_Content *,EST_Item *> &s)
     // contents however will not be freed as they will be referenced
     // somewhere in the copied utterance
     
-    for (EST_Litem *r=s.list.head(); r != 0; r=next(r))
+    for (EST_Litem *r=s.list.head(); r != 0; r=r->next())
 	delete s.list(r).v;
 
 }
@@ -418,7 +418,7 @@ static void sub_utt_copy(EST_Utterance &sub,EST_Item *i,
 	EST_Item *np,*d;
 	EST_Litem *r;
 	EST_Item *ni = map_ling_item(i,s);
-	for (r = i->relations().list.head(); r; r = next(r))
+	for (r = i->relations().list.head(); r; r = r->next())
 	{
 	    EST_String relname = i->relations().list(r).k;
 	    if (!sub.relation_present(relname))
@@ -429,7 +429,7 @@ static void sub_utt_copy(EST_Utterance &sub,EST_Item *i,
 		sub.relation(relname)->append(ni);
 
 	    // Do its daughters
-	    for (d = daughter1(i,relname); d ; d=next(d))
+	    for (d = daughter1(i,relname); d ; d=d->next())
 		sub_utt_copy(sub,d,s);
 	}
     }
@@ -559,19 +559,19 @@ void utt_2_flat_repr( const EST_Utterance &utt,
 		      EST_String &flat_repr )
 {
   EST_Item *phrase = utt.relation("Phrase")->head();
-  for( ; phrase; phrase=next(phrase) ){
+  for( ; phrase; phrase=phrase->next() ){
     flat_repr += "<";
  
     EST_Item *word = daughter1(phrase);
-    for( ; word; word=next(word) ){
+    for( ; word; word=word->next() ){
       flat_repr += "{";
 
       EST_Item *syllable = daughter1(word, "SylStructure");
-      for( ; syllable; syllable=next(syllable) ){
+      for( ; syllable; syllable=syllable->next() ){
 	flat_repr += EST_String::cat( "(", syllable->S("stress") );
 
 	EST_Item *phone = daughter1(syllable);
-	for( ; phone; phone=next(phone) )
+	for( ; phone; phone=phone->next() )
 	  flat_repr += EST_String::cat( " ", phone->S("name"), " " );
 	flat_repr += ")";
       }

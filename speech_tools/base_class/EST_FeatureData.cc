@@ -308,7 +308,7 @@ void EST_FeatureData::extract_named_fields(EST_FeatureData &f,
 
     info().extract_named_fields(*(f.p_info), n_fields);
 
-    for (p = n_fields.head(), i = 0; i < f.num_fields(); ++i, p = next(p))
+    for (p = n_fields.head(), i = 0; i < f.num_fields(); ++i, p = p->next())
 	for (j = 0; j < f.num_samples(); ++j)
 	    f(j, i) = a(j, n_fields(p));
 
@@ -321,12 +321,12 @@ void EST_FeatureData::extract_numbered_fields(EST_FeatureData &f,
     EST_StrList n_fields;
     int i, j;
 
-    for (p = fields.head(); p; p = next(p))
+    for (p = fields.head(); p; p = p->next())
 	n_fields.append(info().field_name(fields(p)));
     
     info().extract_named_fields(*(f.p_info), n_fields);
 
-    for (p = fields.head(), i = 0; i < f.num_fields(); ++i, p = next(p))
+    for (p = fields.head(), i = 0; i < f.num_fields(); ++i, p = p->next())
 	for (j = 0; j < f.num_samples(); ++j)
 	    f(j, i) = a(j, fields(p));
 
@@ -372,7 +372,7 @@ EST_write_status save_est(const EST_FeatureData &f, const EST_String &filename)
     *outf << "FieldTypes " << f.info().field_types();
     if (f.info().group_start.length() > 0)
 	for (s = f.info().group_start.head(), e = f.info().group_end.head(); 
-	     s; s = next(s), e = next(e))
+	     s; s = s->next(), e = e->next())
 	    *outf << "Group " << f.info().group_start.key(s) << " " << 
 		f.info().group_start.val(s) << " " << f.info().group_end.val(e) << endl;
 

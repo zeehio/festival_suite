@@ -111,7 +111,7 @@ static void full_kkcompile(LISP inalpha,LISP outalpha,
     cout << "WFST: intersecting " << rulelist.length() << " rules" << endl;
     EST_Litem *p,*nnp;
     int i;
-    for (i=0,p=rulelist.head(); next(p) != 0; p=nnp)
+    for (i=0,p=rulelist.head(); p->next() != 0; p=nnp)
     {
 	EST_WFST r_wfst,base_wfst,det_wfst;
 	EST_WFST mmm;
@@ -120,14 +120,14 @@ static void full_kkcompile(LISP inalpha,LISP outalpha,
 	cout << "intersecting " << i << " and " << i+1 << " " <<
 	    rulelist.length()-2 << " left" << endl;
 	cout << "   " << rulelist(p).summary() << " and " << endl;
-	cout << "   " << rulelist(next(p)).summary() << " becomes " << endl;
-	mmm.intersection(rulelist(p),rulelist(next(p)));
+	cout << "   " << rulelist(p->next()).summary() << " becomes " << endl;
+	mmm.intersection(rulelist(p),rulelist(p->next()));
 	cout << "   " << mmm.summary() << " minimizes to " << endl;
 	rr_wfst.minimize(mmm);
 	cout << "   " << rr_wfst.summary() << endl;
-	nnp=next(next(p));
+	nnp=p->next()->next();
 	i+=2;
-	rulelist.remove(next(p));
+	rulelist.remove(p->next());
 	rulelist.remove(p);
     }
 

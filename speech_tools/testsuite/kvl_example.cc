@@ -125,7 +125,7 @@ int main(void)
     // list, from this, \Ref{EST_Litem} pointers can be set to items, and
     // then used in access functions:
 
-    for (p=kvl.head(); p != 0; p=next(p))
+    for (p=kvl.head(); p != 0; p=p->next())
 	 cout << kvl.val(p) << " " << kvl.key(p) << endl;
 
     // this can also be used to change values: the following changes the

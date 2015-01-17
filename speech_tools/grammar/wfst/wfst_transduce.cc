@@ -79,12 +79,12 @@ int transduce(const EST_WFST &wfst,const EST_StrList &in,EST_StrList &out)
     EST_IList in_i,out_i;
     int r;
 
-    for (p=in.head(); p != 0; p=next(p))
+    for (p=in.head(); p != 0; p=p->next())
 	in_i.append(wfst.in_symbol(in(p)));
 
     r = transduce(wfst,in_i,out_i);
 
-    for (p=out_i.head(); p != 0; p=next(p))
+    for (p=out_i.head(); p != 0; p=p->next())
 	out.append(wfst.out_symbol(out_i(p)));
 
     return r;
@@ -106,11 +106,11 @@ int transduce(const EST_WFST &wfst,const EST_IList &in,EST_IList &out)
     wfst.transduce(wfst.start_state(),wfst.in_epsilon(),ss_eps_trans);
     add_transduce_mstate(wfst,start_state,ss_eps_trans,*current_ms);
 
-    for (i=in.head(); i != 0; i=next(i))
+    for (i=in.head(); i != 0; i=i->next())
     {
 	wfst_tstate_list *ns = new wfst_tstate_list;
 
-	for (cs=current_ms->head(); cs != 0; cs=next(cs))
+	for (cs=current_ms->head(); cs != 0; cs=cs->next())
 	{   // For each state in current update list of new states
 	    wfst_translist translist;
 	    wfst.transduce((*current_ms)(cs).state,in(i),translist);
@@ -129,7 +129,7 @@ int transduce(const EST_WFST &wfst,const EST_IList &in,EST_IList &out)
 	    endl;
     // should find "best" but we'll find longest at present
     // Choose the longest (should be based on score)
-    for (cs = current_ms->head(); cs != 0; cs=next(cs))
+    for (cs = current_ms->head(); cs != 0; cs=cs->next())
     {
 	if ((wfst.final((*current_ms)(cs).state)) &&
 	    ((*current_ms)(cs).outs.length() > out.length()))
@@ -155,7 +155,7 @@ static void add_transduce_mstate(const EST_WFST &wfst,
     EST_Litem *t;
 
     // Add new states to ns if not already there
-    for (t=translist.head(); t != 0; t=next(t))
+    for (t=translist.head(); t != 0; t=t->next())
     {
 	// Declare a new one and put it on the end of the list
 	// before we fill its values, this saves a copy
@@ -185,7 +185,7 @@ int recognize(const EST_WFST &wfst,const EST_StrList &in,int quiet)
     int i,o;
     int r;
     
-    for (p=in.head(); p != 0; p=next(p))
+    for (p=in.head(); p != 0; p=p->next())
     {
 	if (in(p).contains("/"))
 	{
@@ -215,7 +215,7 @@ int recognize(const EST_WFST &wfst,const EST_IList &in,
     
     for (p=in.head(),q=out.head();
 	 ((p != 0) && (q != 0));
-	 p=next(p),q=next(q))
+	 p=p->next(),q=q->next())
     {
 	nstate = wfst.transition(state,in(p),out(q));
 	if (!quiet)
@@ -253,7 +253,7 @@ int recognize_for_perplexity(const EST_WFST &wfst,
     int i,o;
     int r;
     
-    for (p=in.head(); p != 0; p=next(p))
+    for (p=in.head(); p != 0; p=p->next())
     {
 	if (in(p).contains("/"))
 	{
@@ -290,7 +290,7 @@ int recognize_for_perplexity(const EST_WFST &wfst,
     
     for (p=in.head(),q=out.head();
 	 ((p != 0) && (q != 0));
-	 p=next(p),q=next(q))
+	 p=p->next(),q=q->next())
     {
 	nstate = wfst.transition(state,in(p),out(q),prob);
 	count++;

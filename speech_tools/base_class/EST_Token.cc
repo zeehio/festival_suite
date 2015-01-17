@@ -66,9 +66,12 @@ static inline char *check_extend_str_in(char *str, int pos, int *max)
     // and copy the old one into the new one
     char *newstuff;
     
-    if (pos == *max)
+    if (pos >= *max)
     {
-	*max *= 2;
+        if (pos > *max)
+            *max = 2 * pos;
+        else
+            *max *= 2;
 	newstuff = new char[*max];
 	strncpy(newstuff,str,pos);
 	delete [] str;
@@ -79,7 +82,7 @@ static inline char *check_extend_str_in(char *str, int pos, int *max)
 }
 
 #define check_extend_str(STR, POS, MAX) \
-	(((POS)== *(MAX))?check_extend_str_in((STR),(POS),(MAX)):(STR))
+	(((POS)>= *(MAX))?check_extend_str_in((STR),(POS),(MAX)):(STR))
 
 ostream& operator<<(ostream& s, const EST_Token &p)
 {

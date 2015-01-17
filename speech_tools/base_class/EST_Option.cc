@@ -171,7 +171,7 @@ void EST_Option::add_prefix(EST_String prefix)
 {   
     EST_Litem *ptr;
     
-    for (ptr = list.head(); ptr; ptr = next(ptr))
+    for (ptr = list.head(); ptr; ptr = ptr->next())
 	change_key(ptr, prefix + key(ptr));
 }
 
@@ -184,7 +184,7 @@ ostream& operator << (ostream& s, const EST_Option &kv)
 {
     EST_Litem *ptr;
     
-    for (ptr = kv.list.head(); ptr; ptr = next(ptr))
+    for (ptr = kv.list.head(); ptr; ptr = ptr->next())
         s << kv.key(ptr) << "\t" << kv.val((EST_Litem *)ptr) << endl;
     
     return s;

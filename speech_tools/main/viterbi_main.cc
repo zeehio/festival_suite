@@ -387,7 +387,7 @@ static void print_results(EST_Relation &wstream)
 	exit(-1);
     }
 
-    for (s=wstream.head(); s != 0 ; s=next(s))
+    for (s=wstream.head(); s != 0 ; s=s->next())
     {
 	predict = s->f("best").string();
 	pscore = s->f("best_score");
@@ -471,7 +471,7 @@ static void load_given(const EST_String &filename,
     }
 
     // set max history
-    for (p = given.head(); p; p = next(p))
+    for (p = given.head(); p; p = p->next())
     {
 	for(i=0;i<given(p).length();i++)
 	    if(	is_a_special( given(p)(i), j) && (-j > max_history))
@@ -519,7 +519,7 @@ static EST_VTCandidate *vit_candlist(EST_Item *s,EST_Features &f)
     (void)f;
 
     observe = s->f("pos");  // index for observations TRACK
-    for (i=0,p=vocab.head(); i < observations.num_channels(); i++,p=next(p))
+    for (i=0,p=vocab.head(); i < observations.num_channels(); i++,p=p->next())
     {
 	c = new EST_VTCandidate;
 	c->name = vocab(p);  // to be more efficient this could be the index

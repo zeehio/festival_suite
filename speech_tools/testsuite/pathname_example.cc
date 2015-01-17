@@ -91,7 +91,7 @@ int main(void)
   cout << "listing " << data.filename() << ":\n";
 
   EST_Litem *item;
-  for(item=contents.head(); item; item=next(item))
+  for(item=contents.head(); item; item=item->next())
     if (EST_Pathname(contents(item)).is_filename())
       cout << "    " << contents(item) << "\n";
 

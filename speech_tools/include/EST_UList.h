@@ -53,6 +53,8 @@ public:
     void init() { n = NULL; p = NULL;}
     EST_UItem *n;
     EST_UItem *p;
+    EST_UItem *next() { return n; }
+    EST_UItem *prev() { return p; }
 };
 
 class EST_UList {
@@ -126,6 +128,8 @@ public:
 // inline functions in header file
 // everything else in EST_UList.C
 
+
+/* Please don't use these - use the member functions instead!
 inline EST_UItem *next(EST_UItem *ptr)
 {
     if (ptr != 0)
@@ -139,7 +143,7 @@ inline EST_UItem *prev(EST_UItem *ptr)
 	return ptr->p;
     return 0;
 }
-
+*/
 
 
 #endif

@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 
     if (al.present("-info"))
     {
-	for (p = trlist.head(); p; p = next(p))
+	for (p = trlist.head(); p; p = p->next())
 	    track_info(trlist(p));
 	exit(0);
     }
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
     {
 	tr.resize(0, tr.num_channels());
 	// Reorg -- fix += to resize to largest num_channels (with warning)
-	for (p = trlist.head(); p; p = next(p))
+	for (p = trlist.head(); p; p = p->next())
 	    tr += trlist(p);
     }
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 
 	EST_Litem *np;
 	int ni;
-	for (np = new_names.head(),ni=0; np; np = next(np),ni++)
+	for (np = new_names.head(),ni=0; np; np = np->next(),ni++)
 	    tr.set_channel_name(new_names(np),ni);
 	*/
 	tr.resize(EST_CURRENT, new_names);

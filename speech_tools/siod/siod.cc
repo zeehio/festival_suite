@@ -521,7 +521,7 @@ LISP siod_strlist_to_list(EST_StrList &a)
     LISP b=NIL;;
     EST_Litem *p;
 
-    for (p=a.head(); p != 0; p=next(p))
+    for (p=a.head(); p != 0; p=p->next())
 	b = cons(rintern(a(p)),b);
 
     return reverse(b);

@@ -244,7 +244,7 @@ static void map_to_channels(EST_StrList &channel_map,
     EST_String b, type, first, last;
     int n_f, n_l;
 
-    for (p = channel_map.head(); p; p = next(p))
+    for (p = channel_map.head(); p; p = p->next())
     {
 	b = channel_map(p);
 	if (b.matches("$", 0))
@@ -297,7 +297,7 @@ void EST_Track::resize(int new_num_frames, EST_StrList &new_channels, bool set)
     p_channel_names.resize(new_num_channels);
     // this ensures the new channels have a default name
 
-    for (i = 0, p = x.head(); p ; p = next(p), ++i)
+    for (i = 0, p = x.head(); p ; p = p->next(), ++i)
 	set_channel_name(x(p), i);
 
     p_values.resize(new_num_frames, new_num_channels, set);
@@ -319,7 +319,7 @@ void EST_Track::resize_aux(EST_StrList &new_aux_channels, bool set)
     p_aux_names.resize(new_num_channels);
 
     // this ensures the new channels have a default name
-    for (i = 0, p = new_aux_channels.head(); p ; p = next(p), ++i)
+    for (i = 0, p = new_aux_channels.head(); p ; p = p->next(), ++i)
 	set_aux_channel_name(new_aux_channels(p), i);
 
     p_aux.resize(num_frames(), new_num_channels, set);

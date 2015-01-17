@@ -58,7 +58,7 @@ bool dp_match(const EST_Relation &lexical,
 
 float start(EST_Item *n)
 {
-    return (prev(n) == 0) ? 0.0 : prev(n)->F("end");
+    return (n->prev() == 0) ? 0.0 : n->prev()->F("end");
 }
 
 float duration(EST_Item *n)
@@ -71,7 +71,7 @@ void quantize(EST_Relation &a, float q)
     EST_Item *a_ptr;
     float end;
 
-    for (a_ptr = a.head(); a_ptr != 0; a_ptr = next(a_ptr))
+    for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
     {
 	end = a_ptr->F("end") / q;
 	end = rint(end);
@@ -99,7 +99,7 @@ int edit_labels(EST_Relation &a, EST_String sedfile)
 		(const char *)file1);
 	return -1;
     }
-    for (a_ptr = a.head(); a_ptr != 0; a_ptr = next(a_ptr))
+    for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
     {
 	strcpy(name,  a_ptr->name());
 	fprintf(fp, "%s\n", name);
@@ -122,7 +122,7 @@ int edit_labels(EST_Relation &a, EST_String sedfile)
 		(const char *)file2);
 	return -1;
     }
-    for (a_ptr = a.head(); a_ptr != 0; a_ptr = next(a_ptr))
+    for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
     {
 	fscanf(fp, "%s", newname);
 //	cout << "oldname: " << a_ptr->name() << " newname: " << newname << endl;
@@ -139,7 +139,7 @@ void extract(const EST_Relation &orig, float s,
     EST_Item *a;
     EST_Item *tmp;
 
-    for (a = orig.head(); a != 0; a = next(a))
+    for (a = orig.head(); a != 0; a = a->next())
 	if ((a->F("end") > s) && (start(a) < e))
 	{
 	    tmp = ex.append(a);
@@ -155,8 +155,8 @@ void merge_all_label(EST_Relation &seg, const EST_String &labtype)
 
     for (a_ptr = seg.head(); a_ptr != seg.tail(); a_ptr = n_ptr)
     {
-	n_ptr = next(a_ptr);
-	if (a_ptr->name() == next(a_ptr)->name())
+	n_ptr = a_ptr->next();
+	if (a_ptr->name() == a_ptr->next()->name())
 	    seg.remove_item(a_ptr);
     }
 }
@@ -166,7 +166,7 @@ void change_label(EST_Relation &seg, const EST_String &oname,
 {
     EST_Item *a_ptr;
 
-    for (a_ptr = seg.head(); a_ptr != 0; a_ptr = next(a_ptr))
+    for (a_ptr = seg.head(); a_ptr != 0; a_ptr = a_ptr->next())
 	if (a_ptr->name() == oname)
 	    a_ptr->set_name(nname);
 }
@@ -177,8 +177,8 @@ void change_label(EST_Relation &seg, const EST_StrList &oname,
     EST_Item *a_ptr;
     EST_Litem *p;
 
-    for (a_ptr = seg.head(); a_ptr != 0; a_ptr = next(a_ptr))
-	for (p = oname.head(); p ; p = next(p))
+    for (a_ptr = seg.head(); a_ptr != 0; a_ptr = a_ptr->next())
+	for (p = oname.head(); p ; p = p->next())
 	    if (a_ptr->name() == oname(p))
 		a_ptr->set_name(nname);
 }
@@ -187,7 +187,7 @@ static int is_in_class(const EST_String &name, EST_StrList &s)
 {
     EST_Litem *p;
 
-    for (p = s.head(); p; p = next(p))
+    for (p = s.head(); p; p = p->next())
 	if (name == s(p))
 	    return TRUE;
     
@@ -197,7 +197,7 @@ static int is_in_class(const EST_String &name, EST_StrList &s)
 int check_vocab(EST_Relation &a, EST_StrList &vocab)
 {
     EST_Item *s;
-    for (s = a.head(); s; s = next(s))
+    for (s = a.head(); s; s = s->next())
 	if (!is_in_class(s->name(), vocab))
 	{
 	    cerr<<"Illegal entry in file " <<a.name()<< ":\""  << *s << "\"\n";
@@ -231,7 +231,7 @@ void convert_to_broad(EST_Relation &seg, EST_StrList &pos_list,
     if (broad_name == "")
 	broad_name = "pos";
 
-    for (a_ptr = seg.head(); a_ptr != 0; a_ptr = next(a_ptr))
+    for (a_ptr = seg.head(); a_ptr != 0; a_ptr = a_ptr->next())
 	if (is_in_class(a_ptr->name(), pos_list))
 	    a_ptr->set(broad_name, (polarity) ? 1 : 0);
 	else
@@ -244,7 +244,7 @@ void label_map(EST_Relation &seg, EST_Option &map)
     
     for (p = seg.head(); p != 0; n = p)
     {
-	n = next(p);
+	n = p->next();
 	if (map.present(p->name()))
 	{
 	    if (map.val(p->name()) == "!DELETE")
@@ -261,7 +261,7 @@ void shift_label(EST_Relation &seg, float shift)
     //shift every end time by adding x seconds.
     EST_Item *a_ptr;
     
-    for (a_ptr = seg.head(); a_ptr != 0; a_ptr = next(a_ptr))
+    for (a_ptr = seg.head(); a_ptr != 0; a_ptr = a_ptr->next())
 	a_ptr->set("end", a_ptr->F("end") + shift);
 }
 
@@ -275,7 +275,7 @@ void RelationList_select(EST_RelationList &mlf, EST_StrList filenames, bool
     
     // if not exact match, only match basenames
     EST_StrList tmp_filenames;
-    for (ptr = filenames.head(); ptr != NULL; ptr = next(ptr))
+    for (ptr = filenames.head(); ptr != NULL; ptr = ptr->next())
 	if(exact_match)
 	    tmp_filenames.append( filenames(ptr) );
 	else
@@ -284,7 +284,7 @@ void RelationList_select(EST_RelationList &mlf, EST_StrList filenames, bool
     for(fptr=mlf.head(); fptr != NULL;)
     {
 	flag=false;
-	for (ptr = tmp_filenames.head(); ptr != NULL; ptr = next(ptr))
+	for (ptr = tmp_filenames.head(); ptr != NULL; ptr = ptr->next())
 	    if(exact_match)
 	    {
 		if(tmp_filenames(ptr) == mlf(fptr).name())
@@ -306,10 +306,10 @@ void RelationList_select(EST_RelationList &mlf, EST_StrList filenames, bool
 	    if(fptr==0)			// must have removed head of list
 		fptr=mlf.head();
 	    else
-		fptr=next(fptr);
+		fptr=fptr->next();
 	}
 	else
-	    fptr=next(fptr);
+	    fptr=fptr->next();
     }
     tmp_filenames.clear();
 }
@@ -323,13 +323,13 @@ EST_Relation RelationList_extract(EST_RelationList &mlf, const EST_String &filen
     EST_String test, ref;
 
     if (base)
-	for (p = mlf.head(); p; p = next(p))
+	for (p = mlf.head(); p; p = p->next())
 	{
 	    if (basename(mlf(p).name(), "*")==basename(filename, "*"))
 		return mlf(p);
 	}
     else 
-	for (p = mlf.head(); p; p = next(p))
+	for (p = mlf.head(); p; p = p->next())
 	{	
 	    if (basename(mlf(p).name()) == filename)
 		return mlf(p);
@@ -348,9 +348,9 @@ EST_Relation RelationList_combine(EST_RelationList &mlf)
     EST_Item *s, *t = 0;
     float last = 0.0;
 
-    for (p = mlf.head(); p; p = next(p))
+    for (p = mlf.head(); p; p = p->next())
     {
-	for (s = mlf(p).head(); s; s = next(s))
+	for (s = mlf(p).head(); s; s = s->next())
 	{
 	    t = all.append();
 	    t->set("name", s->S("name"));
@@ -376,10 +376,10 @@ EST_Relation RelationList_combine(EST_RelationList &mlf, EST_Relation &key)
 	return all;
     }
     
-    for (k = key.head(), p = mlf.head(); p; p = next(p), k = next(k))
+    for (k = key.head(), p = mlf.head(); p; p = p->next(), k = k->next())
     {
 	st = start(k);
-	for (s = mlf(p).head(); s; s = next(s))
+	for (s = mlf(p).head(); s; s = s->next())
 	{
 	    t = all.append();
 	    t->set("name", s->S("name"));
@@ -412,7 +412,7 @@ int relation_divide(EST_RelationList &slist, EST_Relation &lab,
     }
 
     // find a the first keylab that will make a non-empty file
-    for (k = keylab.head(); k ; k = next(k))
+    for (k = keylab.head(); k ; k = k->next())
 	if (k->F("end") > lab.head()->F("end"))
 	    break;
 
@@ -420,9 +420,9 @@ int relation_divide(EST_RelationList &slist, EST_Relation &lab,
     a.f.set("name", (filename + ext));
     kstart = 0.0;
     
-    for (s = lab.head(); s; s = next(s))
+    for (s = lab.head(); s; s = s->next())
     {
-	n = next(s);
+	n = s->next();
 	if (n == 0)
 	{
 	    t = a.append(s);
@@ -442,7 +442,7 @@ int relation_divide(EST_RelationList &slist, EST_Relation &lab,
 		t->set("end", (k->F("end") - kstart));
 
 		if (!is_in_class(n->name(), blank))
-		    s = next(s);
+		    s = s->next();
 	    }
 	    else
 	    {
@@ -451,7 +451,7 @@ int relation_divide(EST_RelationList &slist, EST_Relation &lab,
 	    }
 	    
 	    slist.append(a);
-	    k = next(k);
+	    k = k->next();
 	    kstart = start(k);
 	    a.clear();
 	    filename = (EST_String)k->f("file");
@@ -487,7 +487,7 @@ int relation_divide2(EST_RelationList &mlf, EST_Relation &lab,
     a.f.set("name", (k->name() + ext));
     kstart = 0.0;
     
-    for (s = lab.head(); s; s = next(s))
+    for (s = lab.head(); s; s = s->next())
     {
 	t = a.append();
 	t->set_name(s->name());
@@ -500,7 +500,7 @@ int relation_divide2(EST_RelationList &mlf, EST_Relation &lab,
 	    
 	    kstart = s->F("end");
 	    k->set("end", (s->F("end")));
-	    k = next(k);
+	    k = k->next();
 	    a.clear();
 	    a.f.set("name", (k->name() + ext));
 	}
@@ -531,7 +531,7 @@ void map_match_times(EST_Relation &target, const EST_String &match_name,
 
 //    cout << "surface: " << surface << endl;
 
-    for (s = target.head(); s; s = next(s))
+    for (s = target.head(); s; s = s->next())
     {
 	if ((t = daughter1(s->as_relation(match_name))) != 0)
 	{
@@ -559,12 +559,12 @@ void map_match_times(EST_Relation &target, const EST_String &match_name,
 	     target.tail()->set(time_name + "start", last_end);
      }
 
-    for (s = target.head(); s; s = next(s))
+    for (s = target.head(); s; s = s->next())
     {
 	if (!s->f_present(time_name + "end"))
 	{
 //	    cout << "missing end feature for " << *s << endl;
-	    for (i = 1, p = s; p; p = next(p), ++i)
+	    for (i = 1, p = s; p; p = p->next(), ++i)
 		if (p->f_present(time_name + "end"))
 		    break;
 	    inc = (p->F(time_name + "end") - prev_end) / ((float) i);
@@ -572,7 +572,7 @@ void map_match_times(EST_Relation &target, const EST_String &match_name,
 
 //	    cout << "stop phone is " << *p << endl;
 
-	    for (i = 1; s !=p ; s = next(s), ++i)
+	    for (i = 1; s !=p ; s = s->next(), ++i)
 	    {
 		s->set(time_name + "end", (prev_end + ((float) i * inc)));
 		if (do_start)
@@ -603,13 +603,13 @@ EST_Litem *RelationList_ptr_extract(EST_RelationList &mlf, const EST_String &fil
     EST_String test, ref;
     
     if (base)
-	for (p = mlf.head(); p; p = next(p))
+	for (p = mlf.head(); p; p = p->next())
 	{
 	    if (basename(mlf(p).name(), "*")==basename(filename, "*"))
 		return p;
 	}
     else 
-	for (p = mlf.head(); p; p = next(p))
+	for (p = mlf.head(); p; p = p->next())
 	    if (mlf(p).name() == filename)
 		return p;
     
@@ -666,7 +666,7 @@ void print_relation_features(EST_Relation &stream)
     EST_Item *s;
     EST_Features::Entries p;
 
-    for (s = stream.head(); s; s = next(s))
+    for (s = stream.head(); s; s = s->next())
     {
 	cout << s->name() << "\t:";
 	for(p.begin(s->features()); p; ++p)
@@ -684,11 +684,11 @@ void build_RelationList_hash_table(EST_RelationList &mlf,
 {
   EST_Litem *p;
   if (base)
-    for (p = mlf.head(); p; p = next(p))
+    for (p = mlf.head(); p; p = p->next())
 	hash_table.add_item(basename(mlf(p).name(), "*"),
 			    &(mlf(p)));
   else 
-    for (p = mlf.head(); p; p = next(p))
+    for (p = mlf.head(); p; p = p->next())
       hash_table.add_item(mlf(p).name(),
 			      &(mlf(p)));
 }

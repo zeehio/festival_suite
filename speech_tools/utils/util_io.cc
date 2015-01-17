@@ -302,7 +302,7 @@ EST_read_status load_TList_of_StrVector(EST_TList<EST_StrVector> &w,
 int ilist_member(const EST_IList &l,int i)
 {
     EST_Litem *p;
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
 	if (l.item(p) == i)
 	    return TRUE;
 
@@ -313,7 +313,7 @@ int ilist_index(const EST_IList &l,int i)
 {
     EST_Litem *p;
     int j=0;
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
     {
 	if (l.item(p) == i)
 	    return j;
@@ -326,7 +326,7 @@ int ilist_index(const EST_IList &l,int i)
 int strlist_member(const EST_StrList &l,const EST_String &s)
 {
     EST_Litem *p;
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
 	if (l.item(p) == s)
 	    return TRUE;
 
@@ -337,7 +337,7 @@ int strlist_index(const EST_StrList &l,const EST_String &s)
 {
     EST_Litem *p;
     int j=0;
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
     {
 	if (l.item(p) == s)
 	    return j;

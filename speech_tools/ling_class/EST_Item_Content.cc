@@ -94,7 +94,7 @@ int EST_Item_Content::unref_and_delete()
     for (p=relations.list.head(); p;)
     {
 	np = ::item(relations.list(p).v);
-	p=next(p);
+	p=p->next();
 	delete np;
     }
     // When the last relation is deleted this contents itself will be
@@ -114,7 +114,7 @@ ostream& operator << (ostream &s, const EST_Item_Content &a)
     s << a.name() << " ; ";
     s << a.f;
     s << "Relations";
-    for (p=a.relations.list.head(); p; p = next(p))
+    for (p=a.relations.list.head(); p; p = p->next())
 	s << " " << a.relations.list(p).k;
     s << endl;
     return s;

@@ -194,12 +194,12 @@ int main (int argc, char *argv[])
 	play_wave(*toplay, al);
 
 	// pause for a keystroke between each file
-	if (al.present("-wait") && next(p))
+	if (al.present("-wait") && p->next())
 	{
 	    if (getc(stdin) == 'a')
 		continue;
 	}
-	p = next(p);
+	p = p->next();
     }
     return 0;
 }

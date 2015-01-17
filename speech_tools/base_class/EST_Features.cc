@@ -76,7 +76,7 @@ const EST_Val &EST_Features::val(const char *name, const EST_Val &def) const
     // directly rather than requiring the creation of an EST_String
     EST_Litem *p;
 
-    for (p=features->list.head(); p; p=next(p))
+    for (p=features->list.head(); p; p=p->next())
     {
 	if (features->list(p).k == name)
 	    return features->list(p).v;
@@ -90,7 +90,7 @@ const EST_Val &EST_Features::val(const char *name) const
     // directly rather than requiring the creation of an EST_String
     EST_Litem *p;
 
-    for (p=features->list.head(); p; p=next(p))
+    for (p=features->list.head(); p; p=p->next())
     {
 	if (features->list(p).k == name)
 	    return features->list(p).v;

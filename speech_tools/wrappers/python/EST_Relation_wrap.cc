@@ -3894,7 +3894,7 @@ SWIGINTERN PyObject *_wrap_EST_Relation_items(PyObject *SWIGUNUSEDPARM(self), Py
     
     unsigned int i;
     EST_Item *it;
-    for( it = (*arg2), i=0; it!=0; it=next(it), ++i )
+    for( it = (*arg2), i=0; it!=0; it=it->next(), ++i )
     PyList_SetItem( o1, i, SWIG_NewPointerObj((void *) it, SWIGTYPE_p_EST_Item, 0) );
     
     if ((!resultobj) || (resultobj == Py_None)) {

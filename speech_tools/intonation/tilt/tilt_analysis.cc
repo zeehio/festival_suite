@@ -134,7 +134,7 @@ void rfc_analysis(EST_Track &fz, EST_Relation &ev, EST_Features &op)
     // fill values in event labels using matching algorithms
     for (e = ev.head(); e != 0; e = n)
     {
-	n = next(e);
+	n = e->next();
 	// cout << endl << endl;
 	if (!event_item(*e))
 	    continue;
@@ -245,7 +245,7 @@ void convert_to_local(EST_Relation &ev)
 {
     EST_Item *e;
 
-    for (e = ev.head(); e; e = next(e))
+    for (e = ev.head(); e; e = e->next())
 	convert_to_local(e);
 
     // cout << "c to l \n\n\n" << ev << endl << endl;
@@ -497,7 +497,7 @@ static void silence_f0(EST_Relation &ev, EST_Track &fz)
     EST_Item * e;
     int i;
 
-    for (e = ev.head(); e; e = next(e))
+    for (e = ev.head(); e; e = e->next())
 	if (sil_item(*e))
 	{
 	    i = fz.prev_non_break(fz.index(e->F("start")));
@@ -517,7 +517,7 @@ static void add_phrases(EST_Relation &ev)
 
     for (e = ev.head(); e; e = n)
     {
-	n = next(e);
+	n = e->next();
 	if (sil_item(*e))
 	{
 	    if (e != ev.head())
@@ -539,7 +539,7 @@ static void add_phrases(EST_Relation &ev)
 
     for (e = ev.head(); e; e = n)
     {
-	n = next(e);
+	n = e->next();
 	if (sil_item(*e))
 	    ev.remove_item(e);
     }
@@ -556,8 +556,8 @@ static void add_phrases(EST_Relation &ev, bool phrase_edges)
 
     for (e = ev.head(); next(e); e = n)
     {
-	n = next(e);
-	p = prev(e);
+	n = e->next();
+	p = e->prev();
 	if (!sil_item(*e))
 	    continue;
 
@@ -596,7 +596,7 @@ static void add_phrases(EST_Relation &ev, bool phrase_edges)
 
     for (e = ev.head(); e; e = n)
     {
-	n = next(e);
+	n = e->next();
 	if (sil_item(*e))
 	    ev.remove_item(e);
     }
@@ -727,7 +727,7 @@ static void fill_f0_values(EST_Track &fz, EST_Relation &ev)
     int pos;
     float prev = 0.0;
     
-    for (e = ev.head(); e != 0; e = next(e))
+    for (e = ev.head(); e != 0; e = e->next())
     {
 	if (e->name() == "sil")
 	{
@@ -781,7 +781,7 @@ static void insert_silence(EST_Item *n, EST_Track &fz, int i, int j)
 	return;
     
     // make new element, setting end time to silence start time.
-    prev_item = prev(n)->insert_before();
+    prev_item = n->prev()->insert_before();
     make_int_item(*prev_item, n->name(), sil_start, 0.0, n->f("ev:start_f0"),
 			      0.0,0.0);
 
@@ -799,7 +799,7 @@ static void add_phrases_old(EST_Relation &ev, EST_Track &fz)
 
     for (e = ev.head(); next(e); e = n)
     {
-	n = next(e);
+	n = e->next();
 	start = e->F("end");
 	end = n->F("start");
 	sil = false;
@@ -858,11 +858,11 @@ static void add_silences(EST_Track &fz, EST_Relation &ev,
 	    cout << "silence between " <<i << " and " << j << endl;
 	    //	    cout << "  " << fz.t(i) << " and " << fz.t(j) << endl;
 	    
-	    for (e = ev.head(); e != 0; e = next(e))
+	    for (e = ev.head(); e != 0; e = e->next())
 		if (e->F("end") >= fz.t(j))
 		    break;
 	    insert_silence(e, fz, i, j);
-	    //	    for (e = ev.head(); e != 0; e = next(e))
+	    //	    for (e = ev.head(); e != 0; e = e->next())
 	    //		cout << *e << " : " << *RFCS(*e) << endl;
 	    
 	    i = j;
@@ -885,7 +885,7 @@ static void add_silences(EST_Track &fz, EST_Relation &ev,
     
     for (e = ev.head(); e != 0; e = n)
     {
-	n = next(e);
+	n = e->next();
 	if (dur(*e) < min_dur)
 	    ev.remove_item(e);
     }
@@ -896,9 +896,9 @@ static void adjust_overlaps(EST_Relation &ev)
     EST_Item *e, *n;
     float pos=0.0;
     
-    for (e = ev.head(); next(e) != 0; e = next(e))
+    for (e = ev.head(); next(e) != 0; e = e->next())
     {
-	n = next(e);
+	n = e->next();
 	if (e->F("end") > n->F("start"))
 	{
 */
@@ -937,7 +937,7 @@ static void adjust_overlaps(EST_Relation &ev)
     // The overlap adjustments may cause the peak position to lie outside
     // the start and end points. This checks for this and makes an
     // arbitrary adjustment
-    for (e = ev.head(); next(e) != 0; e = next(e))
+    for (e = ev.head(); next(e) != 0; e = e->next())
 	if ((e->f("rfc:type") == "RISEFALL") && (e->F("rfc:peak_pos") <
 						 e->F("start")))
 	    e->set("rfc:peak_pos", 
@@ -952,9 +952,9 @@ static void conn_ends(EST_Track &fz, EST_Relation &ev, float min_length)
     
     cout << min_length << endl;
     
-    for (e = ev.head(); next(e) != 0; e = next(e))
+    for (e = ev.head(); next(e) != 0; e = e->next())
     {
-	n = next(e);
+	n = e->next();
 	cout << *e << ":";
 	cout << "n: " << n->F("start") << " e "<< e->F("end") << endl;
 	
@@ -965,7 +965,7 @@ static void conn_ends(EST_Track &fz, EST_Relation &ev, float min_length)
 	    make_int_item(*tmp, "c", n->f("start"), e->f("start"),
 				e->f("rfc:end_f0"), 0.0, 0.0);
 
-	    e = next(e);		// advance after new connection
+	    e = e->next();		// advance after new connection
 	} 
 	else
 	{ 

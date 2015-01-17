@@ -192,7 +192,7 @@ EST_read_status EST_TrackFile::load_ascii(const EST_String filename, EST_Track &
     // resize track and copy values in
     tr.resize(n_rows, n_cols);
 
-    for (p = sl.head(), i = 0; p != 0; ++i, p = next(p))
+    for (p = sl.head(), i = 0; p != 0; ++i, p = p->next())
     {
         bool ok;
 	tt.open_string(sl(p));
@@ -249,7 +249,7 @@ EST_read_status EST_TrackFile::load_xgraph(const EST_String filename, EST_Track 
     // resize track and copy values in
     tr.resize(n_rows, n_cols);
 
-    for (p = sl.head(), i = 0; p != 0; ++i, p = next(p))
+    for (p = sl.head(), i = 0; p != 0; ++i, p = p->next())
     {
         bool ok; 
 	tt.open_string(sl(p));
@@ -323,7 +323,7 @@ EST_read_status EST_TrackFile::load_xmg(const EST_String filename, EST_Track &tr
     // note the track size is total number of points *and* breaks
     tr.resize(n, 1 );  // REORG - fix this for multi channel work
 
-    for (p = sl.head(), i = 0; p != 0; ++i, p = next(p))
+    for (p = sl.head(), i = 0; p != 0; ++i, p = p->next())
     {
         bool ok;
 	ts.open_string(sl(p));
@@ -931,7 +931,7 @@ EST_write_status save_snns_pat(const EST_String filename,
 	return write_fail;
     
     num_pats = 0;
-    for (pi = inpat.head(); pi ; pi = next(pi))
+    for (pi = inpat.head(); pi ; pi = pi->next())
 	num_pats += inpat(pi).num_frames();
     
     *outf << "SNNS pattern definition file V3.2\n";
@@ -951,7 +951,7 @@ EST_write_status save_snns_pat(const EST_String filename,
     *outf << endl << endl;
     
     for (pi = inpat.head(), po = outpat.head(); pi ; 
-	 pi = next(pi), po = next(po))
+	 pi = pi->next(), po = po->next())
     {
 	if (inpat(pi).num_frames() != outpat(pi).num_frames())
 	{
@@ -1012,7 +1012,7 @@ EST_write_status save_snns_pat(const EST_String filename,
    *cout << "No. of input units : "<< num_inputs << endl;
    *cout << "No. of output units : "<<  num_outputs << endl;
    
-   for (i = 0, p = trlist.head(); p ; p = next(p), ++i)
+   for (i = 0, p = trlist.head(); p ; p = p->next(), ++i)
    {
    *outf << "#Input pattern " << i << ":\n";
    for  (int j = 0; j < num_inputs; ++j)
@@ -2017,7 +2017,7 @@ int track_to_htk_lpc(EST_Track &track, EST_Track &lpc)
 
 EST_write_status save_ind_TrackList(EST_TrackList &tlist, EST_String &otype)
 {
-    for (EST_Litem *p = tlist.head(); p ; p = next(p))
+    for (EST_Litem *p = tlist.head(); p ; p = p->next())
 	tlist(p).save(tlist(p).name(), otype);
     
     return write_ok;
@@ -2029,7 +2029,7 @@ EST_read_status read_TrackList(EST_TrackList &tlist, EST_StrList &files,
     EST_Track s;
     EST_Litem *p, *plp;
     
-    for (p = files.head(); p; p = next(p))
+    for (p = files.head(); p; p = p->next())
     {
 	tlist.append(s);
 	plp = tlist.tail();

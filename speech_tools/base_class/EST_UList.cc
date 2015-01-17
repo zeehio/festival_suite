@@ -43,7 +43,7 @@ void EST_UList::clear_and_free(void (*item_free)(EST_UItem *p))
 
     for (q=head(); q != 0; q = np)
     {
-	np=next(q);
+	np=q->next();
 	if (item_free)
 	    item_free(q);
 	else
@@ -57,7 +57,7 @@ int EST_UList::length() const
     EST_UItem *ptr;
     int n = 0;
 
-    for (ptr = head(); ptr != 0; ptr = next(ptr))
+    for (ptr = head(); ptr != 0; ptr = ptr->next())
 	++n;
     return n;
 }
@@ -67,7 +67,7 @@ int EST_UList::index(EST_UItem *item) const
     EST_UItem *ptr;
     int n = 0;
     
-    for (ptr = head(); ptr != 0; ptr = next(ptr), ++n)
+    for (ptr = head(); ptr != 0; ptr = ptr->next(), ++n)
 	if (item == ptr)
 	    return n;
 
@@ -79,7 +79,7 @@ EST_UItem *EST_UList::nth_pointer(int n) const
     EST_UItem *ptr;
     int i;
     
-    for (i = 0, ptr = head(); ptr != 0; ptr = next(ptr), ++i)
+    for (i = 0, ptr = head(); ptr != 0; ptr = ptr->next(), ++i)
       if (i == n)
 	return ptr;
 
@@ -216,7 +216,7 @@ void EST_UList::exchange(int i, int j)
     EST_UItem *a=0,*b=0;
     int k;
     
-    for (k=0,p = head(); p != 0; p = next(p),k++)
+    for (k=0,p = head(); p != 0; p = p->next(),k++)
     {
 	if(i==k)
 	    a = p;
@@ -282,11 +282,11 @@ bool EST_UList::operator_eq(const EST_UList &a,
 {
     EST_UItem *p,*q;
     q=b.head();
-    for (p = a.head(); p != NULL; p = next(p)){
+    for (p = a.head(); p != NULL; p = p->next()){
 	if(q == NULL)
 	    return false;
 	if(eq(q, p))
-	    q=next(q);
+	    q=q->next();
 	else
 	    return false;
     }
@@ -305,7 +305,7 @@ int EST_UList::index(const EST_UList &l,
     EST_UItem *ptr;
     int n = 0;
     
-    for (ptr = l.head(); ptr != 0; ptr = next(ptr), ++n)
+    for (ptr = l.head(); ptr != 0; ptr = ptr->next(), ++n)
 	if (eq(&val,ptr))
 	    return n;
     
@@ -326,9 +326,9 @@ void EST_UList::sort(EST_UList &l,
     while(!sorted){
 	sorted=true;
 	
-	for(l_ptr=l.head(); l_ptr != 0; l_ptr=next(l_ptr)){
+	for(l_ptr=l.head(); l_ptr != 0; l_ptr=l_ptr->next()){
 	    
-	    m_ptr=next(l_ptr);
+	    m_ptr=l_ptr->next();
 	    if(m_ptr != 0)
 		if(gt(l_ptr, m_ptr)){
 		    l.exchange(l_ptr,m_ptr);
@@ -357,16 +357,16 @@ static EST_UItem *partition(EST_UItem *p, EST_UItem *r,
     while(true){
 	
 	while(gt(j, x) )
-	    j = prev(j);
+	    j = j->prev();
 	
 	while(gt(x, i))
-	    i = next(i);
+	    i = i->next();
 	
-	if((i != j) && (prev(i) != j)){
+	if((i != j) && (i->prev() != j)){
 	    i2=i;
 	    j2=j;
-	    i=next(i);
-	    j=prev(j);
+	    i=i->next();
+	    j=j->prev();
 	    exchange(i2,j2);
 	    
 	}else
@@ -385,7 +385,7 @@ static void qsort_sub(EST_UList &l, EST_UItem *p, EST_UItem *r,
     if(p != r){
 	q = partition(p,r, gt, exchange);
 	qsort_sub(l,p,q, gt, exchange);
-	qsort_sub(l,next(q),r, gt, exchange);
+	qsort_sub(l,q->next(),r, gt, exchange);
     }
 }
 
@@ -410,9 +410,9 @@ void EST_UList::sort_unique(EST_UList &l,
     while(!sorted){
 	sorted=true;
 	
-	for(l_ptr=l.head(); l_ptr != 0; l_ptr=next(l_ptr)){
+	for(l_ptr=l.head(); l_ptr != 0; l_ptr=l_ptr->next()){
 	    
-	    m_ptr=next(l_ptr);
+	    m_ptr=l_ptr->next();
 	    if(m_ptr != 0)
             {
 		if(gt(l_ptr, m_ptr)){
@@ -440,11 +440,11 @@ void EST_UList::merge_sort_unique(EST_UList &l, EST_UList &m,
     // make sure
     sort_unique(l, eq, gt, item_free);
     
-    for(m_ptr=m.head(); m_ptr != 0; m_ptr=next(m_ptr)){
+    for(m_ptr=m.head(); m_ptr != 0; m_ptr=m_ptr->next()){
 	
 	// try and put item from m in list 
 	flag=false;
-	for(l_ptr=l.head(); l_ptr != 0; l_ptr=next(l_ptr)){
+	for(l_ptr=l.head(); l_ptr != 0; l_ptr=l_ptr->next()){
 	    if( gt(l_ptr, m_ptr) ){
 		l.insert_before(l_ptr, m_ptr);
 		flag=true;

@@ -220,7 +220,7 @@ void normalise(EST_Track &tr)
 void normalise(EST_TrackList &trlist, EST_FVector &mean, EST_FVector &sd, 
 	       float upper, float lower)
 {
-    for (EST_Litem *p = trlist.head(); p; p = next(p))
+    for (EST_Litem *p = trlist.head(); p; p = p->next())
 	normalise(trlist(p), mean, sd, upper, lower);
 }
 
@@ -478,7 +478,7 @@ void meansd(EST_TrackList &tl, float &mean, float &sd, int channel)
     n = 0;
     mean = 0.0;
 
-    for (p = tl.head(); p; p = next(p))
+    for (p = tl.head(); p; p = p->next())
 	for (i = 0; i < tl(p).num_frames(); ++i)
 	{
 	    if (!tl(p).track_break(i))
@@ -490,7 +490,7 @@ void meansd(EST_TrackList &tl, float &mean, float &sd, int channel)
 
     mean /= n;
 
-    for (p = tl.head(); p; p = next(p))
+    for (p = tl.head(); p; p = p->next())
 	for (i = 0; i < tl(p).num_frames(); ++i)
 	    if (!tl(p).track_break(i))
 	      var +=  pow(tl(p).a(i, channel) - mean, float(2.0));
@@ -892,7 +892,7 @@ void extract_channel(EST_Track &orig, EST_Track &nt, EST_IList &ch_list)
     nt.copy_setup(orig);
     nt.resize(orig.num_frames(), new_ch);
     
-    for (i = 0, p = ch_list.head(); p; p = next(p), ++i)
+    for (i = 0, p = ch_list.head(); p; p = p->next(), ++i)
     {
 	k = ch_list(p);
 
@@ -918,7 +918,7 @@ void ParallelTracks(EST_Track &a, EST_TrackList &list,const EST_String &style)
     int num_channels, num_frames;
     int i, j, k, n;
     
-    for (num_channels=0,p=list.head(); p; p=next(p))
+    for (num_channels=0,p=list.head(); p; p=p->next())
 	num_channels += list(p).num_channels();
     
     if (style == "first")
@@ -931,7 +931,7 @@ void ParallelTracks(EST_Track &a, EST_TrackList &list,const EST_String &style)
 	if (style != "longest")
 	    cerr << "EST_Track: unknown combine style \"" << style << 
 		"\" assuming longest" << endl;
-	for (num_frames = 0, longest = p = list.head(); p; p = next(p))
+	for (num_frames = 0, longest = p = list.head(); p; p = p->next())
 	    if (num_frames < list(p).num_frames())
 	    {
 		num_frames = list(p).num_frames();
@@ -942,7 +942,7 @@ void ParallelTracks(EST_Track &a, EST_TrackList &list,const EST_String &style)
     a.resize(num_frames, num_channels);
     a.fill(0.0);
     
-    for (k = 0, p = list.head(); p; p = next(p))
+    for (k = 0, p = list.head(); p; p = p->next())
     {
 	n = Lof(num_frames, list(p).num_frames());
 	for (j = 0; j < list(p).num_channels(); ++j, ++k)

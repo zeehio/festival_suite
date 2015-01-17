@@ -81,7 +81,7 @@ static void do_dlist_summary(WDlist *dlist, WDataSet &dataset)
     EST_String predict,real;
     int i,type;
 
-    for (p=dataset.head(); p != 0; p=next(p))
+    for (p=dataset.head(); p != 0; p=p->next())
     {
 	predict = (EST_String)dlist->predict(*dataset(p));
 	type = dataset.ftype(0);
@@ -138,7 +138,7 @@ static WDlist *dlist_score_question(WQuestion &q, WVectorList &ds)
     WVector *wv;
     int i;
 
-    for (i=0,d=ds.head(); d != 0; d=next(d),i++)
+    for (i=0,d=ds.head(); d != 0; d=d->next(),i++)
     {
 	wv = ds(d);
 	if (q.ask(*wv) == TRUE)

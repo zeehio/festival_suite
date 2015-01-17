@@ -44,6 +44,8 @@
 #include "EST_cutils.h"
 #include "EST_Token.h"
 #include "EST_Wagon.h"
+#include "EST_math.h"
+
 
 EST_Val WNode::predict(const WVector &d)
 {
@@ -446,7 +448,7 @@ float WImpurity::vector_impurity()
         if (wgn_VertexFeats.a(0,j) > 0.0)
         {
             b.reset();
-            for (pp=members.head(); pp != 0; pp=next(pp))
+            for (pp=members.head(); pp != 0; pp=pp->next())
             {
                 i = members.item(pp);
                 b += wgn_VertexTrack.a(i,j);
@@ -470,7 +472,7 @@ float WImpurity::vector_impurity()
     {
         if (wgn_VertexFeats.a(0,j) > 0.0)
         {
-            for (pp=members.head(); pp != 0; pp=next(pp))
+            for (pp=members.head(); pp != 0; pp=pp->next())
                 cs[j][j] += wgn_VertexTrack.a(members.item(pp),j);
         }
     }
@@ -479,7 +481,7 @@ float WImpurity::vector_impurity()
         for (i=j+1; i<wgn_VertexFeats.num_channels(); i++)
             if (wgn_VertexFeats.a(0,j) > 0.0)
             {
-                for (pp=members.head(); pp != 0; pp=next(pp))
+                for (pp=members.head(); pp != 0; pp=pp->next())
                 {
                     mmm = members.item(pp);
                     cs[i][j] += (wgn_VertexTrack.a(mmm,i)-cs[j][j].mean())*
@@ -502,11 +504,11 @@ float WImpurity::vector_impurity()
     int x,y;
     double d,q;
     count = 0;
-    for (pp=members.head(); pp != 0; pp=next(pp))
+    for (pp=members.head(); pp != 0; pp=pp->next())
     {
         x = members.item(pp);
         count++;
-        for (qq=next(pp); qq != 0; qq=next(qq))
+        for (qq=pp->next(); qq != 0; qq=qq->next())
         {
             y = members.item(qq);
             for (q=0.0,j=0; j<wgn_VertexFeats.num_channels(); j++)
@@ -565,7 +567,7 @@ float WImpurity::trajectory_impurity()
 
     lss.reset();
     l = 0;
-    for (pp=members.head(); pp != 0; pp=next(pp))
+    for (pp=members.head(); pp != 0; pp=pp->next())
     {
         i = members.item(pp);
         for (q=0; q<wgn_UnitTrack.a(i,1); q++)
@@ -600,7 +602,7 @@ float WImpurity::trajectory_impurity()
         for (j=0; j<l; j++)
             trajectory[j] = new EST_SuffStats[width];
 
-        for (pp=members.head(); pp != 0; pp=next(pp))
+        for (pp=members.head(); pp != 0; pp=pp->next())
         {   /* for each unit */
             i = members.item(pp);
             m = (float)wgn_UnitTrack.a(i,1)/(float)l; /* find interpolation */
@@ -639,7 +641,7 @@ float WImpurity::trajectory_impurity()
         for (j=0; j<l; j++)
             trajectory[j] = new EST_SuffStats[wgn_VertexTrack.num_channels()+1];
 
-        for (pp=members.head(); pp != 0; pp=next(pp))
+        for (pp=members.head(); pp != 0; pp=pp->next())
         {   /* for each unit */
             i = members.item(pp);
             s1l = 0;
@@ -710,10 +712,10 @@ float WImpurity::cluster_impurity()
     double dist;
 
     a.reset();
-    for (pp=members.head(); pp != 0; pp=next(pp))
+    for (pp=members.head(); pp != 0; pp=pp->next())
     {
 	i = members.item(pp);
-	for (q=next(pp); q != 0; q=next(q))
+	for (q=pp->next(); q != 0; q=q->next())
 	{
 	    j = members.item(q);
 	    dist = (j < i ? wgn_DistMatrix.a_no_check(i,j) :
@@ -751,7 +753,7 @@ int WImpurity::in_cluster(int i)
     float dist = cluster_member_mean(i);
     EST_Litem *pp;
 
-    for (pp=members.head(); pp != 0; pp=next(pp))
+    for (pp=members.head(); pp != 0; pp=pp->next())
     {
 	if (dist < cluster_member_mean(members.item(pp)))
 	    return 1;
@@ -766,7 +768,7 @@ float WImpurity::cluster_ranking(int i)
     EST_Litem *pp;
     int ranking = 1;
 
-    for (pp=members.head(); pp != 0; pp=next(pp))
+    for (pp=members.head(); pp != 0; pp=pp->next())
     {
 	if (dist >= cluster_distance(members.item(pp)))
 	    ranking++;
@@ -783,7 +785,7 @@ float WImpurity::cluster_member_mean(int i)
     int j,n;
     double dist,sum;
 
-    for (sum=0.0,n=0,q=members.head(); q != 0; q=next(q))
+    for (sum=0.0,n=0,q=members.head(); q != 0; q=q->next())
     {
 	j = members.item(q);
 	if (i != j)
@@ -856,7 +858,7 @@ ostream & operator <<(ostream &s, WImpurity &imp)
             for (j=0; j<wgn_VertexTrack.num_channels(); j++)
             {
                 b.reset();
-                for (p=imp.members.head(); p != 0; p=next(p))
+                for (p=imp.members.head(); p != 0; p=p->next())
                 {
                     b += wgn_VertexTrack.a(imp.members.item(p),j);
                 }
@@ -879,13 +881,13 @@ ostream & operator <<(ostream &s, WImpurity &imp)
                 if (wgn_VertexFeats.a(0,j) > 0.0)
                 {
                     cs[j].reset();
-                    for (p=imp.members.head(); p != 0; p=next(p))
+                    for (p=imp.members.head(); p != 0; p=p->next())
                     {
                         cs[j] += wgn_VertexTrack.a(imp.members.item(p),j);
                     }
                 }
 
-            for (p=imp.members.head(); p != 0; p=next(p))
+            for (p=imp.members.head(); p != 0; p=p->next())
             {
                 for (x=0.0,j=0; j<wgn_VertexFeats.num_channels(); j++)
                     if (wgn_VertexFeats.a(0,j) > 0.0)
@@ -942,12 +944,12 @@ ostream & operator <<(ostream &s, WImpurity &imp)
     {
 	EST_Litem *p;
 	s << "((";
-	for (p=imp.members.head(); p != 0; p=next(p))
+	for (p=imp.members.head(); p != 0; p=p->next())
 	{
 	    // Ouput cluster member and its mean distance to others
 	    s << "(" << imp.members.item(p) << " " <<
 		imp.cluster_member_mean(imp.members.item(p)) << ")";
-	    if (next(p) != 0)
+	    if (p->next() != 0)
 		s << " ";
 	}
 	s << ") ";

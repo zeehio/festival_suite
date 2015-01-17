@@ -254,7 +254,7 @@ static LISP l_unwind_protect(LISP args, LISP env)
 	// Close any that were opened below here
 	close_open_files_upto(previous_open_files);
 	if (siod_ctrl_c == TRUE)
-	    err("forwarded through unwind_protect",NIL);
+	    err("forwarded through unwind-protect",NIL);
 	r = leval(car(cdr(args)),env);
     }
     else
@@ -350,7 +350,7 @@ void init_subrs_core(void)
  "(the-environment)\n\
   Returns the current (SIOD) environment.");
  init_fsubr("unwind-protect",l_unwind_protect,
- "(unwind_protect NORMALFORM ERRORFORM)\n\
+ "(unwind-protect NORMALFORM ERRORFORM)\n\
  If an error is found while evaluating NORMALFORM catch it and evaluate\n\
  ERRORFORM and continue.  If an error occurs while evaluating NORMALFORM\n\
  all file open evaluating NORMALFORM up to the error while be automatically\n\

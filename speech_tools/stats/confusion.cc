@@ -46,7 +46,7 @@ int nth(EST_String name, EST_TList<EST_String> &lex)
     EST_Litem *p;
     int i;
 
-    for (i = 0, p = lex.head(); p!=0; p = next(p), ++i)
+    for (i = 0, p = lex.head(); p!=0; p = p->next(), ++i)
 	if (name == lex(p))
 	    return i;
 
@@ -61,7 +61,7 @@ EST_FMatrix confusion(EST_StrStr_KVL &list, EST_StrList &lex)
     int n, m;
     a.fill(0.0);
 
-    for (p = list.list.head(); p!=0; p = next(p))
+    for (p = list.list.head(); p!=0; p = p->next())
     {
 	m = nth(list.key(p), lex);
 	n = nth(list.val(p), lex);
@@ -109,7 +109,7 @@ void print_confusion(const EST_FMatrix &a, EST_StrStr_KVL &list,
 	    correct[i] = 100.0 * a(i, i) / rt;
     }
 
-    for (p = lex.head(); p != 0; p = next(p))
+    for (p = lex.head(); p != 0; p = p->next())
 	{
 //	    cout.width(4);
 //	    cout.setf(ios::right);
@@ -117,7 +117,7 @@ void print_confusion(const EST_FMatrix &a, EST_StrStr_KVL &list,
 	}
     cout << endl;
 
-    for (p = lex.head(), i = 0; i < n; ++i, p = next(p))
+    for (p = lex.head(), i = 0; i < n; ++i, p = p->next())
     {
 	cout.width(12);
 	cout << lex(p);

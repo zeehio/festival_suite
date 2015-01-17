@@ -86,7 +86,7 @@ bool Lattice::build_qmap(Bigram &g, float error_margin)
 	for (j = 0; j < g.size(); ++j){
 		
 	    flag = false;
-	    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+	    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 		if(fabs(list_qmap(l_ptr) - g.p(i,j)) <= error_margin){
 		    flag = true;
 		    break;
@@ -100,7 +100,7 @@ bool Lattice::build_qmap(Bigram &g, float error_margin)
 
     // special zero (within error_margin) entry, if not already there
     flag = false;
-    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	if(fabs(list_qmap(l_ptr)) <= error_margin){
 	    flag = true;
 	    break;
@@ -112,13 +112,13 @@ bool Lattice::build_qmap(Bigram &g, float error_margin)
     qsort(list_qmap);
 
     i=0;
-    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	i++;
 
     // transfer to array
     qmap.resize(i);
     i=0;
-    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	qmap(i++) = list_qmap(l_ptr);
 
     list_qmap.clear();
@@ -170,13 +170,13 @@ Lattice::build_nmap(Bigram &g)
     cerr << list_nmap << endl;
 
     j=0;
-    for(l_ptr=list_nmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_nmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	j++;
 
     // transfer to array
     nmap.resize(j);
     j=0;
-    for(l_ptr=list_nmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_nmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	nmap(j++) = list_nmap(l_ptr);
 
     list_nmap.clear();
@@ -228,7 +228,7 @@ Lattice::construct_alphabet(Bigram &g)
 		  
 	    // have we got sym already ?
 	    flag=false;
-	    for(a_ptr=list_alphabet.tail();a_ptr!=NULL;a_ptr=prev(a_ptr)){
+	    for(a_ptr=list_alphabet.tail();a_ptr!=NULL;a_ptr=a_ptr->prev()){
 		if( (list_alphabet(a_ptr)->nmap_index == nindex) &&
 		    (list_alphabet(a_ptr)->qmap_index == qindex) ){
 		    flag=true;
@@ -255,7 +255,7 @@ Lattice::construct_alphabet(Bigram &g)
     nindex = nmap_name_to_index("!ENTER");
     qindex = qmap_value_to_index(0); // log prob
     flag=false;
-    for(a_ptr=list_alphabet.tail();a_ptr!=NULL;a_ptr=prev(a_ptr))
+    for(a_ptr=list_alphabet.tail();a_ptr!=NULL;a_ptr=a_ptr->prev())
 	if( (list_alphabet(a_ptr)->nmap_index == nindex) &&
 	    (list_alphabet(a_ptr)->qmap_index == qindex) ){
 	    flag=true;
@@ -278,13 +278,13 @@ Lattice::construct_alphabet(Bigram &g)
     ptr_qsort(list_alphabet);
 
     count=0;
-    for(a_ptr=list_alphabet.head();a_ptr != NULL; a_ptr=next(a_ptr))
+    for(a_ptr=list_alphabet.head();a_ptr != NULL; a_ptr=a_ptr->next())
 	count++;
 
 
     alphabet.resize(count);
     count=0;
-    for(a_ptr=list_alphabet.head();a_ptr != NULL; a_ptr=next(a_ptr))
+    for(a_ptr=list_alphabet.head();a_ptr != NULL; a_ptr=a_ptr->next())
 	alphabet(count++) = *(list_alphabet(a_ptr));
     
     // .. to do - delete syms
@@ -370,7 +370,7 @@ Lattice::construct(Bigram &g)
 		else
 		    to_name= nmap_name_to_index(g.words(j));
 
-		for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = next(n_ptr)){
+		for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = n_ptr->next()){
 		    int name = nodes(n_ptr)->name(nodes(n_ptr)->name.head());
 		    if(name == from_name)
 			from = nodes(n_ptr);
@@ -408,13 +408,13 @@ Lattice::construct(Bigram &g)
     cerr << "                                    \r";
 
     int c1=0,c2=0,c3=0;
-    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
+    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
 	c1++;
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=next(a_ptr))
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=a_ptr->next())
 	    c2++;
     }
     
-    for (n_ptr = final_nodes.head(); n_ptr != 0; n_ptr = next(n_ptr))
+    for (n_ptr = final_nodes.head(); n_ptr != 0; n_ptr = n_ptr->next())
 	c3++;
 
     cerr << "NFA has " << c1 
@@ -474,9 +474,9 @@ bool Lattice::determinise()
 
 
 
-    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = next(n_ptr)){
+    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = n_ptr->next()){
 
-	for (a_ptr = nodes(n_ptr)->arcs_out.head(); a_ptr != 0; a_ptr = next(a_ptr)){
+	for (a_ptr = nodes(n_ptr)->arcs_out.head(); a_ptr != 0; a_ptr = a_ptr->next()){
 
 	    current_label = nodes(n_ptr)->arcs_out(a_ptr)->label;
 
@@ -487,20 +487,20 @@ bool Lattice::determinise()
 	    if(final(nodes(n_ptr)->arcs_out(a_ptr)->to) )
 		is_final=true;
 	    while((a_ptr != NULL) &&
-		  (next(a_ptr) != NULL) &&
-		  (nodes(n_ptr)->arcs_out(next(a_ptr))->label == current_label)){
-		merge_sort_unique(new_name,nodes(n_ptr)->arcs_out(next(a_ptr))->to->name);
+		  (a_ptr->next() != NULL) &&
+		  (nodes(n_ptr)->arcs_out(a_ptr->next())->label == current_label)){
+		merge_sort_unique(new_name,nodes(n_ptr)->arcs_out(a_ptr->next())->to->name);
 
-		if( !is_final && final(nodes(n_ptr)->arcs_out(next(a_ptr))->to) )
+		if( !is_final && final(nodes(n_ptr)->arcs_out(a_ptr->next())->to) )
 		    is_final=true;
 
-		a_ptr=next(a_ptr);
+		a_ptr=a_ptr->next();
 
 	    }
 
 	    // make new node with this name, unless we already have one
 	    bool flag=false;
-	    for (n2_ptr = new_nodes.head(); n2_ptr != 0; n2_ptr = next(n2_ptr))
+	    for (n2_ptr = new_nodes.head(); n2_ptr != 0; n2_ptr = n2_ptr->next())
 		if( new_nodes(n2_ptr)->name == new_name ){
 		    flag=true;
 		    break;
@@ -512,7 +512,7 @@ bool Lattice::determinise()
 		if(new_node == NULL){
 		    cerr << "Could not allocate any more memory";
 		    count=0;
-		    for (n2_ptr = new_nodes.head(); n2_ptr != 0; n2_ptr = next(n2_ptr))
+		    for (n2_ptr = new_nodes.head(); n2_ptr != 0; n2_ptr = n2_ptr->next())
 			count++;
 		    cerr << " after making " << count << " nodes" << endl;
 		    return false;
@@ -536,7 +536,7 @@ bool Lattice::determinise()
 
     c=0;
     new_arcs_made=0;
-    for (n_ptr = new_nodes.head(); n_ptr != 0; n_ptr = next(n_ptr)){
+    for (n_ptr = new_nodes.head(); n_ptr != 0; n_ptr = n_ptr->next()){
 
 	c++;
 	cerr << "Processing node " << c
@@ -544,9 +544,9 @@ bool Lattice::determinise()
 
 	// find constituent nodes in NFA (only works if NFA names are single ints !)
 	arc_list.clear();
-	for(l_ptr=new_nodes(n_ptr)->name.head(); l_ptr != 0; l_ptr = next(l_ptr)){
+	for(l_ptr=new_nodes(n_ptr)->name.head(); l_ptr != 0; l_ptr = l_ptr->next()){
 
-	    for(n2_ptr = nodes.head(); n2_ptr != 0; n2_ptr = next(n2_ptr)){
+	    for(n2_ptr = nodes.head(); n2_ptr != 0; n2_ptr = n2_ptr->next()){
 		
 		if(nodes(n2_ptr)->name(nodes(n2_ptr)->name.head()) ==
 		   new_nodes(n_ptr)->name(l_ptr))
@@ -567,7 +567,7 @@ bool Lattice::determinise()
 
 	sort_by_label(arc_list);
 
-	for(a_ptr=arc_list.head();a_ptr!=NULL;a_ptr=next(a_ptr)){
+	for(a_ptr=arc_list.head();a_ptr!=NULL;a_ptr=a_ptr->next()){
 
 	    current_label=arc_list(a_ptr)->label;
 	    //cerr << " label " << current_label;
@@ -578,19 +578,19 @@ bool Lattice::determinise()
 	    if(final(arc_list(a_ptr)->to) )
 		is_final=true;
 	    while((a_ptr != NULL) &&
-		  (next(a_ptr) != NULL) &&
-		  (arc_list(next(a_ptr))->label == current_label)){
+		  (a_ptr->next() != NULL) &&
+		  (arc_list(a_ptr->next())->label == current_label)){
 		merge_sort_unique(new_name2,arc_list(a_ptr)->to->name);
 		if( !is_final && final(arc_list(a_ptr)->to) )
 		    is_final=true;
-		a_ptr=next(a_ptr);
+		a_ptr=a_ptr->next();
 	    }
 
 	    //cerr << " -> " << new_name2;
 
 	    // find DFA node with that name
 	    bool flag=false;
-	    for (n2_ptr = new_nodes.head(); n2_ptr != 0; n2_ptr = next(n2_ptr))
+	    for (n2_ptr = new_nodes.head(); n2_ptr != 0; n2_ptr = n2_ptr->next())
 		if( new_nodes(n2_ptr)->name == new_name2 ){
 		    flag=true;
 		    break;
@@ -601,7 +601,7 @@ bool Lattice::determinise()
 		if(new_node == NULL){
 		    cerr << "Could not allocate any more memory";
 		    count=0;
-		    for (n2_ptr = new_nodes.head(); n2_ptr != 0; n2_ptr = next(n2_ptr))
+		    for (n2_ptr = new_nodes.head(); n2_ptr != 0; n2_ptr = n2_ptr->next())
 			count++;
 		    cerr << " after making " << count << " nodes" << endl;
 		    return false;
@@ -629,7 +629,7 @@ bool Lattice::determinise()
     cerr << endl;
 
     // delete old nodes, and replace with new nodes
-    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = next(n_ptr))
+    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = n_ptr->next())
 	delete nodes(n_ptr);
     nodes.clear();
     nodes=new_nodes;
@@ -640,13 +640,13 @@ bool Lattice::determinise()
     new_final_nodes.clear();
 
     int c1=0,c2=0,c3=0;
-    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
+    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
 	c1++;
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=next(a_ptr))
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=a_ptr->next())
 	    c2++;
     }
     
-    for (n_ptr = final_nodes.head(); n_ptr != 0; n_ptr = next(n_ptr))
+    for (n_ptr = final_nodes.head(); n_ptr != 0; n_ptr = n_ptr->next())
 	c3++;
 
     cerr << "DFA has " << c1 
@@ -692,7 +692,7 @@ Lattice::sort_arc_lists()
 {
     EST_Litem *n_ptr;
 
-    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = next(n_ptr)){
+    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = n_ptr->next()){
 	
 	// can't sort nodes(n_ptr)->arcs_out directly
 	// since it is a list of pointers
@@ -736,8 +736,8 @@ Lattice::build_distinguished_state_table(bool ** &dst)
 
     cerr << "final/non-final scan";
     // any final/non-final (or non-final/final) pairs are distinguished immediately
-    for(i=0,n_ptr=nodes.head();next(n_ptr)!=NULL;n_ptr=next(n_ptr),i++){
-	for(j=i+1,n2_ptr=next(n_ptr);n2_ptr!=NULL;n2_ptr=next(n2_ptr),j++){
+    for(i=0,n_ptr=nodes.head();n_ptr->next()!=NULL;n_ptr=n_ptr->next(),i++){
+	for(j=i+1,n2_ptr=n_ptr->next();n2_ptr!=NULL;n2_ptr=n2_ptr->next(),j++){
 	    
 	    if(final(nodes(n_ptr)) && !final(nodes(n2_ptr)))
 		dst[i][j] = true;
@@ -792,9 +792,9 @@ Lattice::build_distinguished_state_table_direct(bool ** &dst)
 
 	scan_count++;
 
-	for(i=0,n_ptr=nodes.head();next(n_ptr)!=NULL;n_ptr=next(n_ptr),i++){
+	for(i=0,n_ptr=nodes.head();n_ptr->next()!=NULL;n_ptr=n_ptr->next(),i++){
 	    
-	    for(j=i+1,n2_ptr=next(n_ptr);n2_ptr!=NULL;n2_ptr=next(n2_ptr),j++){
+	    for(j=i+1,n2_ptr=n_ptr->next();n2_ptr!=NULL;n2_ptr=n2_ptr->next(),j++){
 		
 		cerr << "scan " << scan_count << " : " << i << "," << j << "     \r";
 
@@ -814,7 +814,7 @@ Lattice::build_distinguished_state_table_direct(bool ** &dst)
 
 			    j1=-1;
 			    for(a_ptr=nodes(n2_ptr)->arcs_out.head();
-				a_ptr!=NULL; a_ptr=next(a_ptr))
+				a_ptr!=NULL; a_ptr=a_ptr->next())
 				if(nodes(n2_ptr)->arcs_out(a_ptr)->label == this_symbol)
 				    j1 = node_index(nodes(n2_ptr)->arcs_out(a_ptr)->to);
 
@@ -824,7 +824,7 @@ Lattice::build_distinguished_state_table_direct(bool ** &dst)
 
 			    i1=-1;
 			    for(a_ptr=nodes(n_ptr)->arcs_out.head();
-				a_ptr!=NULL; a_ptr=next(a_ptr))
+				a_ptr!=NULL; a_ptr=a_ptr->next())
 				if(nodes(n_ptr)->arcs_out(a_ptr)->label == this_symbol)
 				    i1 = node_index(nodes(n_ptr)->arcs_out(a_ptr)->to);
 			}
@@ -845,7 +845,7 @@ Lattice::build_distinguished_state_table_direct(bool ** &dst)
 				
 			    }
 
-			s_ptr=next(s_ptr);
+			s_ptr=s_ptr->next();
 			if( (s_ptr==NULL) && (flag2) ){ // now go down second list
 			    s_ptr=nodes(n2_ptr)->arcs_out.head();
 			    flag2=false;
@@ -955,11 +955,11 @@ Lattice::minimise()
 	flag=false;
 
 	merge_list.clear();
-	for(i=0,n_ptr=nodes.head();next(n_ptr)!=NULL;n_ptr=next(n_ptr),i++){
+	for(i=0,n_ptr=nodes.head();n_ptr->next()!=NULL;n_ptr=n_ptr->next(),i++){
 	    
 	    cerr << "merge, processing row " << i << "        \r";
 	    
-	    for(j=i+1,n2_ptr=next(n_ptr);n2_ptr!=NULL;n2_ptr=next(n2_ptr),j++){
+	    for(j=i+1,n2_ptr=n_ptr->next();n2_ptr!=NULL;n2_ptr=n2_ptr->next(),j++){
 		
 		if(!dst[i][j]){
 
@@ -975,7 +975,7 @@ Lattice::minimise()
 			// see if either of this pair of nodes is on the merge list,
 			// and if so add the other node in the pair
 			bool add1=false,add2=false;
-			for(n3_ptr=merge_list.head();n3_ptr!=NULL;n3_ptr=next(n3_ptr)){
+			for(n3_ptr=merge_list.head();n3_ptr!=NULL;n3_ptr=n3_ptr->next()){
 			    if(merge_list(n3_ptr) == nodes(n_ptr))
 				add2=true;
 			    if(merge_list(n3_ptr) == nodes(n2_ptr))
@@ -1002,12 +1002,12 @@ Lattice::minimise()
 
 	    // so merge them
 	    count=0;
-	    for(n_ptr=merge_list.head();n_ptr!=NULL;n_ptr=next(n_ptr))
+	    for(n_ptr=merge_list.head();n_ptr!=NULL;n_ptr=n_ptr->next())
 		count++;
 	    cerr << "merging " << count << " nodes out of ";
 	    
 	    count=0;
-	    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr))
+	    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next())
 		count++;
 	    cerr << count;
 	    
@@ -1015,7 +1015,7 @@ Lattice::minimise()
 	    flag=true;
 
 	    count=0;
-	    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr))
+	    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next())
 		count++;
 	    cerr << " leaving " << count << endl;
 	    
@@ -1026,9 +1026,9 @@ Lattice::minimise()
     }
 
     int c1=0,c2=0;
-    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
+    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
 	c1++;
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=next(a_ptr))
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=a_ptr->next())
 	    c2++;
     }
     
@@ -1038,9 +1038,9 @@ Lattice::minimise()
     merge_arcs();
 
     c1=0,c2=0;
-    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
+    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
 	c1++;
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=next(a_ptr))
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=a_ptr->next())
 	    c2++;
     }
     
@@ -1074,18 +1074,18 @@ Lattice::merge_nodes(EST_TList<Node*> &l)
 
 
 
-    for(n_ptr=l.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
+    for(n_ptr=l.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
 
 	// get arcs
-	for(a_ptr=l(n_ptr)->arcs_out.head();a_ptr!=NULL;a_ptr=next(a_ptr))
+	for(a_ptr=l(n_ptr)->arcs_out.head();a_ptr!=NULL;a_ptr=a_ptr->next())
 	    new_node->arcs_out.append(l(n_ptr)->arcs_out(a_ptr));
 
 	// get name
 	merge_sort_unique(new_node->name,l(n_ptr)->name);
 
 	// find arcs into old nodes and make them go into new node
-	for(n2_ptr=nodes.head();n2_ptr!=NULL;n2_ptr=next(n2_ptr)){
-	    for(a2_ptr=nodes(n2_ptr)->arcs_out.head();a2_ptr!=NULL;a2_ptr=next(a2_ptr)){
+	for(n2_ptr=nodes.head();n2_ptr!=NULL;n2_ptr=n2_ptr->next()){
+	    for(a2_ptr=nodes(n2_ptr)->arcs_out.head();a2_ptr!=NULL;a2_ptr=a2_ptr->next()){
 		if(nodes(n2_ptr)->arcs_out(a2_ptr)->to == l(n_ptr))
 		    nodes(n2_ptr)->arcs_out(a2_ptr)->to = new_node;
 	    }
@@ -1095,8 +1095,8 @@ Lattice::merge_nodes(EST_TList<Node*> &l)
 
 
     // delete old nodes, but not arcs
-    for(n_ptr=l.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
-	for(n2_ptr=nodes.head();n2_ptr!=NULL;n2_ptr=next(n2_ptr))
+    for(n_ptr=l.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
+	for(n2_ptr=nodes.head();n2_ptr!=NULL;n2_ptr=n2_ptr->next())
 	    if(nodes(n2_ptr) == l(n_ptr)){
 		nodes(n2_ptr)->name.clear();
 		nodes(n2_ptr)->arcs_out.clear();
@@ -1118,19 +1118,19 @@ Lattice::merge_arcs()
     int count=0,count2;
 
     // find repeated arcs with the same label between two nodes
-    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
+    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
 
 	count2=0;
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=next(a_ptr))
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=a_ptr->next())
 	    count2++;
 
 	cerr << "merging arcs from node " << ++count 
 	     << ", before:" << count2;
 
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();next(a_ptr)!=NULL; a_ptr=next(a_ptr)){
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr->next()!=NULL; a_ptr=a_ptr->next()){
 	    
 	    merge_list.clear();
-	    for(a2_ptr=next(a_ptr);a2_ptr!=NULL; a2_ptr=next(a2_ptr))
+	    for(a2_ptr=a_ptr->next();a2_ptr!=NULL; a2_ptr=a2_ptr->next())
 
 		if((nodes(n_ptr)->arcs_out(a_ptr)->label ==
 		   nodes(n_ptr)->arcs_out(a2_ptr)->label) &&
@@ -1146,7 +1146,7 @@ Lattice::merge_arcs()
 	}
 
 	count2=0;
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=next(a_ptr))
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=a_ptr->next())
 	    count2++;
 
 	cerr<< ", after:" << count2 << endl;
@@ -1164,7 +1164,7 @@ Lattice::prune_arcs(Node *node, EST_TList<Arc*> arcs)
 
     int count=0;
     EST_Litem *a_ptr;
-    for(a_ptr=arcs.head(); a_ptr != 0; a_ptr=next(a_ptr) ){
+    for(a_ptr=arcs.head(); a_ptr != 0; a_ptr=a_ptr->next() ){
 	prune_arc(node, arcs(a_ptr));
 	count++;
     }
@@ -1184,7 +1184,7 @@ void
 Lattice::remove_arc_from_nodes_in_list(Node *n, Arc *a)
 {
     EST_Litem *a_ptr;
-    for (a_ptr = n->arcs_in.head(); a_ptr != 0; a_ptr = next(a_ptr))
+    for (a_ptr = n->arcs_in.head(); a_ptr != 0; a_ptr = a_ptr->next())
 	if(n->arcs_in(a_ptr) == a)
 	    n->arcs_in.remove(a_ptr);
 }
@@ -1194,7 +1194,7 @@ void
 Lattice::remove_arc_from_nodes_out_list(Node *n, Arc *a)
 {
     EST_Litem *a_ptr;
-    for (a_ptr = n->arcs_out.head(); a_ptr != 0; a_ptr = next(a_ptr))
+    for (a_ptr = n->arcs_out.head(); a_ptr != 0; a_ptr = a_ptr->next())
 	if(n->arcs_out(a_ptr) == a)
 	    n->arcs_out.remove(a_ptr);
 }
@@ -1205,7 +1205,7 @@ Lattice::is_enter_node(Node *n)
 {
     // contains "!ENTER" in its list of names
     EST_Litem *l_ptr;
-    for(l_ptr=n->name.head(); l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=n->name.head(); l_ptr != 0; l_ptr=l_ptr->next())
 	if(n->name(l_ptr) == nmap_name_to_index("!ENTER")) // temporary !!
 	    return true;
     return false;
@@ -1217,7 +1217,7 @@ bool
 Lattice::is_exit_node(Node *n)
 {
     EST_Litem *l_ptr;
-    for(l_ptr=n->name.head(); l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=n->name.head(); l_ptr != 0; l_ptr=l_ptr->next())
 	if(n->name(l_ptr) == nmap_name_to_index("!EXIT")) // temporary !!
 	    return true;
     return false;
@@ -1341,7 +1341,7 @@ int
 Lattice::node_index(Node *n)
 {
     EST_Litem *n_ptr;
-    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = next(n_ptr)){
+    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = n_ptr->next()){
 	if(nodes(n_ptr) == n)
 	    return nodes.index(n_ptr);
 	
@@ -1368,13 +1368,13 @@ Lattice::expand()
     EST_TList<int> word_list;
     Node *new_node;
     Arc *new_arc;
-    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = next(n_ptr)){
+    for (n_ptr = nodes.head(); n_ptr != 0; n_ptr = n_ptr->next()){
 
 	// find all arcs into this node
 	word_list.clear();
-	for (n2_ptr = nodes.head(); n2_ptr != 0; n2_ptr = next(n2_ptr)){
+	for (n2_ptr = nodes.head(); n2_ptr != 0; n2_ptr = n2_ptr->next()){
 
-	    for (a_ptr = nodes(n2_ptr)->arcs_out.head(); a_ptr != 0; a_ptr = next(a_ptr))
+	    for (a_ptr = nodes(n2_ptr)->arcs_out.head(); a_ptr != 0; a_ptr = a_ptr->next())
 		if(nodes(n2_ptr)->arcs_out(a_ptr)->to == nodes(n_ptr)){
 		    
 		    if(nodes(n2_ptr)->arcs_out(a_ptr)->label != e_move_symbol_index){
@@ -1388,12 +1388,12 @@ Lattice::expand()
 	
 	
 	// if word_list.head() is NULL we should be worried
-	if((word_list.head() != NULL) && next(word_list.head()) != NULL){
+	if((word_list.head() != NULL) && word_list.head()->next() != NULL){
 
 	    // for each word make a null node, change all offending arcs to point
 	    // to it, and make another link from null node to nodes(n_ptr)
 
-	    for(w_ptr=word_list.head();w_ptr!=NULL;w_ptr=next(w_ptr)){
+	    for(w_ptr=word_list.head();w_ptr!=NULL;w_ptr=w_ptr->next()){
 
 		// make null node
 		new_node = new Node;
@@ -1403,9 +1403,9 @@ Lattice::expand()
 		new_node->arcs_out.append(new_arc);
 
 		// for every arc into nodes(n_ptr) with this word label, change its arcs
-		for (n2_ptr = nodes.head(); n2_ptr != 0; n2_ptr = next(n2_ptr)){
+		for (n2_ptr = nodes.head(); n2_ptr != 0; n2_ptr = n2_ptr->next()){
 		    
-		    for (a_ptr = nodes(n2_ptr)->arcs_out.head(); a_ptr != 0; a_ptr = next(a_ptr)){
+		    for (a_ptr = nodes(n2_ptr)->arcs_out.head(); a_ptr != 0; a_ptr = a_ptr->next()){
 			if(nodes(n2_ptr)->arcs_out(a_ptr)->to == nodes(n_ptr)){
 			    
 			    word = alphabet_index_to_symbol(nodes(n2_ptr)->arcs_out(a_ptr)->label)->nmap_index;
@@ -1427,8 +1427,8 @@ Lattice::expand()
 
     //Node *enter_node = nodes(nodes.head());
     bool flag=false;
-    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=next(a_ptr)){
+    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=a_ptr->next()){
 	    flag=true;
 	    break;
 	}
@@ -1453,7 +1453,7 @@ Lattice::expand()
 	// make null node
 	new_node = new Node;
 
-	for(n_ptr=final_nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
+	for(n_ptr=final_nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
 
 	    new_arc = new Arc;
 	    new_arc->label = e_move_symbol_index; // no label
@@ -1473,9 +1473,9 @@ Lattice::expand()
 
 
     int c1=0,c2=0;
-    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr)){
+    for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
 	c1++;
-	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=next(a_ptr))
+	for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL; a_ptr=a_ptr->next())
 	    c2++;
     }
     
@@ -1489,7 +1489,7 @@ bool
 Lattice::final(Node *n)
 {
     EST_Litem *n_ptr;
-    for (n_ptr = final_nodes.head(); n_ptr != 0; n_ptr = next(n_ptr))
+    for (n_ptr = final_nodes.head(); n_ptr != 0; n_ptr = n_ptr->next())
 	if(final_nodes(n_ptr) == n)
 	    return true;
 
@@ -1502,7 +1502,7 @@ EST_String Lattice::name_as_string(EST_IList &l)
 {
     EST_String name;
     EST_Litem *l_ptr;
-    for(l_ptr=l.head();l_ptr!=NULL;l_ptr=next(l_ptr))
+    for(l_ptr=l.head();l_ptr!=NULL;l_ptr=l_ptr->next())
 	name+=nmap_index_to_name(l(l_ptr)) + ",";
 
     return name;
@@ -1616,14 +1616,14 @@ Lattice::build_transition_function()
 	return false;
     }
 
-    for(i=0,n_ptr=nodes.head();n_ptr!=NULL;n_ptr=next(n_ptr),i++){
+    for(i=0,n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next(),i++){
 
 	cerr << "building transition function " << (int)((float)(i+1)*100/(float)num_nodes) << "%    \r";
 
 	for(j=0;j<alphabet.n();j++){
 
 	    tf[i][j]=-1; // means no transition
-	    for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL;a_ptr=next(a_ptr)){
+	    for(a_ptr=nodes(n_ptr)->arcs_out.head();a_ptr!=NULL;a_ptr=a_ptr->next()){
 
 		if(j == nodes(n_ptr)->arcs_out(a_ptr)->label){
 		    tf[i][j] = node_index(nodes(n_ptr)->arcs_out(a_ptr)->to);
@@ -1674,14 +1674,14 @@ Lattice::viterbi_transduce(EST_TList<EST_String> &input,
 
     best=NULL;
     float max=-10000000; // hack for now
-    for (a_ptr = start_node->arcs_out.head(); a_ptr != 0; a_ptr = next(a_ptr)){
+    for (a_ptr = start_node->arcs_out.head(); a_ptr != 0; a_ptr = a_ptr->next()){
 
 	if( alphabet_index_to_symbol(start_node->arcs_out(a_ptr)->label)->nmap_index
 	    == nmap_name_to_index(input(current_symbol)) ){
 	    
 	    float x = viterbi_transduce(input,
 					path,
-					next(current_symbol),
+					current_symbol->next(),
 					start_node->arcs_out(a_ptr)->to)
 		+ qmap_index_to_value(alphabet_index_to_symbol(start_node->arcs_out(a_ptr)->label)->qmap_index);
 	
@@ -1732,7 +1732,7 @@ float Lattice::viterbi_transduce(EST_Track &observations,
     
     best=NULL;
     float max=-10000000; // hack for now
-    for (a_ptr = start_node->arcs_out.head(); a_ptr != 0; a_ptr = next(a_ptr)){
+    for (a_ptr = start_node->arcs_out.head(); a_ptr != 0; a_ptr = a_ptr->next()){
 
 	int observation_element =
 	    alphabet_index_to_symbol(start_node->arcs_out(a_ptr)->label)->nmap_index

@@ -191,7 +191,7 @@ int main (int argc, char *argv[])
 
     if (files.length() > 1)
     {
-	for (p= next(files.head()); p != 0; p=next(p))
+	for (p= files.head()->next(); p != 0; p=p->next())
 	{
 	    if (read_wave(sigload, files(p), al) != format_ok)
 		exit(-1);
@@ -272,7 +272,7 @@ int main (int argc, char *argv[])
 
         if (wave_divide(wl, sig, key, al.val("-ext", 0)) == -1)
 	    exit(0);
-	for (p = wl.head(); p; p = next(p))
+	for (p = wl.head(); p; p = p->next())
 	    wl(p).save(wl(p).name(), al.val("-otype", 0));
 	exit(0);
     }

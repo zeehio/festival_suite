@@ -141,7 +141,7 @@ static LISP *find_state_usage(EST_WFST &wfst, LISP data)
 	state_data[i] = NIL;
 	ddd = cons(state_data[i],ddd);
 //	// smoothing
-//	for (tp=wfst.state(i)->transitions.head(); tp != 0; tp = next(tp))
+//	for (tp=wfst.state(i)->transitions.head(); tp != 0; tp = tp->next())
 //	    wfst.state(i)->transitions(tp)->set_weight(1);
     }
 
@@ -174,7 +174,7 @@ static double entropy(const EST_WFST_State *s)
 {
     double sentropy,w;
     EST_Litem *tp;
-    for (sentropy=0,tp=s->transitions.head(); tp != 0; tp = next(tp))
+    for (sentropy=0,tp=s->transitions.head(); tp != 0; tp = tp->next())
     {
 	w = s->transitions(tp)->weight();  /* the probability */
 	if (w > 0)
@@ -431,7 +431,7 @@ static LISP find_split_pdfs(EST_WFST &wfst,
     for (i=0; i < wfst.num_states(); i++)
     {
 	const EST_WFST_State *s = wfst.state(i);
-	for (tp=s->transitions.head(); tp != 0; tp = next(tp))
+	for (tp=s->transitions.head(); tp != 0; tp = tp->next())
 	{
 	    if ((s->transitions(tp)->state() == split_state_name)
 		&& (s->transitions(tp)->weight() > 0))
@@ -485,7 +485,7 @@ EST_WFST_Transition *find_best_trans_split(EST_WFST &wfst,
     for (i=1; i < wfst.num_states(); i++)
     {
 	const EST_WFST_State *s = wfst.state(i);
-	for (tp=s->transitions.head(); tp != 0; tp = next(tp))
+	for (tp=s->transitions.head(); tp != 0; tp = tp->next())
 	{
 	    if ((wfst.state(s->transitions(tp)->state()) == split_state) &&
 		(s->transitions(tp)->weight() > 0))
@@ -592,7 +592,7 @@ static void split_state(EST_WFST &wfst, EST_WFST_Transition *trans)
     /* must be done before adding the new transitions to nstate */
     trans->set_state(nstate);
 
-    for (tp=wfst.state(ostate)->transitions.head(); tp != 0; tp = next(tp))
+    for (tp=wfst.state(ostate)->transitions.head(); tp != 0; tp = tp->next())
     {
 	wfst.state_non_const(nstate)->
 	    add_transition(0.0,  /* weight will be filled in later*/
@@ -620,7 +620,7 @@ static void split_state(EST_WFST &wfst, LISP trans_list, int ostate)
     for (t=trans_list; t; t=cdr(t))
 	trans(car(t))->set_state(nstate);
 
-    for (tp=wfst.state(ostate)->transitions.head(); tp != 0; tp = next(tp))
+    for (tp=wfst.state(ostate)->transitions.head(); tp != 0; tp = tp->next())
     {
 	wfst.state_non_const(nstate)->
 	    add_transition(0.0,  /* weight will be filled in later*/

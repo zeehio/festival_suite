@@ -81,7 +81,7 @@ int contains(EST_TList<int> &l, int n)
 {
     EST_Litem *p;
 
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
 	if (l(p) == n)
 	    return 1;
 
@@ -93,8 +93,8 @@ void remove_distances(EST_FMatrix &d , EST_TList<int> &group)
     EST_Litem *pi, *pj;
     int i, j;
     
-    for (i = 0, pi = group.head(); pi != 0; pi = next(pi), ++i)
-	for (j = 0, pj = group.head(); pj != 0; pj = next(pj), ++j)
+    for (i = 0, pi = group.head(); pi != 0; pi = pi->next(), ++i)
+	for (j = 0, pj = group.head(); pj != 0; pj = pj->next(), ++j)
 	    d(group(pi), group(pj)) = 0.0;
 }
 
@@ -118,11 +118,11 @@ void collapse(EST_FMatrix &d, EST_CBK &cbk, int row, int col)
 {
     EST_Litem *pi, *pj;
 
-    for (pi = cbk.head(); pi != 0; pi = next(pi))
+    for (pi = cbk.head(); pi != 0; pi = pi->next())
 	if (contains(cbk(pi), row))
 	    break;
 
-    for (pj = cbk.head(); pj != 0; pj = next(pj))
+    for (pj = cbk.head(); pj != 0; pj = pj->next())
 	if (contains(cbk(pj), col))
 	    break;
 
@@ -164,7 +164,7 @@ void collapse3(EST_FMatrix &d, EST_CBK &cbk, int row, int col, EST_String method
 
     cout << "row " << row << " col " << col << " left out " << v;
     
-    for (pi = v.head(); pi != 0; pi = next(pi))
+    for (pi = v.head(); pi != 0; pi = pi->next())
     {
 	if (method == "nearest")
 	    fm = min(d(row,v(pi)),d(col,v(pi)));
@@ -197,7 +197,7 @@ int nn_cluster2(EST_FMatrix &m, EST_CBK &cbk, float d)
     cout << "row = " << row << " col " << col << endl;
     collapse(m, cbk, row, col);
 
-    for (EST_Litem *p = cbk.head(); p != 0; p = next(p))
+    for (EST_Litem *p = cbk.head(); p != 0; p = p->next())
 	cout << cbk(p);
     cout << "New matrix\n" << m;
 
@@ -219,7 +219,7 @@ float nn_cluster3(EST_FMatrix &m, EST_CBK &cbk, EST_String method)
     cout << "row = " << row << " col " << col << endl;
     collapse3(m, cbk, row, col, method);
 
-    for (EST_Litem *p = cbk.head(); p != 0; p = next(p))
+    for (EST_Litem *p = cbk.head(); p != 0; p = p->next())
 	cout << cbk(p);
     cout << "New matrix\n" << m << endl << endl;
 
@@ -235,9 +235,9 @@ int nn_cluster(EST_FMatrix &m, EST_CBK &cbk, float d)
     int c = 0;
     
     i = 0;
-    for (pi = cbk.head(); pi != 0; pi = next(pi), ++i)
+    for (pi = cbk.head(); pi != 0; pi = pi->next(), ++i)
     {
-	for (pj = next(pi); pj != 0; pj = next(pj))
+	for (pj = pi->next(); pj != 0; pj = pj->next())
 	{
 	    smallest = lowestval(m, cbk(pj), cbk(pi));
 	    if (smallest < d)
@@ -248,7 +248,7 @@ int nn_cluster(EST_FMatrix &m, EST_CBK &cbk, float d)
 	}
     }
     
-    for (pi = cbk.head(); pi != 0; pi = next(pi))
+    for (pi = cbk.head(); pi != 0; pi = pi->next())
     {
 	if (cbk(pi).empty())
 	{
@@ -270,9 +270,9 @@ int fn_cluster(EST_FMatrix &m, EST_CBK &cbk, float d)
     int c = 0;
     
     i = 0;
-    for (pi = cbk.head(); pi != 0; pi = next(pi), ++i)
+    for (pi = cbk.head(); pi != 0; pi = pi->next(), ++i)
     {
-	for (pj = next(pi); pj != 0; pj = next(pj))
+	for (pj = pi->next(); pj != 0; pj = pj->next())
 	{
 	    smallest = highestval(m, cbk(pj), cbk(pi));
 	    if (smallest < d)
@@ -283,7 +283,7 @@ int fn_cluster(EST_FMatrix &m, EST_CBK &cbk, float d)
 	}
     }
     
-    for (pi = cbk.head(); pi != 0; pi = next(pi))
+    for (pi = cbk.head(); pi != 0; pi = pi->next())
     {
 	if (cbk(pi).empty())
 	{
@@ -351,16 +351,16 @@ EST_String print_codebook(EST_CBK &cbk, float d, EST_TList<EST_String> &names)
     EST_String s;
     
     s = ftoString(d) + " ";
-    for (pi = cbk.head(); pi != 0; pi = next(pi))
+    for (pi = cbk.head(); pi != 0; pi = pi->next())
     {
 	s += "(";
-	for (pj = cbk(pi).head(); pj != 0; pj = next(pj))
+	for (pj = cbk(pi).head(); pj != 0; pj = pj->next())
 	{
 	    if (names.empty())
 		s += itoString(cbk.item(pi).item(pj));
 	    else 
 		s += names.nth(cbk.item(pi).item(pj));
-	    if (next(pj) !=  0)
+	    if (pj->next() !=  0)
 		s += "   ";
 	}
 	s += ") ";
@@ -440,8 +440,8 @@ float lowestval(EST_FMatrix &m, EST_TList<int> &a, EST_TList<int> &b)
     
     cout << "list a:" << a << "list b:" << b;
     
-    for (pa = a.head(); pa != 0; pa = next(pa))
-	for (pb = b.head(); pb != 0; pb = next(pb))
+    for (pa = a.head(); pa != 0; pa = pa->next())
+	for (pb = b.head(); pb != 0; pb = pb->next())
 	{
 	    //      cout << "m:" << a(pa) << " " << b(pb) << " " << m.x[a(pa)][b(pb)] << endl;
 	    if (m(a(pa), b(pb)) < lowest)
@@ -476,8 +476,8 @@ float highestval(EST_FMatrix &m, EST_TList<int> &a, EST_TList<int> &b)
     
     cout << "list a:" << a << "list b:" << b;
     
-    for (pa = a.head(); pa != 0; pa = next(pa))
-	for (pb = b.head(); pb != 0; pb = next(pb))
+    for (pa = a.head(); pa != 0; pa = pa->next())
+	for (pb = b.head(); pb != 0; pb = pb->next())
 	{
 	    if (m(a(pa), b(pb)) > h)
 		h = m(a(pa), b(pb));
@@ -491,7 +491,7 @@ float highestval(EST_FMatrix &m, EST_TList<int> &a, EST_TList<int> &b)
    EST_Litem *p;
    float lowest = 100000.0;
    
-   for (p = cbk.head(); p != 0; p = next(p))
+   for (p = cbk.head(); p != 0; p = p->next())
    {
    cout << "cbk(p) " << cbk(p) << endl;
    if (cbk(p) < lowest)
@@ -506,7 +506,7 @@ void merge(EST_TList<int> cbk[], int i, int j)
 {
     EST_Litem *p;
     
-    for (p = cbk[j].head(); p != 0; p = next(p))
+    for (p = cbk[j].head(); p != 0; p = p->next())
 	cbk[i].append(cbk[j].item(p));
     
     cbk[j].clear();
@@ -533,7 +533,7 @@ int load_names(EST_String file, EST_TList<EST_String> &names)
   EST_TList<int> newgroup;
   EST_Litem *p;
   
-  for (p = cbk[j].head(); p != 0; p = next(p))
+  for (p = cbk[j].head(); p != 0; p = p->next())
   cbk[i].append(cbk[j].item(p));
   
   cbk[j].clear();

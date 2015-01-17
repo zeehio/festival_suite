@@ -66,10 +66,10 @@ bool save(Lattice &lattice, EST_String filename)
     }
 
     // count
-    for (n_ptr = lattice.nodes.head(); n_ptr != 0; n_ptr = next(n_ptr)){
+    for (n_ptr = lattice.nodes.head(); n_ptr != 0; n_ptr = n_ptr->next()){
 	ncount++;
 	for (a_ptr = lattice.nodes(n_ptr)->arcs_out.head();
-	     a_ptr != 0; a_ptr = next(a_ptr))
+	     a_ptr != 0; a_ptr = a_ptr->next())
 	    acount++;
     }
 
@@ -96,7 +96,7 @@ bool save(Lattice &lattice, EST_String filename)
 	ncount=0;
 	acount=0;
 
-	for (n_ptr = lattice.nodes.head(); n_ptr != 0; n_ptr = next(n_ptr)){
+	for (n_ptr = lattice.nodes.head(); n_ptr != 0; n_ptr = n_ptr->next()){
 	    
 	    from=lattice.node_index(lattice.nodes(n_ptr));
 	    
@@ -105,7 +105,7 @@ bool save(Lattice &lattice, EST_String filename)
 		
 	    }else
 		for (a_ptr = lattice.nodes(n_ptr)->arcs_out.head();
-		     a_ptr != 0; a_ptr = next(a_ptr)){
+		     a_ptr != 0; a_ptr = a_ptr->next()){
 
 		    to = lattice.node_index(lattice.nodes(n_ptr)->arcs_out(a_ptr)->to);
 		    
@@ -329,13 +329,13 @@ load(Lattice &lattice,EST_String filename)
     i=0;
     EST_Litem *l_ptr;
     bool flag;
-    for(l_ptr=list_nmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_nmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	i++;
 
     // transfer to array
     lattice.nmap.resize(i);
     i=0;
-    for(l_ptr=list_nmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_nmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	lattice.nmap[i++] = list_nmap(l_ptr);
 
     list_nmap.clear();
@@ -352,7 +352,7 @@ load(Lattice &lattice,EST_String filename)
     for(i=0;i<numarcs;i++){
 		
 	    flag = false;
-	    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+	    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 		if(fabs(list_qmap(l_ptr) - temp_arcs[i].logprob) <= error_margin){
 		    flag = true;
 		    break;
@@ -365,7 +365,7 @@ load(Lattice &lattice,EST_String filename)
     
     // special zero (within error_margin) entry, if not already there
     flag = false;
-    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	if(fabs(list_qmap(l_ptr)) <= error_margin){
 	    flag = true;
 	    break;
@@ -377,13 +377,13 @@ load(Lattice &lattice,EST_String filename)
     qsort(list_qmap);
     
     i=0;
-    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	i++;
     
     // transfer to array
     lattice.qmap.resize(i);
     i=0;
-    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=next(l_ptr))
+    for(l_ptr=list_qmap.head();l_ptr != 0; l_ptr=l_ptr->next())
 	lattice.qmap[i++] = list_qmap(l_ptr);
 
     list_qmap.clear();
@@ -455,7 +455,7 @@ load(Lattice &lattice,EST_String filename)
 
 	for (n_ptr =lattice. nodes.head(),count=0; 
 	     count<temp_arcs[j].start;
-	     n_ptr = next(n_ptr),count++){
+	     n_ptr = n_ptr->next(),count++){
 
 	    if(n_ptr == NULL){
 		cerr << "Couldn't find 'from' node ";
@@ -474,7 +474,7 @@ load(Lattice &lattice,EST_String filename)
 
 	for (n_ptr = lattice.nodes.head(),count=0; 
 	     count<temp_arcs[j].end;
-	     n_ptr = next(n_ptr),count++){
+	     n_ptr = n_ptr->next(),count++){
 
 	    if(n_ptr == NULL){
 		cerr << "Couldn't find 'to' node ";
@@ -515,7 +515,7 @@ load(Lattice &lattice,EST_String filename)
     // find final nodes
     for (n_ptr = lattice.nodes.head(),count=0; 
 	 n_ptr!= NULL;
-	 n_ptr = next(n_ptr)){
+	 n_ptr = n_ptr->next()){
 
 	if(lattice.nodes(n_ptr)->arcs_out.head() == NULL){
 	    lattice.final_nodes.append(lattice.nodes(n_ptr));

@@ -87,7 +87,7 @@ bool EST_Discrete::init(const EST_StrList &vocab)
     namevector.resize(vocab.length());
     nametrie.clear(Discrete_val_delete_funct);
 
-    for (i=0,w=vocab.head(); w != 0; i++,w=next(w)){
+    for (i=0,w=vocab.head(); w != 0; i++,w=w->next()){
 	namevector[i] = vocab(w);
 	tmp = new int;
 	*tmp = i;

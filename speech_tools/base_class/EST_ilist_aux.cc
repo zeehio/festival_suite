@@ -53,7 +53,7 @@
 int ilist_member(const EST_IList &l,int i)
 {
     EST_Litem *p;
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
 	if (l.item(p) == i)
 	    return TRUE;
 
@@ -64,7 +64,7 @@ int ilist_index(const EST_IList &l,int i)
 {
     EST_Litem *p;
     int j=0;
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
     {
 	if (l.item(p) == i)
 	    return j;
@@ -84,7 +84,7 @@ void IList_to_IVector(EST_IList &l, EST_IVector &v)
 
     //EST_TBI *p;
     EST_Litem *p;
-    for (p = l.head(),i=0; p != 0; p = next(p),i++)
+    for (p = l.head(),i=0; p != 0; p = p->next(),i++)
 	v[i] = l(p);
 }
 

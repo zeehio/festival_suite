@@ -434,7 +434,7 @@ void EST_SCFG_traintest::reestimate_grammar_probs(int passes,
 	    printf(" %d",c); fflush(stdout);
 	    if (corpus.a_no_check(c).length() == 0) continue;
 	    init_io_cache(c,num_nonterminals());
-	    for (ri=0,r=rules.head(); r != 0; r=next(r),ri++)
+	    for (ri=0,r=rules.head(); r != 0; r=r->next(),ri++)
 	    {
 		if (rules(r).type() == est_scfg_binary_rule)
 		    reestimate_rule_prob_B(c,ri,
@@ -453,7 +453,7 @@ void EST_SCFG_traintest::reestimate_grammar_probs(int passes,
 	}
 	printf("\n");
 
-	for (se=0.0,ri=0,r=rules.head(); r != 0; r=next(r),ri++)
+	for (se=0.0,ri=0,r=rules.head(); r != 0; r=r->next(),ri++)
 	{
 	    double n_prob = n[ri]/d[ri];
 	    if (d[ri] == 0)

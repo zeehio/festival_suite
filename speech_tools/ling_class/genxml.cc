@@ -581,7 +581,7 @@ void GenXML_Parser_Class::element_open(XML_Parser_Class &c,
 	      }
 	    EST_Litem *idp = ids.head();
 	    bool first=TRUE;
-	    for(; idp!= NULL; idp = next(idp))
+	    for(; idp!= NULL; idp = idp->next())
 	      {
 		 EST_String id = ids(idp);
 		 if (id==EST_String::Empty)

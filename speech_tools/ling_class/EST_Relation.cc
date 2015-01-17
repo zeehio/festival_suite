@@ -151,14 +151,14 @@ int EST_Relation::length() const
 
     if (this == 0)
 	return 0;
-    for (i=0,node=p_head; node; node=next(node))
+    for (i=0,node=p_head; node; node=node->next())
 	i++;
     return i;
 }
 
 void EST_Relation::evaluate_item_features()
 {
-    for (EST_Item *s = head(); s; s = next(s))
+    for (EST_Item *s = head(); s; s = s->next())
 	s->evaluate_features();
 }
 
@@ -168,7 +168,7 @@ void EST_Relation::clear()
 
     for (nn = p_head; nn != 0; nn = nnn)
     {
-	nnn = next(nn);
+	nnn = nn->next();
 	delete nn;
     }
     p_head = p_tail = 0;
@@ -177,9 +177,9 @@ void EST_Relation::clear()
 void EST_Relation::remove_item(EST_Item *node)
 {
     if (p_head == node)
-	p_head = next(node);
+	p_head = node->next();
     if (p_tail == node)
-	p_tail = prev(node);
+	p_tail = node->prev();
     delete node;
 }
 
@@ -260,19 +260,30 @@ EST_write_status EST_Relation::save_items(EST_Item *node,
 {
     if (node != 0)
     {
-	int myname = node_count++;
-	// Name it before dealing with the next nodes
-	nodenames.add_item(node,myname);
-	// This will need to be expanded if the we make Relations
-	// have more complex structures
-	save_items(node->next(),outf,cnames,nodenames,node_count);
-	save_items(node->down(),outf,cnames,nodenames,node_count);
-	outf << myname << " " <<
-	   (node->contents() == 0 ? 0 : cnames.val(node->contents())) << " " <<
-	   (node->up() == 0 ? 0 : nodenames.val(node->up())) << " " <<
-	   (node->down() == 0 ? 0 : nodenames.val(node->down())) << " " <<
-	   (node->next() == 0 ? 0 : nodenames.val(node->next())) << " " <<
-	   (node->prev() == 0 ? 0 : nodenames.val(node->prev())) << endl;
+        EST_Item *n = node;
+        int myname;
+
+        while (n)
+        {
+            myname = node_count++;
+            nodenames.add_item(n,myname);
+            n = n->next();
+        }
+
+        n = node;
+        while (n)
+        {
+            // This will need to be expanded if the we make Relations
+            // have more complex structures
+            save_items(n->down(),outf,cnames,nodenames,node_count);
+            outf << nodenames.val(n) << " " <<
+                (n->contents() == 0 ? 0 : cnames.val(n->contents())) << " " <<
+                (n->up() == 0 ? 0 : nodenames.val(n->up())) << " " <<
+                (n->down() == 0 ? 0 : nodenames.val(n->down())) << " " <<
+                (n->next() == 0 ? 0 : nodenames.val(n->next())) << " " <<
+                (n->prev() == 0 ? 0 : nodenames.val(n->prev())) << endl;
+            n = n->next();
+        }
     }
     return write_ok;
 }
@@ -682,7 +693,7 @@ ostream& operator << (ostream &s, const EST_Relation &a)
 {
     s << a.f << endl;
 
-    for (EST_Item *p = a.head(); p; p = next(p))
+    for (EST_Item *p = a.head(); p; p = p->next())
 	s << *p << endl;
 
     return s;

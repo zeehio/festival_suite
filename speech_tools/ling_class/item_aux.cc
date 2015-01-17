@@ -48,7 +48,7 @@ int in_list(const EST_Item *c,const EST_Item *l)
 {
     const EST_Item *i;
     
-    for (i=l; i != 0; i=next(i))
+    for (i=l; i != 0; i=i->next())
 	if (i == c)
 	    return TRUE;
     return FALSE;
@@ -91,7 +91,7 @@ int merge_item(EST_Item *from, EST_Item *to)
     merge_features(to->features(),from->features());
 
     EST_Litem *r;
-    for (r = from->relations().list.head(); r; r=next(r))
+    for (r = from->relations().list.head(); r; r=r->next())
     {
 	i = item(from->relations().list(r).v);
 	if (i != from)
@@ -140,7 +140,7 @@ int move_sub_tree(EST_Item *from, EST_Item *to)
     // until after the copy in case from is within to's daughters
     d = to->grab_daughters();  
     if (rfrom == d)
-      d = next(d);
+      d = d->next();
     if ((rfrom != 0) && (daughter1(rfrom)))
     {   // copy the descendant structure
 	copy_node_tree(daughter1(rfrom),to->insert_below(daughter1(rfrom)));
@@ -148,7 +148,7 @@ int move_sub_tree(EST_Item *from, EST_Item *to)
     }
     for (r=d; r; r=nr)
     {
-       nr = next(r);
+       nr = r->next();
        delete r;
     }
 

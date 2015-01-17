@@ -264,7 +264,7 @@ static void wgn_set_up_data(WVectorVector &data,const WVectorList &ds,int held_o
     // Make it definitely big enough
     data.resize(ds.length());
     
-    for (j=i=0,d=ds.head(); d != 0; d=next(d),j++)
+    for (j=i=0,d=ds.head(); d != 0; d=d->next(),j++)
     {
 	if ((in) && ((j%100) >= held_out))
 	    data[i++] = ds(d);
@@ -293,7 +293,7 @@ static float test_tree_class(WNode &tree,WDataSet &dataset,ostream *output)
     int i,type;
     float correct=0,total=0, count=0;
 
-    for (p=dataset.head(); p != 0; p=next(p))
+    for (p=dataset.head(); p != 0; p=p->next())
     {
 	pnode = tree.predict_node((*dataset(p)));
 	predict = (EST_String)pnode->get_impurity().value();
@@ -344,7 +344,7 @@ static float test_tree_vector(WNode &tree,WDataSet &dataset,ostream *output)
     double count;
     EST_Litem *pp;
 
-    for (p=dataset.head(); p != 0; p=next(p))
+    for (p=dataset.head(); p != 0; p=p->next())
     {
 	leaf = tree.predict_node((*dataset(p)));
 	pos = dataset(p)->get_int_val(wgn_predictee);
@@ -352,7 +352,7 @@ static float test_tree_vector(WNode &tree,WDataSet &dataset,ostream *output)
             if (wgn_VertexFeats.a(0,j) > 0.0)
             {
                 b.reset();
-                for (pp=leaf->get_impurity().members.head(); pp != 0; pp=next(pp))
+                for (pp=leaf->get_impurity().members.head(); pp != 0; pp=pp->next())
                 {
                     i = leaf->get_impurity().members.item(pp);
                     b += wgn_VertexTrack.a(i,j);
@@ -433,7 +433,7 @@ static float test_tree_trajectory(WNode &tree,WDataSet &dataset,ostream *output)
     double count;
     EST_Litem *pp;
 
-    for (p=dataset.head(); p != 0; p=next(p))
+    for (p=dataset.head(); p != 0; p=p->next())
     {
 	leaf = tree.predict_node((*dataset(p)));
 	pos = dataset(p)->get_int_val(wgn_predictee);
@@ -441,7 +441,7 @@ static float test_tree_trajectory(WNode &tree,WDataSet &dataset,ostream *output)
             if (wgn_VertexFeats.a(0,j) > 0.0)
             {
                 b.reset();
-                for (pp=leaf->get_impurity().members.head(); pp != 0; pp=next(pp))
+                for (pp=leaf->get_impurity().members.head(); pp != 0; pp=pp->next())
                 {
                     i = leaf->get_impurity().members.item(pp);
                     b += wgn_VertexTrack.a(i,j);
@@ -515,7 +515,7 @@ static float test_tree_cluster(WNode &tree,WDataSet &dataset,ostream *output)
     EST_SuffStats ranking, meandist;
     EST_Litem *p;
 
-    for (p=dataset.head(); p != 0; p=next(p))
+    for (p=dataset.head(); p != 0; p=p->next())
     {
 	leaf = tree.predict_node((*dataset(p)));
 	real = dataset(p)->get_int_val(wgn_predictee);
@@ -550,7 +550,7 @@ static float test_tree_float(WNode &tree,WDataSet &dataset,ostream *output)
     double cor,error;
     double count;
 
-    for (p=dataset.head(); p != 0; p=next(p))
+    for (p=dataset.head(); p != 0; p=p->next())
     {
 	predict = tree.predict((*dataset(p)));
 	real = dataset(p)->get_flt_val(wgn_predictee);

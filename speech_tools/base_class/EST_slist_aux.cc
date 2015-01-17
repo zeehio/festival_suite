@@ -54,7 +54,7 @@ int StrListtoFList(EST_StrList &s, EST_FList &f)
 {
     EST_Litem *p;
 
-    for (p = s.head(); p; p = next(p))
+    for (p = s.head(); p; p = p->next())
 	if (!s(p).matches(RXdouble))
 	{
 	    cout << 
@@ -72,7 +72,7 @@ int StrListtoIList(EST_StrList &s, EST_IList &il)
 {
     EST_Litem *p;
 
-    for (p = s.head(); p; p = next(p))
+    for (p = s.head(); p; p = p->next())
 	if (!s(p).matches(RXint))
 	{
 	    cout << 
@@ -119,7 +119,7 @@ void StringtoStrList(EST_String s, EST_StrList &l, EST_String sep)
     
 void StrListtoString(EST_StrList &l, EST_String &s, EST_String sep)
 {
-    for (EST_Litem *p = l.head(); p; p = next(p))
+    for (EST_Litem *p = l.head(); p; p = p->next())
 	s += l(p) + sep;
 }
     
@@ -158,17 +158,17 @@ EST_write_status save_StrList(EST_String filename, EST_StrList &l,
 
     if (style == "words")
     {
-	for (p = l.head(); p; p = next(p))
+	for (p = l.head(); p; p = p->next())
 	{
 	    *outf << l(p);
-	    if (next(p) != 0)
+	    if (p->next() != 0)
 		*outf << " ";
 	}
 	*outf << endl;
     }
 
     else if (style == "lines")
-	for (p = l.head(); p; p = next(p))
+	for (p = l.head(); p; p = p->next())
 	    *outf << l(p) << endl;
     else
     {
@@ -184,7 +184,7 @@ EST_write_status save_StrList(EST_String filename, EST_StrList &l,
 int strlist_member(const EST_StrList &l,const EST_String &s)
 {
     EST_Litem *p;
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
 	if (l.item(p) == s)
 	    return TRUE;
 
@@ -195,7 +195,7 @@ int strlist_index(const EST_StrList &l,const EST_String &s)
 {
     EST_Litem *p;
     int j=0;
-    for (p = l.head(); p != 0; p = next(p))
+    for (p = l.head(); p != 0; p = p->next())
     {
 	if (l.item(p) == s)
 	    return j;
@@ -214,7 +214,7 @@ void StrList_to_StrVector(EST_StrList &l, EST_StrVector &v)
 
     //EST_TBI *p;
     EST_Litem *p;
-    for (p = l.head(),i=0; p != 0; p = next(p),i++)
+    for (p = l.head(),i=0; p != 0; p = p->next(),i++)
 	v[i] = l(p);
 }
 

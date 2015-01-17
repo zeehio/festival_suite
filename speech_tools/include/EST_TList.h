@@ -230,7 +230,7 @@ template <class T> class EST_TList : public EST_UList
   /// print list
     friend ostream& operator << (ostream &st, EST_TList<T> const &list) {
         EST_Litem *ptr; 
-        for (ptr = list.head(); ptr != 0; ptr = next(ptr)) 
+        for (ptr = list.head(); ptr != 0; ptr = ptr->next()) 
             st << list.item(ptr) << " "; 
         return st;
     }
@@ -246,7 +246,7 @@ protected:
   struct IPointer {  EST_Litem *p; };
 
   void point_to_first(IPointer &ip) const { ip.p = head(); }
-  void move_pointer_forwards(IPointer &ip) const { ip.p = next(ip.p); }
+  void move_pointer_forwards(IPointer &ip) const { ip.p = ip.p->next(); }
   bool points_to_something(const IPointer &ip) const { return ip.p != NULL; }
   T &points_at(const IPointer &ip) { return item(ip.p); }
 

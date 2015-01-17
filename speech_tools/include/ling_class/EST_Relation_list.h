@@ -37,6 +37,8 @@
 #ifndef __EST_RELATION_LIST_H__
 #define __EST_RELATION_LIST_H__
 
+
+#if 0
 /**@name Functions for building and traversing list relations
  */
 
@@ -80,6 +82,7 @@ inline EST_Item *first(const EST_Item *n,const char *relname)
 inline EST_Item *last(const EST_Item *n,const char *relname) 
     { return last(as(n,relname)); }
 
+#endif
 
 /** Given a node <parameter>l</parameter>, return true if
     <parameter>c</parameter> after it in a list relation. */

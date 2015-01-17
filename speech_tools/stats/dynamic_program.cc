@@ -177,9 +177,9 @@ bool dp_match(const EST_Relation &lexical,
     vr1[0] = null_sym;
     vr2[0] = null_sym;
 
-    for (p=lexical.head(),i=1; p != 0; p = next(p),i++)
+    for (p=lexical.head(),i=1; p != 0; p = p->next(),i++)
 	vr1[i] = p;
-    for (p=surface.head(),i=1; p != 0; p = next(p),i++)
+    for (p=surface.head(),i=1; p != 0; p = p->next(),i++)
 	vr2[i] = p;
 	
     DP_path_i.resize(l1,l2);
@@ -217,7 +217,7 @@ bool dp_match(const EST_Relation &lexical,
     }
     // make somewhere to record the relations
     //utt.create_relation("Match");
-    for (p = lexical.head(); p; p = next(p))
+    for (p = lexical.head(); p; p = p->next())
 	match.append(p);
 
     /*
@@ -397,18 +397,18 @@ void trace_back_and_link(int i, int j,
 	    // match, or substitution
 	    //cerr << "sub " << p1->name() << " with " << p2->name() << endl;
 	    p1->append_daughter(p2);
-	    p1=prev(p1);
-	    p2=prev(p2);
+	    p1=p1->prev();
+	    p2=p2->prev();
 	}
 	else
 	    // deletion
-	    p1=prev(p1);
+	    p1=p1->prev();
     }    
     else
     {
 	// insertion
 	// p1->append_daughter(p2); // decorative
-	p2=prev(p2);
+	p2=p2->prev();
     }
 
     trace_back_and_link(DP_path_i(i,j), DP_path_j(i,j),

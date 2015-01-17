@@ -247,7 +247,7 @@ int main(int argc, char **argv)
     if(script.head()==NULL)
 	script += files;
     else
-	for(p=files.head();p!=0;p=next(p))
+	for(p=files.head();p!=0;p=p->next())
 	    if(files(p) != "-")
 		script.append(files(p));
 
@@ -289,7 +289,7 @@ int main(int argc, char **argv)
 	cout << "==================" << endl;
     }
 
-    for (p = script.head(); p; p = next(p))
+    for (p = script.head(); p; p = p->next())
     {
 	// test each file
 	if (test_stats(ngrammar,

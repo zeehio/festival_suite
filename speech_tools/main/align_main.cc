@@ -270,14 +270,14 @@ static void align_score(EST_Utterance &u, const EST_String &refrel,
     for (ri=u.relation(refrel)->first(),
 	 hi=u.relation(hyporel)->first();
 	 ri;
-	 ri=next(ri),hi=next(hi))
+	 ri=ri->next(),hi=hi->next())
     {
-	for ( ; (as(hi,alignrel) == 0) && hi ; hi=next(hi))
+	for ( ; (as(hi,alignrel) == 0) && hi ; hi=hi->next())
 	{
 	    fprintf(stdout,"inserted: %s\n",(const char *)hi->name());
 	    ins++;
 	}
-	for ( ; (daughter1(ri,alignrel) == 0) && ri; ri=next(ri))
+	for ( ; (daughter1(ri,alignrel) == 0) && ri; ri=ri->next())
 	{
 	    fprintf(stdout,"deleted: %s\n",(const char *)ri->name());
 	    del++;
@@ -296,7 +296,7 @@ static void align_score(EST_Utterance &u, const EST_String &refrel,
 	}
     }
     // For trailing hypothesized (or ref is nil)
-    for ( ;  hi ; hi=next(hi))
+    for ( ;  hi ; hi=hi->next())
     {
 	fprintf(stdout,"inserted: %s\n",(const char *)hi->name());
 	ins++;
@@ -356,11 +356,11 @@ void align(EST_Utterance &utt,
     }
 
     ri = utt.relation(refrel)->first();
-    for (i=1; ri; ri=next(ri),i++)
+    for (i=1; ri; ri=ri->next(),i++)
     {
 	ar->append(ri);  // for use later
 	hi = utt.relation(hyporel)->first();
-	for (j=1; hi; hi=next(hi),j++)
+	for (j=1; hi; hi=hi->next(),j++)
 	{
 	    cost = name_distance(ri,hi);
 	    to_insert = insdel_cost + dpt(i,j-1);
@@ -395,10 +395,10 @@ void align(EST_Utterance &utt,
 	}
     }
 
-//      for (i=1,ri=utt.relation(refrel)->first(); i < r_size+1; i++,ri=next(ri))
+//      for (i=1,ri=utt.relation(refrel)->first(); i < r_size+1; i++,ri=ri->next())
 //      {
 //  	fprintf(stdout,"%10s  ",(const char *)ri->name());
-//  	for (j=1,hi=utt.relation(hyporel)->first(); j<h_size+1; j++,hi=next(hi))
+//  	for (j=1,hi=utt.relation(hyporel)->first(); j<h_size+1; j++,hi=hi->next())
 //  	    fprintf(stdout,"%3d/%2d ",(int)dpt(i,j),dpp(i,j));
 //  	fprintf(stdout,"\n");
 //      }
@@ -406,14 +406,14 @@ void align(EST_Utterance &utt,
     for (i=r_size,j=h_size,
 	     ri=utt.relation(refrel)->last(),
 	     hi=utt.relation(hyporel)->last();
-	 ri; i--,ri=prev(ri))
+	 ri; i--,ri=ri->prev())
     {
 	while (dpp(i,j) == 1)
 	{
 	    j--;
 //	    fprintf(stdout,"skipping hi %s\n",
 //		    (const char *)hi->name());
-	    hi=prev(hi);
+	    hi=hi->prev();
 	}
 	if (dpp(i,j) == 0)
 	{
@@ -422,7 +422,7 @@ void align(EST_Utterance &utt,
 //		    (const char *)hi->name());
 	    append_daughter(ri,alignrel,hi);
 	    j--;
-	    hi=prev(hi);
+	    hi=hi->prev();
 	}
 //	else
 //	    fprintf(stdout,"skipping ri %s\n",

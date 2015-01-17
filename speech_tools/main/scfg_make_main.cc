@@ -224,21 +224,21 @@ static LISP make_all_rules(const EST_StrList &NonTerminals,
     EST_Litem *p,*q,*r;
     LISP rules = NIL;
 	
-    for (p=NonTerminals.head(); p != 0; p=next(p))
+    for (p=NonTerminals.head(); p != 0; p=p->next())
     {
 	int num_rules_nt = (NonTerminals.length()*NonTerminals.length())+
 	    Terminals.length();
 	double *probs = new double[num_rules_nt];
 	generate_probs(probs,num_rules_nt);
 	int i=0;
-	for (q=NonTerminals.head(); q != 0; q=next(q))
-	    for (r=NonTerminals.head(); r != 0; r=next(r),i++)
+	for (q=NonTerminals.head(); q != 0; q=q->next())
+	    for (r=NonTerminals.head(); r != 0; r=r->next(),i++)
 		rules = cons(cons(flocons(probs[i]),
 				  cons(rintern(NonTerminals(p)),
 				  cons(rintern(NonTerminals(q)),
 				  cons(rintern(NonTerminals(r)),NIL)))),
 			     rules);
-	for (q=Terminals.head(); q != 0; q=next(q),i++)
+	for (q=Terminals.head(); q != 0; q=q->next(),i++)
 	    rules = cons(cons(flocons(probs[i]),
 			      cons(rintern(NonTerminals(p)),
 				   cons(rintern(Terminals(q)),NIL))),

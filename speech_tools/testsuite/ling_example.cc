@@ -310,7 +310,7 @@ int main(void)
   //@{ code
   EST_Item *s;
 
-  for (s = phones.head(); s != 0; s = next(s))
+  for (s = phones.head(); s != 0; s = s->next())
     cout << s->S("NAME") << endl;
   //@} code
 
@@ -330,7 +330,7 @@ int main(void)
     */
   //@{ code
 
-  for (s = phones.tail(); s != 0; s = prev(s))
+  for (s = phones.tail(); s != 0; s = s->prev())
     cout << s->S("NAME") << endl;
 
   //@} code
@@ -360,7 +360,7 @@ int main(void)
     */
 
   //@{ code
-  for (s = phones.head(); s; s = next(s))
+  for (s = phones.head(); s; s = s->next())
     cout << s->S("NAME") << endl;
   //@} code
   
@@ -465,15 +465,15 @@ int main(void)
     {
       if (daughter1(n) != 0) // if daughter exists, make n its daughter 
         n = daughter1(n);
-      else if (next(n) != 0)//otherwise visit its sisters 
-        n = next(n);
+      else if (n->next() != 0)//otherwise visit its sisters 
+        n = n->next();
       else                    // if no sisters are left, go back up the tree 
 	{                       // until a sister to a parent is found 
 	  bool found=FALSE;
 	  for (EST_Item *pp = parent(n); pp != 0; pp = parent(pp))
-	    if (next(pp))
+	    if (pp->next())
 	      {
-		n = next(pp);
+		n = pp->next();
 		found=TRUE;
 		break;
 	      }

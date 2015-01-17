@@ -803,7 +803,7 @@ bool EST_Ngrammar::build(const EST_StrList &filenames,
     bool skip_this;
     EST_String new_filename;
     EST_Litem *p;
-    for (p = filenames.head(); p; p = next(p))
+    for (p = filenames.head(); p; p = p->next())
     {
 	cerr << "Building from " << filenames(p) << endl;
 

@@ -81,7 +81,7 @@ template<class T> void EST_TItem<T>::release(EST_TItem<T> *it)
 template<class T> void EST_TList<T>::copy_items(const EST_TList<T> &l)
 {
     EST_UItem *p;
-    for (p = l.head();  p; p = next(p))
+    for (p = l.head();  p; p = p->next())
 	append(l.item(p));
 }
 

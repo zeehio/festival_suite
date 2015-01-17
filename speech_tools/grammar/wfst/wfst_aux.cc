@@ -99,7 +99,7 @@ void add_assumption(int y,int z,wfst_assumes &assumptions)
     int y_ok = FALSE;
     int z_ok = FALSE;
 
-    for (p=assumptions.list.head(); p != 0; p=next(p))
+    for (p=assumptions.list.head(); p != 0; p=p->next())
     {
 	if (assumptions.list(p).k == y)
 	{
@@ -137,19 +137,19 @@ int equivalent_to(int y,int z,wfst_assumes &assumptions)
 	return TRUE;
     else 
     {
-	for (p=assumptions.list.head(); p != 0; p=next(p))
+	for (p=assumptions.list.head(); p != 0; p=p->next())
 	{
 	    if (assumptions.list(p).k == y)
 	    {
 		EST_IList &b = assumptions.list(p).v;
-		for (q=b.head(); q != 0; q=next(q))
+		for (q=b.head(); q != 0; q=q->next())
 		    if (z == b(q))
 			return TRUE;
 	    }
 	    if (assumptions.list(p).k == z)
 	    {   
 		EST_IList &b = assumptions.list(p).v;
-		for (q=b.head(); q != 0; q=next(q))
+		for (q=b.head(); q != 0; q=q->next())
 		    if (y == b(q))
 			return TRUE;
 	    }
@@ -162,11 +162,11 @@ void mark_undistinguished(wfst_marks &marks,wfst_assumes &assumptions)
 {
     EST_Litem *p, *q;
 
-    for (p=assumptions.list.head(); p != 0; p=next(p))
+    for (p=assumptions.list.head(); p != 0; p=p->next())
     {
 	int x = assumptions.list(p).k;
 	EST_IList &b = assumptions.list(p).v;
-	for (q=b.head(); q != 0; q=next(q))
+	for (q=b.head(); q != 0; q=q->next())
 	    marks.undistinguish(x,b(q));
     }
 }

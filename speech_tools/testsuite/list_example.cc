@@ -81,7 +81,7 @@ int main(void)
 
     // find pointer to "eagle", add "hawk" before it, and then add sparrow
     // after "hawk"
-    for (p = slist.head(); p != 0; p = next(p))
+    for (p = slist.head(); p != 0; p = p->next())
 	if (slist(p) == "eagle")
 	{
 	    p = slist.insert_before(p,"hawk");
@@ -109,7 +109,7 @@ int main(void)
     //@{ code
     cout << "[ List Accessed by LItem\n";
     // print out contents of array.
-    for (p = slist.head(); p != 0; p = next(p))
+    for (p = slist.head(); p != 0; p = p->next())
       cout << "  " << slist(p) << "\n";
     cout << "]\n";
 
@@ -132,7 +132,7 @@ int main(void)
 
     //@{ code
     // Capital;ise all 'e's in all strings
-    for (p = slist.head(); p != 0; p = next(p))
+    for (p = slist.head(); p != 0; p = p->next())
 	slist(p).gsub("e", "E");
 
     // print out last item in list
@@ -159,7 +159,7 @@ int main(void)
     //@} code  
 
     cout << "\n[ List After Substitutions and Replacements\n";
-    for (p = slist.head(); p != 0; p = next(p))
+    for (p = slist.head(); p != 0; p = p->next())
       cout << "  " << slist(p) << "\n";
     cout << "]\n";
 
@@ -178,14 +178,14 @@ int main(void)
     // points this to the next item in the loop, giving the appearance
     // of seamless iteration.
 
-    for (p = slist.head(); p != 0; p = next(p))
+    for (p = slist.head(); p != 0; p = p->next())
       if (slist(p) == "EaglE")
 	p = slist.remove(p);
 
     //@} code
 
     cout << "\n[ List After Removing Eagle\n";
-    for (p = slist.head(); p != 0; p = next(p))
+    for (p = slist.head(); p != 0; p = p->next())
       cout << "  " << slist(p) << "\n";
     cout << "]\n";
 
@@ -198,7 +198,7 @@ int main(void)
     
 
     cout << "\n[ List After Reverse\n";
-    for (p = slist.head(); p != 0; p = next(p))
+    for (p = slist.head(); p != 0; p = p->next())
       cout << "  " << slist(p) << "\n";
     cout << "]\n";
 
@@ -218,7 +218,7 @@ int main(void)
     sort(slist);
  
    cout << "\n[ Sorted\n";
-   for(p=slist.head(); p ; p=next(p))
+   for(p=slist.head(); p ; p=p->next())
      cout << "  " << slist(p) << "\n";
    cout << "]\n";
  
@@ -226,7 +226,7 @@ int main(void)
    qsort(slist,&second_char_gt );
  
    cout << "\n[ Sorted by second character\n";
-   for(p=slist.head(); p ; p=next(p))
+   for(p=slist.head(); p ; p=p->next())
      cout << "  " << slist(p) << "\n";
    cout << "]\n";
    //@} code

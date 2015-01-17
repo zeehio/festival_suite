@@ -239,7 +239,7 @@ Java_cstr_est_Relation_cpp_1findItem(JNIEnv *env, jobject self, jfloat time)
   EST_Item * item = relation->head();
 
   while (item!=NULL && item->F("end", 0.0) < time)
-    item = next(item);
+    item = item->next();
 
   return (long)item;
 }

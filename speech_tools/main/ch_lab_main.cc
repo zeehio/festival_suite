@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     read_RelationList(mlf, files, al);
 
     // perform all utility functions on all relations in mlf
-    for (p = mlf.head(); p; p = next(p))
+    for (p = mlf.head(); p; p = p->next())
 	relation_convert(mlf(p), al, op);
     
     if (al.present("-verify"))
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 		<< " for verification\n";
 	    exit(-1);
 	}
-	for (p = mlf.head(); p; p = next(p))
+	for (p = mlf.head(); p; p = p->next())
 	    check_vocab(mlf(p), vocab);
 	exit(0);
     }

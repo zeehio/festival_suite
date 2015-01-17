@@ -54,7 +54,7 @@ void XML_Parser_Class::registered_ids(EST_TList<EST_String> &list)
 {
   EST_Litem *p;
 
-  for(p=known_ids.head(); p != 0; p= next(p))
+  for(p=known_ids.head(); p != 0; p= p->next())
     {
       EST_String re(known_ids.key(p).tostring());
       EST_String &pattern = known_ids.val(p);
@@ -130,7 +130,7 @@ InputSource XML_Parser_Class::try_and_open(Entity ent)
 
   int starts[EST_Regex_max_subexpressions];
   int ends[EST_Regex_max_subexpressions];
-  for (p = known_ids.head(); p != 0; p = next(p))
+  for (p = known_ids.head(); p != 0; p = p->next())
     {
       EST_Regex &re = known_ids.key(p);
       EST_String pattern(known_ids.val(p));

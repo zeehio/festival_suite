@@ -103,7 +103,7 @@ void extract_channels(EST_Wave &single, const EST_Wave &multi,
     single.set_sample_rate(multi.sample_rate());
     single.set_file_type(multi.file_type());
 
-    for (i = 0, p = ch_list.head(); p; p = next(p), ++i)
+    for (i = 0, p = ch_list.head(); p; p = p->next(), ++i)
     {
 	channel = ch_list(p);
     

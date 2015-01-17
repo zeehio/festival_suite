@@ -2,8 +2,8 @@
 /*                                                                       */
 /*                Centre for Speech Technology Research                  */
 /*                 (University of Edinburgh, UK) and                     */
-/*                           Rob Clark                                   */
-/*                         Copyright (c) 2006                            */
+/*                           Korin Richmond                              */
+/*                         Copyright (c) 2003                            */
 /*                         All Rights Reserved.                          */
 /*                                                                       */
 /*  Permission is hereby granted, free of charge, to use and distribute  */
@@ -32,100 +32,58 @@
 /*  THIS SOFTWARE.                                                       */
 /*                                                                       */
 /*************************************************************************/
+/*************************************************************************/
 /*                                                                       */
-/*                          Author: Rob Clark                            */
-/*                            Date: June 2006                            */
-/* --------------------------------------------------------------------- */
-/*                                                                       */
-/*                                                                       */
-/*                                                                       */
+/*                   Author :  Korin Richmond                            */
+/*                     Date :  09 May 2008                               */
+/* -------------------------------------------------------------------   */
+/*       EST_rw_status script language interface file to be included     */
+/*        wherever function return these status code enums               */
 /*                                                                       */
 /*************************************************************************/
 
-
-#ifndef __EST_TARGETCOST_FLAT_H__
-#define __EST_TARGETCOST_FLAT_H__
-
-#include "EST_THash.h"
-#include "EST_TargetCost.h" 
-
-/* we use WQRD in place of WORD below to keep VC++ happy */
-enum tcdata_t 
-{
-  VOWEL, SIL, BAD_DUR, NBAD_DUR, BAD_OOL, NBAD_OOL, BAD_F0,
-  SYL, SYL_STRESS, N_SIL, N_VOWEL,
-  NSYL, NSYL_STRESS,
-  RC, NNBAD_DUR, NNSYL, LC, PBAD_DUR,
-  PSYL, WQRD, NWQRD, NNWQRD, PWQRD,
-  SYLPOS, WQRDPOS, PBREAK, 
-  POS, PUNC, NPOS, NPUNC,
-  TCHI_LAST
-} ;
+%{
+#include "EST_rw_status.h"
+%}
 
 
-typedef EST_IVector TCData;
-VAL_REGISTER_TYPE_DCLS(ivector,TCData)
-
-typedef EST_THash<EST_Item*,TCData*> TCDataHash; 
-
-
-/*
- *  DERIVED CLASS: EST_FlatTargetCost
- */
-class EST_FlatTargetCost : public EST_TargetCost {
-
- public:
-  EST_FlatTargetCost() : li(0){};
-
-
- private:
-  mutable const TCData *t;
-  mutable const TCData *c;
-  mutable const EST_Item *li; 
-
-  inline void set_t_and_c(const TCData* targ, const TCData* cand) const
-    { 
-      t = targ;
-      c = cand;
-    }
-
-  float stress_cost() const;
-  inline float position_in_syllable_cost() const
-  { return ( t->a_no_check(SYLPOS) == c->a_no_check(SYLPOS) ) ? 0 : 1; }
-  inline float position_in_word_cost() const
-  { return ( t->a_no_check(WQRDPOS) == c->a_no_check(WQRDPOS) ) ? 0 : 1; }
-  float position_in_phrase_cost() const;
-  float punctuation_cost() const;
-  float partofspeech_cost() const;
-  inline float left_context_cost() const
-  { return ( t->a_no_check(LC) == c->a_no_check(LC) ) ? 0 : 1; }
-  inline float right_context_cost() const
-  { return ( t->a_no_check(RC) == c->a_no_check(RC) ) ? 0 : 1; }
-  float bad_duration_cost() const;
-  float out_of_lex_cost() const;
-  inline float bad_f0_cost() const
-  { return float(c->a_no_check(BAD_F0)) / 2.0; }
-
-
-
- public:
-  float operator()(const EST_Item* targ, const EST_Item* cand) const
-  { EST_error("EST_FlatTargetCost operator() called with EST_Items\n");
-    return 1; }
-  float operator()(const TCData *targ, const TCData *cand) const;
-  const bool is_flatpack() const { return true; }
-  TCData *flatpack(EST_Item *seg) const;
-
-
+/** Possible outcomes of a file reading operation. More stuff*/
+enum EST_read_status {
+    /// The file was read in successfully
+  read_ok		= make_status_int(rws_ok,	rwr_none,	0),
+    /// The file exists but is not in the format specified
+  read_format_error	= make_status_int(rws_failed,	rwr_format,	0),
+    /// The file does not exist.
+  read_not_found_error	= make_status_int(rws_failed,	rwr_existance,	0),
+    /// An error occurred while reading
+  read_error		= make_status_int(rws_failed,	rwr_unknown,	0)
 };
 
 
+/** Possible outcomes of a file writing operation */
+enum EST_write_status {
+    /// The file was written successfully
+  write_ok		= make_status_int(rws_ok,	rwr_none,	0),
+    /// The file was not written successfully
+  write_fail		= make_status_int(rws_failed,	rwr_unknown,	0),
+    /// The file was not written successfully
+  write_error		= make_status_int(rws_failed,	rwr_unknown,	0),
+    /// A valid file was created, but only some of the requested data is in there
+  write_partial		= make_status_int(rws_partial,	rwr_unknown,	0)
+};
 
-
-
-#endif // __EST_TARGETCOST_H__
-
-
-
+/** Possible outcomes of a network connection operation */
+enum EST_connect_status {
+  /// Connection made.
+  connect_ok		= make_status_int(rws_ok,	rwr_none,	0),
+  /// Connection failed.
+  connect_not_found_error = make_status_int(rws_failed,	rwr_existance,	0),
+  /// Connection failed.
+  connect_not_allowed_error = make_status_int(rws_failed, rwr_permission, 0),
+  /// System failure of some kind
+  connect_system_error = make_status_int(rws_failed, rwr_system, 0),
+  /// The file was not written successfully
+  connect_error		= make_status_int(rws_failed,	rwr_unknown,	0)
+};
 
 

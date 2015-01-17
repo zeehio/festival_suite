@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
 
     EST_Utterance u;
 
-    EST_Litem *fp = next(files.head());
-    for(; fp != NULL; fp=next(fp))
+    EST_Litem *fp = files.head()->next();
+    for(; fp != NULL; fp=fp->next())
       {
 	rstat = u.load(files(fp));
 

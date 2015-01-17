@@ -545,7 +545,7 @@ EST_read_status EST_FMatrix::load(const EST_String &filename)
 	// resize track and copy values in
 	resize(n_rows, n_cols);
 	
-	for (p = sl.head(), i = 0; p != 0; ++i, p = next(p))
+	for (p = sl.head(), i = 0; p != 0; ++i, p = p->next())
 	{
 	    tt.open_string(sl(p));
 	    for (j = 0; !tt.eof(); ++j)

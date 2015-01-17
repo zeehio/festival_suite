@@ -58,7 +58,7 @@ int operator !=(const EST_StrList &l1,
 {
     EST_Litem *p1, *p2;
 
-    for (p1 = l1.head(), p2 = l2.head(); p1 && p2; p1 = next(p1),p2 = next(p2))
+    for (p1 = l1.head(), p2 = l2.head(); p1 && p2; p1 = p1->next(),p2 = p2->next())
 	if (l1(p1) != l2(p2))
 	    return false;
 

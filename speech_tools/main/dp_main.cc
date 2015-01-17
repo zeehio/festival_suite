@@ -250,7 +250,7 @@ int main(int argc, char **argv)
     }
 
     StringtoStrList(files(files.head()),pattern1_l," ");
-    StringtoStrList(files(next(files.head())),pattern2_l," ");
+    StringtoStrList(files(files.head()->next()),pattern2_l," ");
 
     EST_Utterance utt;
     path1 = utt.create_relation("Lexical");
@@ -258,7 +258,7 @@ int main(int argc, char **argv)
     match = utt.create_relation("Match");
 
     EST_Litem *p;
-    for(p=pattern1_l.head();p != 0; p=next(p))
+    for(p=pattern1_l.head();p != 0; p=p->next())
     {
 	if( StrVector_index(vocab,pattern1_l(p)) < 0)
 	{
@@ -270,7 +270,7 @@ int main(int argc, char **argv)
 	path1->append(&new_item);
     }
 
-    for(p=pattern2_l.head();p != 0; p=next(p))
+    for(p=pattern2_l.head();p != 0; p=p->next())
     {
 	if( StrVector_index(vocab,pattern2_l(p)) < 0)
 	{

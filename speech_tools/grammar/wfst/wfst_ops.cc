@@ -75,7 +75,7 @@ Declare_TList_T(EST_WFST_MultiState *,EST_WFST_MultiStateP)
         template class EST_TKVL<int, EST_IList>; 
         template class EST_TKVI<int, EST_IList>; 
 // ostream &operator<<(ostream &s, EST_TKVI< int , EST_IList > const &i){  return s << i.k << "\t" << i.v << "\n"; } 
-//	ostream& operator << (ostream& s,  EST_TKVL< int , EST_IList > const &l) {EST_Litem *p; for (p = l.list.head(); p ; p = next(p)) s << l.list(p).k << "\t" << l.list(p).v << endl; return s;} 
+//	ostream& operator << (ostream& s,  EST_TKVL< int , EST_IList > const &l) {EST_Litem *p; for (p = l.list.head(); p ; p = p->next()) s << l.list(p).k << "\t" << l.list(p).v << endl; return s;} 
         Instantiate_TIterator_T(KVL_int_EST_IList_t, KVL_int_EST_IList_t::IPointer_k, int, KVL_int_EST_IList_kitt) 
         Instantiate_TStructIterator_T(KVL_int_EST_IList_t, KVL_int_EST_IList_t::IPointer, KVI_int_EST_IList_t, KVL_int_EST_IList_itt) 
         Instantiate_TIterator_T(KVL_int_EST_IList_t, KVL_int_EST_IList_t::IPointer, KVI_int_EST_IList_t, KVL_int_EST_IList_itt) 
@@ -106,7 +106,7 @@ void EST_WFST_MultiState::add(int i)
     EST_Litem *p;
 
     if (p_type == wfst_ms_set)
-	for (p=head(); p != 0; p=next(p))
+	for (p=head(); p != 0; p=p->next())
 	{
 	    if ((*this)(p) == i)
 		return;
@@ -131,7 +131,7 @@ int multistate_index(EST_WFST_MultiStateIndex &index,
     EST_Litem *p;
     int ns,found;
 
-    for (p=ms->head(); p != 0; p = next(p))
+    for (p=ms->head(); p != 0; p = p->next())
 	istring += itoString((*ms)(p)) + " ";
 
     ns = index.val(istring,found);
@@ -196,10 +196,10 @@ void EST_WFST::determinize(const EST_WFST &ndwfst)
 		<< multistate_agenda.length() << endl;
 	c++;
 
-	for (sp=current->head(); sp != 0; sp=next(sp))
+	for (sp=current->head(); sp != 0; sp=sp->next())
 	{
 	    const EST_WFST_State *s = ndwfst.state((*current)(sp));
-	    for (tp=s->transitions.head(); tp != 0; tp = next(tp))
+	    for (tp=s->transitions.head(); tp != 0; tp = tp->next())
 	    {
 		i = s->transitions(tp)->in_symbol();
 		o = s->transitions(tp)->out_symbol();
@@ -257,7 +257,7 @@ EST_WFST_MultiState *EST_WFST::apply_multistate(const EST_WFST &wfst,
     
     new_ms->clear();
     
-    for (p=ms->head(); p != 0; p=next(p))
+    for (p=ms->head(); p != 0; p=p->next())
 	// Add all new possible states from ms(p) given in/out
 	wfst.transition_all((*ms)(p),in,out,new_ms);
 
@@ -275,7 +275,7 @@ enum wfst_state_type EST_WFST::ms_type(EST_WFST_MultiState *ms) const
     EST_Litem *p;
     enum wfst_state_type r = wfst_nonfinal;
 
-    for (p=ms->head(); p != 0; p = next(p))
+    for (p=ms->head(); p != 0; p = p->next())
 	if (p_states((*ms)(p))->type() == wfst_error)
 	    return wfst_error;
 	else if (p_states((*ms)(p))->type() == wfst_licence)
@@ -300,7 +300,7 @@ void EST_WFST::transition_all(int state,
     const EST_WFST_State *s = p_states(state);
     EST_Litem *i;
 
-    for (i=s->transitions.head(); i != 0; i=next(i))
+    for (i=s->transitions.head(); i != 0; i=i->next())
     {
 	if ((in == s->transitions(i)->in_symbol()) &&
 	    (out == s->transitions(i)->out_symbol()))
@@ -310,7 +310,7 @@ void EST_WFST::transition_all(int state,
 
 static int is_a_member(const EST_IList &ii, int i)
 {
-    for (EST_Litem *p=ii.head(); p != 0; p=next(p))
+    for (EST_Litem *p=ii.head(); p != 0; p=p->next())
 	if (ii(p) == i)
 	    return TRUE;
     return FALSE;
@@ -325,15 +325,15 @@ void EST_WFST::add_epsilon_reachable(EST_WFST_MultiState *ms) const
     int ie = p_in_symbols.name(get_c_string(epsilon_label()));
     int oe = p_out_symbols.name(get_c_string(epsilon_label()));
 
-    for (p=ms->head(); p != 0; p=next(p))
+    for (p=ms->head(); p != 0; p=p->next())
 	ii.append((*ms)(p));
 
-    for (p=ii.head(); p != 0; p=next(p))
+    for (p=ii.head(); p != 0; p=p->next())
     {
 	const EST_WFST_State *s = p_states(ii(p));
 	EST_Litem *i;
 
-	for (i=s->transitions.head(); i != 0; i=next(i))
+	for (i=s->transitions.head(); i != 0; i=i->next())
 	{
 	    if ((ie == s->transitions(i)->in_symbol()) &&
 		(oe == s->transitions(i)->out_symbol()))
@@ -372,7 +372,7 @@ void EST_WFST::intersection(wfst_list &wl)
 
     // Determinize each input WFST and make a new start state consisting of 
     // the start states of each of the input WFSTs
-    for (p=wl.tail(); p != 0; p=prev(p))
+    for (p=wl.tail(); p != 0; p=p->prev())
     {
 	if (!wl(p).deterministic())
 	{
@@ -410,7 +410,7 @@ void EST_WFST::intersection(wfst_list &wl)
 		// state using each WFST
 		for (n=0,p=wl.head(),q=current->head(); 
 		     (p != 0) && (q != 0);
-		     p=next(p),q=next(q),n++)
+		     p=p->next(),q=q->next(),n++)
 		    nms->add(wl(p).transition((*current)(q),i,o));
 		if (intersect_state_type(wl,nms) == wfst_error)
 		{
@@ -452,7 +452,7 @@ static enum wfst_state_type intersect_state_type(wfst_list &wl,
 
     for (p=wl.head(),q=ms->head(); 
 	 (p != 0) && (q != 0); 
-	 p=next(p),q=next(q))
+	 p=p->next(),q=q->next())
     {
 	if ((*ms)(q) == WFST_ERROR_STATE)
 	    return wfst_error;
@@ -543,7 +543,7 @@ static int check_distinguished(const EST_WFST &nmwfst,
     }
     else 
     {   // Have to check their transitions individually
-	for (t=nmwfst.state(p)->transitions.head(); t != 0; t=next(t))
+	for (t=nmwfst.state(p)->transitions.head(); t != 0; t=t->next())
 	{
 	    int in = nmwfst.state(p)->transitions(t)->in_symbol();
 	    int out = nmwfst.state(p)->transitions(t)->out_symbol();
@@ -572,7 +572,7 @@ static int check_distinguished(const EST_WFST &nmwfst,
 	// assume they are undistinguished
 	add_assumption(p,q,assumptions);
 	for (yp=from_p.head(),zp=from_q.head(); 
-	     yp != 0; yp=next(yp),zp=next(zp))
+	     yp != 0; yp=yp->next(),zp=zp->next())
 	    if (check_distinguished(nmwfst,from_p(yp),from_q(zp),
 				    marks,
 				    assumptions))
@@ -626,7 +626,7 @@ EST_WFST_State *EST_WFST::copy_and_map_states(const EST_IVector &state_map,
 
     ns->set_type(s->type());
 
-    for (i=s->transitions.head(); i != 0; i=next(i))
+    for (i=s->transitions.head(); i != 0; i=i->next())
     {
 	int mapped_state= state_map(s->transitions(i)->state());
 	if (mapped_state != WFST_ERROR_STATE)
@@ -670,7 +670,7 @@ static int noloopstostart(const EST_WFST &a)
     {
 	const EST_WFST_State *s = a.state(i);
 	EST_Litem *p;
-	for (p=s->transitions.head(); p != 0; p=next(p))
+	for (p=s->transitions.head(); p != 0; p=p->next())
 	{
 	    if (s->transitions(p)->state() == a.start_state())
 		return FALSE;
@@ -690,14 +690,14 @@ int EST_WFST::deterministiconstartstates(const EST_WFST &a, const EST_WFST &b) c
     tab.fill(0);
 
     for (EST_Litem *t=a.state(a.start_state())->transitions.head();
-	 t != 0; t=next(t))
+	 t != 0; t=t->next())
     {
 	tab(a.state(a.start_state())->transitions(t)->in_symbol(),
 	    a.state(a.start_state())->transitions(t)->out_symbol()) = 1;
     }
 
     for (EST_Litem *tt=b.state(b.start_state())->transitions.head();
-	 tt != 0; tt=next(tt))
+	 tt != 0; tt=tt->next())
     {
 	in = a.in_symbol(b.in_symbol(b.state(b.start_state())->transitions(tt)->in_symbol()));
 	out = a.out_symbol(b.out_symbol(b.state(b.start_state())->transitions(tt)->out_symbol()));
@@ -740,7 +740,7 @@ void EST_WFST::uunion(const EST_WFST &a,const EST_WFST &b)
 
 	const EST_WFST_State *s = b.state(b.start_state());
 	EST_Litem *p;
-	for (p=s->transitions.head(); p != 0; p=next(p))
+	for (p=s->transitions.head(); p != 0; p=p->next())
 	{
 	    int mapped_state= smap(s->transitions(p)->state());
 	    if (mapped_state != WFST_ERROR_STATE)
@@ -848,7 +848,7 @@ void EST_WFST::compose(const EST_WFST &a,const EST_WFST &b)
 	    wfst_translist transa;
 
 	    wl.first().transduce(current->first(),i,transa);
-	    for (p=transa.head(); p != 0; p=next(p))
+	    for (p=transa.head(); p != 0; p=p->next())
 	    {
 		wfst_translist transb;
 		// feed a's out to b'is in
@@ -856,7 +856,7 @@ void EST_WFST::compose(const EST_WFST &a,const EST_WFST &b)
                           current->last(),
 			  b.in_symbol(a.out_symbol(transa(p)->out_symbol())),
 			  transb);
-		for (q = transb.head(); q != 0; q=next(q))
+		for (q = transb.head(); q != 0; q=q->next())
 		{
 		    nms = new EST_WFST_MultiState(wfst_ms_list);
 		    nms->add(transa(p)->state());
@@ -950,7 +950,7 @@ int EST_WFST::can_reach_final(int state)
 	// temporarily set this to error to stop infinite recursion
 	p_states[state]->set_type(wfst_error);
 
-	for (i=p_states[state]->transitions.head(); i != 0; i=next(i))
+	for (i=p_states[state]->transitions.head(); i != 0; i=i->next())
 	    // if any transition goes to something that reaches a final state
 	    // set the value back to its original
 	    if (can_reach_final(p_states[state]->transitions(i)->state()))
@@ -982,7 +982,7 @@ int EST_WFST::deterministic() const
     for (int i=0; i < p_num_states; i++)
     {
 	tab.fill(0);
-	for (EST_Litem *t=state(i)->transitions.head(); t != 0; t=next(t))
+	for (EST_Litem *t=state(i)->transitions.head(); t != 0; t=t->next())
 	{
 	    if (tab(state(i)->transitions(t)->in_symbol(),
 		    state(i)->transitions(t)->out_symbol()) == 1)

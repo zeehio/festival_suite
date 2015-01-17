@@ -449,7 +449,7 @@ EST_PredictionSuffixTree::build(const EST_StrList &input)
 	window[i] = "";
 
     EST_Litem *i_ptr;
-    for(i_ptr=input.head();i_ptr!=NULL;i_ptr=next(i_ptr))
+    for(i_ptr=input.head();i_ptr!=NULL;i_ptr=i_ptr->next())
     {
 	slide(window,-1);
 	window[p_order-1] = input(i_ptr);

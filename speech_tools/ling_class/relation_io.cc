@@ -150,7 +150,7 @@ EST_write_status save_esps_label(ostream *outf,
         *outf << "timing_style unit\n";
 */
     
-    for (ptr = s.head(); ptr != 0; ptr = next(ptr))
+    for (ptr = s.head(); ptr != 0; ptr = ptr->next())
     {
 	*outf << "\t";
 	outf->precision(5);
@@ -357,7 +357,7 @@ EST_write_status save_htk_label(ostream *outf,
     outf->precision(6);
 
     start = end = 0;
-    for (ptr = a.head(); ptr != 0; ptr = next(ptr))
+    for (ptr = a.head(); ptr != 0; ptr = ptr->next())
     {
 	outf->width(15);
 	cout.setf(ios::left,ios::adjustfield);
@@ -400,7 +400,7 @@ EST_write_status save_label_spn(const EST_String &filename,
     outf->width(8);
     *outf << (ptr->dur() * 1000.0) << "\t (0,140)" << endl;
     
-    for (; next(ptr) != 0; ptr = next(ptr))
+    for (; next(ptr) != 0; ptr = ptr->next())
     {
 	outf->precision(3);
 	outf->setf(ios::left, ios::adjustfield);
@@ -443,7 +443,7 @@ EST_write_status save_label_names(const EST_String &filename,
 	return misc_write_error;
     }
     
-    for (ptr = a.head(); next(ptr) != 0; ptr = next(ptr))
+    for (ptr = a.head(); next(ptr) != 0; ptr = ptr->next())
     {
 	*outf << ptr->name();
 	if ((features != "") && (features != "OneLine"))
@@ -486,11 +486,11 @@ EST_write_status save_RelationList(const EST_String &filename,
     outf->precision(6);
 
     start = end = 0;
-    for (p = plist.head(); p != 0; p = next(p))
+    for (p = plist.head(); p != 0; p = p->next())
     {
 	outname = path ? plist(p).name() : basename(plist(p).name());
 	*outf << "\"*/" << outname<<"\"\n";
-	for (ptr = plist(p).head(); ptr != 0; ptr = next(ptr))
+	for (ptr = plist(p).head(); ptr != 0; ptr = ptr->next())
 	{
 	    if (time)
 	    {
@@ -532,9 +532,9 @@ EST_write_status save_WordList(const EST_String &filename,
 	return write_fail;
     }
     
-    for (p = plist.head(); p != 0; p = next(p))
+    for (p = plist.head(); p != 0; p = p->next())
     {
-	for (ptr = plist(p).head(); next(ptr) != 0; ptr = next(ptr))
+	for (ptr = plist(p).head(); ptr->next() != 0; ptr = ptr->next())
 	{
 	    *outf << ptr->name();
 	    if (style == 0)
@@ -561,7 +561,7 @@ EST_write_status save_ind_RelationList(const EST_String &filename,
     (void) filename;
     (void) features;
     
-    for (p = plist.head(); p != 0; p = next(p))
+    for (p = plist.head(); p != 0; p = p->next())
     {
 	outname = path ? plist(p).name() : basename(plist(p).name());
 	if (plist(p).save(outname,false) != write_ok)
@@ -621,7 +621,7 @@ static void pad_ends(EST_Relation &s, float length)
     EST_Item *p;
     int i;
     
-    for (i = 0, p = s.head(); p; p = next(p), ++i)
+    for (i = 0, p = s.head(); p; p = p->next(), ++i)
 	p->set("end",(length * float(i)/float(s.length())));
 }
 
@@ -636,7 +636,7 @@ EST_read_status read_RelationList(EST_RelationList &plist,
 	    exit (-1);
     }
     else
-	for (p = files.head(); p; p = next(p))
+	for (p = files.head(); p; p = p->next())
 	{
 	    EST_Relation s(files(p));
 	    plist.append(s);

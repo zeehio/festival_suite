@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     EST_Litem *item;
 
-    for(item=files.head(); item; item = next(item))
+    for(item=files.head(); item; item = item->next())
       {
 	FILE *src;
 

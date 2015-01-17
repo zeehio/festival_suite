@@ -2,7 +2,7 @@
 ##                                                                       ##
 ##                Centre for Speech Technology Research                  ##
 ##                     University of Edinburgh, UK                       ##
-##                       Copyright (c) 1996-2003                         ##
+##                       Copyright (c) 1996-2010                         ##
 ##                        All Rights Reserved.                           ##
 ##                                                                       ##
 ##  Permission is hereby granted, free of charge, to use and distribute  ##
@@ -34,7 +34,7 @@
 ##     Top level Makefile for Edinburgh Speech tools library             ##
 ##     Authors: Paul Taylor, Simon King, Alan W Black, Richard Caley     ##
 ##                 and others (see ACKNOWLEDGEMENTS)                     ##
-##     Version: 1.2.95 current July 2004                                 ##
+##     Version: 2.1 beta November 2010                                   ##
 ##                                                                       ##
 ###########################################################################
 

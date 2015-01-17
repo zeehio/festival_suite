@@ -393,7 +393,7 @@ static LISP directory_entries(LISP ldir, LISP lnoflagdir)
   EST_StrList entries(dir.entries(lnoflagdir!=NIL?0:1));
   EST_Litem *item;
 
-  for(item=entries.head(); item; item = next(item))
+  for(item=entries.head(); item; item = item->next())
     {
       EST_String entry(entries(item));
       if (entry != "../" && entry != "./" && entry != ".." && entry != ".")

@@ -114,7 +114,7 @@ int main (int argc, char *argv[])
     // temporary fix until status of start and end is finalised
     float prev_end = 0.0;
 
-    for (e = ev.head(); e; e = next(e))
+    for (e = ev.head(); e; e = e->next())
     {
 	e->set("start", prev_end);
 	prev_end = e->F("end");

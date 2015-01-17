@@ -268,7 +268,7 @@ void calculate_orders(EST_StrList &clist, EST_IList &olist,
     EST_String k;
     int v;
 
-    for (c = clist.head(), o = olist.head(); c && o; c= next(c), o = next(o))
+    for (c = clist.head(), o = olist.head(); c && o; c= c->next(), o = o->next())
     {
 	k = clist(c) + "_order";
 	v = olist(o);

@@ -224,7 +224,7 @@ static int valid_option(const EST_Option &options,const char *arg,
     // The actual arg name is put in sarg
     EST_Litem *p;
     
-    for (p = options.list.head(); p != 0; p = next(p))
+    for (p = options.list.head(); p != 0; p = p->next())
     {
 	if (options.key(p) == arg)
 	{

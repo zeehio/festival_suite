@@ -148,7 +148,7 @@ int main(int argc, char **argv)
      if (interactive)
 	siod_load_default_files();
 
-    for (p=files.head(); p != 0; p=next(p))
+    for (p=files.head(); p != 0; p=p->next())
     {
 	if (files(p) == "-")
 	    continue;

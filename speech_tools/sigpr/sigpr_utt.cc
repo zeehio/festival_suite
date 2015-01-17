@@ -88,7 +88,7 @@ void add_channels_to_map(EST_StrList &map, EST_StrList &types,
     
  
 
-    for (EST_Litem *s = types.head(); s; s = next(s))
+    for (EST_Litem *s = types.head(); s; s = s->next())
     {
       t = types(s);
       if (op.present(t + "_order"))
@@ -148,7 +148,7 @@ void sigpr_base(EST_Wave &sig, EST_Track &fv, EST_Features &op,
 
     parse_op_settings(op, wf, frame_factor);
 
-    for (EST_Litem *s = slist.head(); s; s = next(s))
+    for (EST_Litem *s = slist.head(); s; s = s->next())
     {
 	k = slist(s);
 
@@ -300,14 +300,14 @@ void sigpr_acc(EST_Wave &sig, EST_Track &fv, EST_Features &op,
 void sigpr_acc(EST_Wave &sig, EST_Track &fv, EST_Features &op, 
 		const EST_StrList &slist)
 {
-    for (EST_Litem *s = slist.head(); s; s = next(s))
+    for (EST_Litem *s = slist.head(); s; s = s->next())
 	sigpr_acc(sig, fv, op, slist(s));
 }
 
 void sigpr_delta(EST_Wave &sig, EST_Track &fv, EST_Features &op, 
 		const EST_StrList &slist)
 {
-    for (EST_Litem *s = slist.head(); s; s = next(s))
+    for (EST_Litem *s = slist.head(); s; s = s->next())
 	sigpr_delta(sig, fv, op, slist(s));
 }
 

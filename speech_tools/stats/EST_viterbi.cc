@@ -111,7 +111,7 @@ void EST_Viterbi_Decoder::initialise(EST_Relation *p)
     EST_Item *i;
     EST_VTPoint *t = 0,*n;
 
-    for (i=p->head(); i != 0; i=next(i))
+    for (i=p->head(); i != 0; i=i->next())
     {
 	n = new EST_VTPoint;
 	n->s = i;
