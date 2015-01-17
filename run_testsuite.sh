@@ -6,6 +6,7 @@ set -ev
 if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then
    BASEDIR=`pwd`
    cd "speech_tools"
+   autoconf
    ./configure #--enable-profile=gcov --with-pulseaudio
    make
    make test
