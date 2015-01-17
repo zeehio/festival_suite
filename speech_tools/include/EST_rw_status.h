@@ -40,13 +40,19 @@
 #ifndef __RW_STATUS_H__
 #define __RW_STATUS_H__
 
+#ifdef __cplusplus
+#include <cstdio>
+#include <cerrno>
+#else
+#include <stdio.h>
+#include <errno.h>
+
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <errno.h>
 
   /*
    * make_status_int builds the status as an integer

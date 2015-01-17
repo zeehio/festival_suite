@@ -46,7 +46,7 @@ TSRCS = list_i_t.cc list_si_t.cc list_f_t.cc list_d_t.cc \
 	list_li_t.cc list_vs_t.cc list_vi_t.cc \
 	\
 	matrix_i_t.cc matrix_si_t.cc matrix_f_t.cc matrix_d_t.cc \
-	matrix_c_t.cc matrix_s_t.cc \
+	matrix_s_t.cc \
         matrix_val_t.cc \
 	\
 	vector_i_t.cc vector_si_t.cc vector_f_t.cc vector_d_t.cc \
@@ -67,7 +67,7 @@ TSRCS = list_i_t.cc list_si_t.cc list_f_t.cc list_d_t.cc \
 	deq_s_t.cc deq_i_t.cc \
 	\
 
-#	kvl_srcfmp_t.cc kvl_scsmm_t.cc
+#	kvl_srcfmp_t.cc kvl_scsmm_t.cc matrix_c_t.cc 
 
 CPPSRCS = $(TSRCS)
 

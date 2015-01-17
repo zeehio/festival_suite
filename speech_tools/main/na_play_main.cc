@@ -177,11 +177,16 @@ int main (int argc, char *argv[])
 	    wave_extract_channel(tmp,sig,al.ival("-c"));
 	    toplay=&tmp;
 	  }
+
+	/* 
+	 * This is redundant as play_wave does this
+	 *
 	else  if (sig.num_channels() > 1)
 	  {
 	    wave_combine_channels(tmp, sig);
 	    toplay=&tmp;
 	  }
+*/
 
 	if (al.present("-scale"))
 	  (*toplay).rescale(al.fval("-scale"));

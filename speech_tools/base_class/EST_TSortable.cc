@@ -40,8 +40,8 @@
 
 
 
-//#include <stdlib.h>
-//#include <stdio.h>
+//#include <cstdlib>
+//#include <cstdio>
 #include "EST_TSortable.h"
 
 // requires operators '<' and '>' for type T

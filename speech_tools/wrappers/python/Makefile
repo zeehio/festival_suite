@@ -40,38 +40,50 @@
 TOP=../..
 DIRNAME=wrappers/python
 
-SWIG_COMMAND = $(CONFIG_SWIG_COMPILER) -c -c++ -python -shadow -Wall
-SWIG_RUNTIMELIBS = -lswigpy
-
-INTERFACE_DIRS = ../interface/ ../interface/python/
-INTERFACE_DIRS_SWG = $(foreach d,$(INTERFACE_DIRS),-I$(d))
 WRAPPERS = EST_FVector.i \
 	   EST_Wave.i EST_Track.i EST_SignalProc.i\
 	   EST_pitchmark.i \
 	   EST_Utterance.i EST_Relation.i EST_Item.i \
-	   EST_Ngrammar.i
-
-vpath %.i $(INTERFACE_DIRS)
+	   EST_Ngrammar.i #EST_Complex.i
 
 WRAPPER_SRCS = $(WRAPPERS:.i=_wrap.cc)
+WRAPPER_PY = $(WRAPPERS:.i=.py)
 OBJS = $(WRAPPER_SRCS:.cc=.o)
 ALL_WRAPPERS = $(WRAPPERS:%.i=_%.so)
 
-FILES= Makefile
+FILES= Makefile $(WRAPPER_SRCS) $(WRAPPER_PY)
 ALL = .make_wrappers
 LOCAL_INCLUDES = $(CONFIG_PYTHON_INCLUDES)
-LOCAL_LIBS += $(SWIG_RUNTIMELIBS)
-LOCAL_CLEAN = $(WRAPPER_SRCS) $(WRAPPERS:.i=.py) $(WRAPPERS:.i=.pyc) $(ALL_WRAPPERS) $(OBJS)
+
+# following flag switches off GCC's strict aliasing rules assumption
+# when performing optimization (hence, that optimisiation is no
+# longer available).  This is necessary because swig generated wrapper
+# code contains lots of type punning in the course of doing its magic,
+# which violates the strict aliasing and so can generate duff code 
+CC_OTHER_FLAGS += -fno-strict-aliasing 
 
 include $(TOP)/config/common_make_rules
 include $(TOP)/config/rules/bin_process.mak
 
-# implicit build rules 
-$(WRAPPER_SRCS) : %_wrap.cc : %.i
-	$(SWIG_COMMAND) $(INTERFACE_DIRS_SWG) -o $@ $<
+# if the user gives a path to swig in $EST/config/config file, then
+# test *.i interface files, and use swig to rebuild wrappers, otherwise
+# use the default pre-swigged versions (and not delete them on make clean!)
+ifdef CONFIG_SWIG_COMPILER
+  INTERFACE_DIRS = ../interface/ ../interface/python/ ../../include
+  INTERFACE_DIRS_SWG = $(foreach d,$(INTERFACE_DIRS),-I$(d))
+  vpath %.i $(INTERFACE_DIRS)
+  SWIG_COMMAND = $(CONFIG_SWIG_COMPILER) -c++ -python -shadow -Wall
+
+  $(WRAPPER_SRCS) : %_wrap.cc : %.i
+	  $(SWIG_COMMAND) $(INTERFACE_DIRS_SWG) -o $@ $<
+
+  LOCAL_CLEAN = $(WRAPPER_SRCS) $(WRAPPERS:.i=.py) $(WRAPPERS:.i=.pyc) $(ALL_WRAPPERS)
+else
+  LOCAL_CLEAN = $(WRAPPERS:.i=.pyc) $(ALL_WRAPPERS)
+endif
 
 $(ALL_WRAPPERS) : _%.so : %_wrap.o
-	$(CXX) -shared $(LIBS) -o $@ $<
+	$(subst XXX,$@,$(MAKE_SHARED_LIB)) $(LIBS) $<
 
 .make_wrappers : $(ALL_WRAPPERS) 
 

@@ -42,9 +42,9 @@
 #if !defined(__EST_DEFINES_WIN32_H__)
 #define __EST_DEFINES_WIN32_H__ 1
 
-#define size_t unsigned int
+/* #define size_t unsigned int */
 #undef DIFFERENCE
-#define M_PI (3.1415926)
+/* #define M_PI (3.1415926) */
 #define isnan(N) 0
 #define isnanf(N) 0
 

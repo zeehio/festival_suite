@@ -36,8 +36,8 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <iostream>
 #include "EST_TKVL.h"
 #include "EST_Option.h"
 #include "EST_util_class.h"

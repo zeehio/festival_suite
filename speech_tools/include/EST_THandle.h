@@ -34,7 +34,10 @@
 #ifndef __EST_THANDLE_H__
 #define __EST_THANDLE_H__
 
-#include "EST_iostream.h"
+#include <iostream>
+
+using namespace std;
+
 #include "EST_bool.h"
 
 /** A `smart' pointer which does reference counting.
@@ -60,7 +63,7 @@
   * @see EST_THandle:example
   * 
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_THandle.h,v 1.3 2004/05/04 00:00:16 awb Exp $
+  * @version $Id: EST_THandle.h,v 1.5 2006/07/19 21:52:12 awb Exp $
   */
 
 
@@ -137,19 +140,13 @@ public:
   const ObjectT* operator ->() const { return (ptr->object_ptr()); }
   ObjectT* operator ->() { return (ptr->object_ptr()); }
 
-  friend int operator == (const EST_THandle< BoxT, ObjectT > &a, const EST_THandle< BoxT, ObjectT > & b);
-  friend int operator != (const EST_THandle< BoxT, ObjectT > &a, const EST_THandle< BoxT, ObjectT > & b);
+  friend int operator == (const EST_THandle< BoxT, ObjectT > &a, const EST_THandle< BoxT, ObjectT > & b)
+    {return a.ptr==b.ptr; }
+  friend int operator != (const EST_THandle< BoxT, ObjectT > &a, const EST_THandle< BoxT, ObjectT > & b)
+    { return !( a==b ); }
 
-  friend ostream & operator << (ostream &s, const EST_THandle< BoxT, ObjectT > &a);
+  friend ostream & operator << (ostream &s, const EST_THandle< BoxT, ObjectT > &a)
+    { return s << "HANDLE"; }
 };
-
-template<class BoxT, class ObjectT>
-int operator == (const EST_THandle< BoxT, ObjectT > &a, const EST_THandle< BoxT, ObjectT > & b) { return a.ptr==b.ptr; }
-
-template<class BoxT, class ObjectT>
-int operator != (const EST_THandle< BoxT, ObjectT > &a, const EST_THandle< BoxT, ObjectT > & b) { return !( a==b ); }
-
-template<class BoxT, class ObjectT>
-ostream & operator << (ostream &s, const EST_THandle< BoxT, ObjectT > &a) { return s << "HANDLE"; }
 
 #endif

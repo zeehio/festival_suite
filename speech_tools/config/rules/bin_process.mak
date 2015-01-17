@@ -46,6 +46,10 @@ ifneq ($(SHARED),0)
 endif
 endif
 
+ifndef LD_LIBRARY_PATH_VARIABLE
+    LD_LIBRARY_PATH_VARIABLE = LD_LIBRARY_PATH
+endif
+
 .remove_links: FORCE
 	@echo
 	@$(ECHO_N) "Remove Links:"
@@ -110,6 +114,7 @@ endif
 				javac="$(JAVAC)" \
 				java_version="$(EST_JAVA_VERSION)" \
 				ldpath="$(SYSTEM_LD_LIBRARY_PATH)" \
+				ldvar="$(LD_LIBRARY_PATH_VARIABLE)" \
 				$(PROJECT_SCRIPTS_DIR)/shared_script  > "$(subst TOP,$(TOP),$(BIN))/$$b" ;\
 	    chmod +x "$(subst TOP,$(TOP),$(BIN))/$$b" ;\
 	done
@@ -155,6 +160,7 @@ endif
 			javac=$(JAVAC) \
 			classpath=$(SYSTEM_JAVA_CLASSPATH) \
 			ldpath="$(SYSTEM_LD_LIBRARY_PATH)" \
+			ldvar="$(LD_LIBRARY_PATH_VARIABLE)" \
 			"$$script"  > "$(subst TOP,$(TOP),$(BIN))/$$b" ;\
 		chmod +x "$(subst TOP,$(TOP),$(BIN))/$$b";\
 		fi ;\

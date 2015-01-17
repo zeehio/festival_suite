@@ -38,9 +38,9 @@
  /*************************************************************************/
 
 
-#include <stdlib.h>
-#include <fstream.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include "EST_error.h"
 #include "EST_cutils.h"
 #include "EST_cmd_line.h"

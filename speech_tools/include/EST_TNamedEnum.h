@@ -51,7 +51,10 @@
 #ifndef __EST_TNAMEDENUM_H__
 #define __EST_TNAMEDENUM_H__
 
-#include <string.h>
+#include <cstring>
+
+using namespace std;
+
 #include "EST_String.h"
 #include "EST_rw_status.h"
 

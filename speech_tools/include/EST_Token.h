@@ -40,7 +40,10 @@
 #ifndef __EST_TOKEN_H__
 #define __EST_TOKEN_H__
 
-#include <stdio.h>
+#include <cstdio>
+
+using namespace std;
+
 #include "EST_String.h"
 #include "EST_common.h"
 

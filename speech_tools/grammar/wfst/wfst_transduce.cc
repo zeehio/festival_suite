@@ -37,7 +37,7 @@
 /* Transduction using a WFST                                             */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
+#include <iostream>
 #include "EST_WFST.h"
 
 /** An internal class in transduction of WFSTs holding intermediate

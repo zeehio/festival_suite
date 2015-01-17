@@ -37,7 +37,7 @@
 /* WFST functions for building from REGEXs                               */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
+#include <iostream>
 #include "EST_cutils.h"
 #include "EST_WFST.h"
 

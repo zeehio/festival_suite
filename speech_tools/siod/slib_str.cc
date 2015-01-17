@@ -8,11 +8,11 @@
  * String functions
 
 */
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <setjmp.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cctype>
 
 #include "EST_Pathname.h"
 #include "EST_cutils.h"
@@ -268,7 +268,7 @@ LISP symbolexplode(LISP name)
 LISP l_matches(LISP atom, LISP regex)
 {
     // t if printname of atom matches regex, nil otherwise
-    EST_String pname = get_c_string(atom);
+    const EST_String pname = get_c_string(atom);
 
     if (pname.matches(make_regex(get_c_string(regex))) == TRUE)
 	return truth;

@@ -38,9 +38,9 @@
 /*                                                                       */
 /*************************************************************************/
 
-#include <fstream.h>
-#include <iostream.h>
-#include <math.h>
+#include <fstream>
+#include <iostream>
+#include <cmath>
 #include "EST_unix.h"
 #include "EST_Track.h"
 #include "EST_string_aux.h"

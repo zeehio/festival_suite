@@ -44,7 +44,7 @@
 /* Black, International Workshop of Parsing Technologies, CMU 89         */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
+#include <iostream>
 #include "EST_cutils.h"
 #include "EST_THash.h"
 #include "EST_WFST.h"

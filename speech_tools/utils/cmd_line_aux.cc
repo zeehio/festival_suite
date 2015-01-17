@@ -36,7 +36,7 @@
 /*    A separate file for an override function that may optionally be    */
 /*    provided by the main program.                                      */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_String.h"
 #include "EST_Token.h"
 #include "EST_cutils.h"

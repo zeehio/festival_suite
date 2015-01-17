@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdio.h>
+#include <cstdio>
 #include "EST_cutils.h"
 #include "EST_Wave.h"
 #include "EST_Option.h"

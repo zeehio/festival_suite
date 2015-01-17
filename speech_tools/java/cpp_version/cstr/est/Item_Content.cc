@@ -112,7 +112,7 @@ Java_cstr_est_Item_1Content_create_1cpp_1itemContent(JNIEnv *env,
 				 : (EST_Item_Content *)handle
 				 );
 
-  // printf("create itemContent %x\n", itemContent);
+  // printf("create itemContent %p\n", itemContent);
 
   env->SetLongField(self, handle_field, (jlong)itemContent);
 
@@ -124,7 +124,7 @@ Java_cstr_est_Item_1Content_destroy_1cpp_1itemContent (JNIEnv *env, jobject self
 {
   EST_Item_Content *itemContent = (EST_Item_Content *) env->GetLongField(self, handle_field);
 
-  // printf("destroy itemContent  %x\n", itemContent);
+  // printf("destroy itemContent  %p\n", itemContent);
 
   delete itemContent;
   return 1;

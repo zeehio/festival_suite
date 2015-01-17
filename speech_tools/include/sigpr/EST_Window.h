@@ -49,7 +49,7 @@
 //@{
   
 /// Function which creates a window.
-typedef void EST_WindowFunc(int size, EST_TBuffer<float> &r_window, int window_centre=-1 );
+typedef void EST_WindowFunc(int size, EST_TBuffer<float> &r_window, int window_centre );
 
 //@}
 
@@ -130,7 +130,7 @@ public:
       asymmetric windows are returned.
     */
   static void make_window(EST_TBuffer<float> &window_vals, int size, 
-    const char *name, int window_centre=-1);
+    const char *name, int window_centre);
 
   /** Make a EST_FVector containing a window function of specified type. 
       If window_centre < 0 (default -1), then a symmetric window is
@@ -138,7 +138,7 @@ public:
       asymmetric windows are returned.
     */
   static void make_window(EST_FVector &window_vals, int size, 
-    const char *name, int window_centre=-1);
+    const char *name, int window_centre);
 
   /// Return the creation function for the given window type.
   static Func *creator(const char *name, bool report_error = false);

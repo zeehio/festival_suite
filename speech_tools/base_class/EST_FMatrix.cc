@@ -37,11 +37,13 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <fstream.h>
-#include <math.h>
-#include <limits.h>
+#include <cstdlib>
+#include <cstdio>
+#include <fstream>
+#include <cmath>
+#include <climits>
+using namespace std;
+
 #include "EST_String.h"
 #include "EST_types.h"
 #include "EST_FileType.h"
@@ -49,6 +51,7 @@
 #include "EST_FMatrix.h"
 #include "EST_cutils.h"  // for swap functions 
 #include "EST_Token.h"
+
 
 /* EST_FVector may used as EST_Val */
 VAL_REGISTER_CLASS(fvector,EST_FVector)

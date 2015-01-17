@@ -38,8 +38,8 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <stdlib.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <iostream>
 #include "EST_TNamedEnum.h"
 
 #if defined(DATAC)

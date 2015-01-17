@@ -36,10 +36,10 @@
 /*             Generalised relations in utterances                       */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
 #include "ling_class/EST_Relation.h"
 #include "ling_class/EST_Item.h"
 #include "relation_io.h"

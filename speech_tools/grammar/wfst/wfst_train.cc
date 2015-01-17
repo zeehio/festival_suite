@@ -37,12 +37,12 @@
 /* Training method to split states of existing WFST based on data to     */
 /* optimize entropy                                                      */
 /*                                                                       */
-/* Confusing as it may be this has nothing to do with the modelling      */
+/* Confusing as this has nothing to do with the modelling                */
 /* technique known as "maximum entropy"                                  */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
-#include <stdlib.h>
+#include <iostream>
+#include <cstdlib>
 #include "EST_WFST.h"
 #include "wfst_aux.h"
 #include "EST_Token.h"
@@ -85,11 +85,14 @@ LISP load_string_data(EST_WFST &wfst,EST_String &filename)
     LISP ss = NIL;
     EST_String t;
     int id;
+    int i,j;
     
     if (ts.open(filename) == -1)
 	EST_error("wfst_train: failed to read data from \"%s\"",
 			  (const char *)filename);
 
+    i = 0;
+    j = 0;
     while (!ts.eof())
     {
 	LISP s = NIL;
@@ -103,10 +106,15 @@ LISP load_string_data(EST_WFST &wfst,EST_String &filename)
 		    t << "\"" << endl;
 	    }
 	    s = cons(flocons(id),s);
+	    j++;
 	}
 	while (!ts.eoln() && !ts.eof());
+	i++;
 	ss = cons(reverse(s),ss);
     }
+
+    printf("wfst_train: loaded %d lines of %d tokens\n",
+	   i,j);
 
     return reverse(ss);
 }
@@ -137,7 +145,7 @@ static LISP *find_state_usage(EST_WFST &wfst, LISP data)
 //	    wfst.state(i)->transitions(tp)->set_weight(1);
     }
 
-    for (d=data; d; d=cdr(d))
+    for (i=0,d=data; d; d=cdr(d),i++)
     {
 	s = wfst.start_state();
 	for (w=car(d); w; w=cdr(w))
@@ -145,8 +153,16 @@ static LISP *find_state_usage(EST_WFST &wfst, LISP data)
 	    state_data[s] = cons(w,state_data[s]);
 	    id = get_c_int(car(w));
 	    trans = wfst.find_transition(s,id,id);
-	    trans->set_weight(trans->weight()+1);
-	    s = trans->state();
+	    if (!trans)
+	    {
+		printf("sentence %d not in language, skipping\n",i);
+		continue;
+	    }
+	    else
+	    {
+		trans->set_weight(trans->weight()+1);
+		s = trans->state();
+	    }
 	}
     }
 	
@@ -160,7 +176,7 @@ static double entropy(const EST_WFST_State *s)
     EST_Litem *tp;
     for (sentropy=0,tp=s->transitions.head(); tp != 0; tp = next(tp))
     {
-	w = s->transitions(tp)->weight();
+	w = s->transitions(tp)->weight();  /* the probability */
 	if (w > 0)
 	    sentropy += w * log(w);
     }
@@ -299,7 +315,8 @@ static LISP find_best_split(EST_WFST &wfst,
     LISP *ssplits;
     gc_protect(&splits);
     EST_String sname;
-    int b,best_b,i;
+    int b,best_b;
+    EST_Litem *i;
     int num_pdfs;
     double best_score, score, sfreq;
 
@@ -374,7 +391,7 @@ static double score_pdf_combine(EST_DiscreteProbDistribution &a,
     // Find score of (a+b) vs (all-(a+b))
     EST_DiscreteProbDistribution ab(a);
     EST_DiscreteProbDistribution all_but_ab(all);
-    int i;
+    EST_Litem *i;
     EST_String sname;
     double sfreq, score;
     for (i=b.item_start(); !b.item_end(i);
@@ -411,7 +428,7 @@ static LISP find_split_pdfs(EST_WFST &wfst,
     EST_DiscreteProbDistribution empty;
     double value;
 
-    for (i=1; i < wfst.num_states(); i++)
+    for (i=0; i < wfst.num_states(); i++)
     {
 	const EST_WFST_State *s = wfst.state(i);
 	for (tp=s->transitions.head(); tp != 0; tp = next(tp))
@@ -506,7 +523,7 @@ static double find_score_if_split(EST_WFST &wfst,
     EST_DiscreteProbDistribution pdf_split(&wfst.in_symbols());
     EST_DiscreteProbDistribution pdf_remain(&wfst.in_symbols());
     int in, tostate, id;
-    int i;
+    EST_Litem *i;
     double sfreq;
     EST_String sname;
 

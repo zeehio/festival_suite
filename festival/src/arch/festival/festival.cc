@@ -37,19 +37,19 @@
 /* Top level file for synthesizer                                        */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdio.h>
+#include <cstdio>
 #include "EST_unix.h"
 #include "EST_Pathname.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include "festival.h"
 #include "festivalP.h"
 #include "siod.h"
 #include "ModuleDescription.h"
 
-static void festival_lisp_funcs(void);
-static void festival_lisp_vars(void);
-static void festival_banner(void);
-static void festival_load_default_files(void);
+void festival_lisp_funcs(void);
+void festival_lisp_vars(void);
+void festival_banner(void);
+void festival_load_default_files(void);
 
 #define _S_S_S(S) #S
 #define STRINGIZE(S) _S_S_S(S)
@@ -201,20 +201,23 @@ void festival_tidy_up(void)
     
 }
 
-static void festival_banner(void)
+void festival_banner(void)
 {
     /* Print out a banner, copyright and version */
     
     if (siod_get_lval("hush_startup",NULL) == NIL)
     {
 	EST_Litem *t;
-	cout << STRINGIZE(FTNAME) << " " << 
+	cout << "\n" << STRINGIZE(FTNAME) << " " << 
 	    festival_version << endl;
-	cout << "Copyright (C) University of Edinburgh, 1996-2004. " <<
+	cout << "Copyright (C) University of Edinburgh, 1996-2010. " <<
 	    "All rights reserved." << endl;
 	if (sub_copyrights.length() > 0)
+        {
+            cout << "\n";
 	    for (t = sub_copyrights.head(); t != 0; t = next(t))
 		cout << sub_copyrights.item(t);
+        }
 	cout << "For details type `(festival_warranty)'" << endl;
     }
 }
@@ -292,7 +295,7 @@ static LISP lisp_debug_output(LISP arg)
     return NIL;
 }
 
-static void festival_load_default_files(void)
+void festival_load_default_files(void)
 {
     // Load in default files, init.scm. Users ~/.festivalrc 
     // (or whatever you wish to call it) is loaded by init.scm
@@ -308,7 +311,7 @@ static void festival_load_default_files(void)
 
 }
 
-static void festival_lisp_vars(void)
+void festival_lisp_vars(void)
 {
     // set up specific lisp variables 
     EST_TokenStream ts;
@@ -341,6 +344,8 @@ static void festival_lisp_vars(void)
 	proclaim_module("freebsd16audio");
     if (linux16_supported)
 	proclaim_module("linux16audio");
+    if (macosx_supported)
+	proclaim_module("macosxaudio");
     if (win32audio_supported)
 	proclaim_module("win32audio");
     if (mplayer_supported)
@@ -356,7 +361,9 @@ static void festival_lisp_vars(void)
     //  Modify my PATH to include these directories
     siod_set_lval("etc-path",cons(rintern(etcdir),
 				  cons(rintern(etcdircommon),NIL)));
-    char *path = getenv("PATH");
+    const char *path = getenv("PATH");
+    if (path == 0)
+	path = "";
     char *newpath = walloc(char,1024+strlen(path)+strlen(etcdir)+
 			   strlen(etcdircommon));
     sprintf(newpath,"PATH=%s:%s:%s",path,etcdir,etcdircommon);
@@ -379,7 +386,46 @@ LISP l_lr_predict(LISP si, LISP lr_model);
 void festival_unitdb_init(void);
 LISP Gen_Viterbi(LISP utt);
 
-static void festival_lisp_funcs(void)
+LISP utf8_explode(LISP name)
+{
+    /* return a list of utf-8 characters as strings */
+    const unsigned char *xxx = (const unsigned char *)get_c_string(name);
+    LISP chars=NIL;
+    int i, l=0;
+    char utf8char[5];
+
+    for (i=0; xxx[i]; i++)
+    {
+        if (xxx[i] < 0x80)  /* one byte */
+        {
+            sprintf(utf8char,"%c",xxx[i]);
+            l = 1;
+        }
+        else if (xxx[i] < 0xe0) /* two bytes */
+        {
+            sprintf(utf8char,"%c%c",xxx[i],xxx[i+1]);
+            i++;
+            l = 2;
+        }
+        else if (xxx[i] < 0xff) /* three bytes */
+        {
+            sprintf(utf8char,"%c%c%c",xxx[i],xxx[i+1],xxx[i+2]);
+            i++; i++;
+            l = 3;
+        }
+        else
+        {
+            sprintf(utf8char,"%c%c%c%c",xxx[i],xxx[i+1],xxx[i+2],xxx[i+3]);
+            i++; i++; i++;
+            l = 4;
+        }
+        chars = cons(strcons(l,utf8char),chars);
+    }
+    return reverse(chars);
+
+}
+
+void festival_lisp_funcs(void)
 {
     // declare festival specific Lisp functions 
     
@@ -409,6 +455,9 @@ static void festival_lisp_funcs(void)
  "(debug_output ARG)\n\
   If ARG is non-nil cause all future debug output to be sent to cerr,\n\
   otherwise discard it (send it to /dev/null).");
+    init_subr_1("utf8explode", utf8_explode,
+ "(utf8explode utf8string)\n\
+  Returns a list of utf-8 characters in given string.");
     
     init_subr_2("wagon",l_wagon,
  "(wagon ITEM TREE)\n\

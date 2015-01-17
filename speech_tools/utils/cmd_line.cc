@@ -38,7 +38,7 @@
 /*  awb merged the help usage and argument definitions April 97          */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_unix.h"
 #include "EST_String.h"
 #include "EST_io_aux.h"

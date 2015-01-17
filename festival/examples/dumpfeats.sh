@@ -61,6 +61,9 @@
              A scheme file to be loaded before dumping.  This may contain
              dump specific features etc.  If filename starts with a left
              parenthis it it evaluated as lisp.
+  -from_file <ifile>
+             A file with a list of utterance files names (used when there
+             are a very large number of files.
 ")
   (quit))
 
@@ -100,6 +103,13 @@
 	      (set! desired_features (read-from-string (car (cdr o))))
 	      (set! desired_features (load (car (cdr o)) t)))
 	  (set! o (cdr o)))
+	 ((string-equal "-from_file" (car o))
+	  (if (not (cdr o))
+	      (durmeanstd_error "no file of utts names file specified"))
+          (set! files 
+                (append
+                 (reverse (load (car (cdr o)) t)) files))
+	  (set! o (cdr o)))
 	 ((string-equal "-eval" (car o))
 	  (if (not (cdr o))
 	      (dumpfeats_error "no file specified to load"))
@@ -129,20 +139,24 @@ to a files or files specified by outskeleton."
 	(set! fd (fopen outskeleton "w")))
     (mapcar
      (lambda (uttfile)
-       (format stderr "%s\n" uttfile)
+       (if (cdr names)  ;; only output the utt name if there is more than one
+           (format stderr "%s\n" uttfile))
        ;; change fd to new file if in skeleton mode
        (if (string-matches outskeleton ".*%s.*")
 	   (set! fd (fopen (format nil outskeleton
 				   (string-before 
 				    (basename uttfile) "."))
 			   "w")))
-       (extract_feats 
-	relname 
-	feats 
-	(utt.load nil uttfile)
-	fd)
+       (unwind-protect
+        (extract_feats 
+         relname 
+         feats 
+         (utt.load nil uttfile)
+         fd)
+        nil)
        (if (string-matches outskeleton ".*%s.*")
-	   (fclose fd)))
+	   (fclose fd))
+       t)
      names)
     (if (not (string-matches outskeleton ".*%s.*"))
 	(fclose fd))))
@@ -160,8 +174,10 @@ Extract the features and write them to the file descriptor."
 	    (format outfd "%l " fval)
 	    (format outfd "%s " fval)))
       feats)
-     (format outfd "\n"))
-   (utt.relation.items utt relname)))
+     (format outfd "\n")
+     t)
+   (utt.relation.items utt relname))
+  t)
 
 (define (get_utt fname)
   (utt.load nil fname))

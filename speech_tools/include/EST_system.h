@@ -44,8 +44,8 @@
 
 #if defined(SYSTEM_IS_WIN32)
 #   define _WINSOCKAPI_		/* horrible hack */
-#   include <windows.h>
-#   include <winbase.h>
+#   define _LPCVOID_DEFINED     /* and another */
+#   include <windows.h> 
 #   include "win32/EST_defines_win32.h"
 #   if defined(_MSC_VER)
 #       define VISUAL_CPP 1

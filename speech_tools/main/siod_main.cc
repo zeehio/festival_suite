@@ -37,7 +37,7 @@
 /*  interpreter                                                          */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_cmd_line.h"
 #include "EST_cutils.h"
 #include "EST_Pathname.h"

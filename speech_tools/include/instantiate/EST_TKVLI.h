@@ -39,7 +39,7 @@
 /** Instantiate rules for list template.
   * 
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TKVLI.h,v 1.3 2004/05/04 00:00:17 awb Exp $
+  * @version $Id: EST_TKVLI.h,v 1.4 2006/07/19 21:52:12 awb Exp $
   */
 
 #include "instantiate/EST_TListI.h"
@@ -52,8 +52,6 @@
 #define Instantiate_KVL_T(KEY, VAL, TAG) \
         template class EST_TKVL<KEY, VAL>; \
         template class EST_TKVI<KEY, VAL>; \
-	ostream &operator<<(ostream &s, EST_TKVI< KEY , VAL > const &i){  return s << i.k << "\t" << i.v << "\n"; } \
-	ostream& operator << (ostream& s,  EST_TKVL< KEY , VAL > const &l) {EST_Litem *p; for (p = l.list.head(); p ; p = next(p)) s << l.list(p).k << "\t" << l.list(p).v << endl; return s;} \
         Instantiate_TIterator_T(KVL_ ## TAG ## _t, KVL_ ## TAG ## _t::IPointer_k, KEY, KVL_ ## TAG ##_kitt) \
         Instantiate_TStructIterator_T(KVL_ ## TAG ## _t, KVL_ ## TAG ## _t::IPointer, KVI_ ## TAG ## _t, KVL_ ## TAG ##_itt) \
         Instantiate_TIterator_T(KVL_ ## TAG ## _t, KVL_ ## TAG ## _t::IPointer, KVI_ ## TAG ## _t, KVL_ ## TAG ##_itt) \

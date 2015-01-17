@@ -44,10 +44,12 @@
   * @see EST_TBox
   * @see EST_TrackMap
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_Handleable.h,v 1.3 2004/05/04 00:00:16 awb Exp $
+  * @version $Id: EST_Handleable.h,v 1.4 2004/09/29 08:24:17 robert Exp $
   */
 
-#include <limits.h>
+#include <climits>
+
+using namespace std;
 
 class EST_Handleable
 {

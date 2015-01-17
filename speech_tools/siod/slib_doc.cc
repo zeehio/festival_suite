@@ -8,7 +8,7 @@
  * Documentation support
 
 */
-#include <stdio.h>
+#include <cstdio>
 #include "EST_cutils.h"
 #include "siod.h"
 #include "siodp.h"

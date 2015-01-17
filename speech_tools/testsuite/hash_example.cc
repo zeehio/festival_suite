@@ -38,9 +38,9 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <stdlib.h>
-#include <iostream.h>
-#include <math.h>
+#include <cstdlib>
+#include <iostream>
+#include <cmath>
 #include "EST_THash.h"
 #include "EST_String.h"
 
@@ -71,8 +71,8 @@ const EST_TStringHash<int> const_lengths = lengths;
 
 EST_THash<int,float> logs(100);
 
-logs.add_item(12, log(12));
-logs.add_item(34, log(34));
+logs.add_item(12, log(12.0));
+logs.add_item(34, log(34.0));
 
 cout << "length of `fred' = " << lengths.val("fred") << "\n";
 cout << "log of 34' = " << logs.val(34) << "\n";

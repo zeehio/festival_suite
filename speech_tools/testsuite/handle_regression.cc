@@ -40,8 +40,8 @@
  /*************************************************************************/
 
 
-#include <stdlib.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <iostream>
 #include "EST_THandle.h"
 #include "EST_String.h"
 

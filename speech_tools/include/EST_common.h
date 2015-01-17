@@ -51,7 +51,11 @@ extern "C" {
 #include "EST_bool.h"
 
 #ifdef INCLUDE_DMALLOC
-#    include <stdlib.h>
+#  ifdef __cplusplus
+#    include <cstdlib>
+#  else
+#    include <stdlib.h>  
+#  endif
 #    include <dmalloc.h>
 #endif
 

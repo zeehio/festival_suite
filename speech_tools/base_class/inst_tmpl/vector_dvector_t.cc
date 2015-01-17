@@ -46,9 +46,6 @@
 
 template class EST_TVector<EST_DVector>;
 
-
-template ostream& operator << (ostream &st, const EST_TVector<EST_DVector> &v);
-
 #endif
 static const EST_DVector def_val_DVector;
 static EST_DVector error_return_DVector;

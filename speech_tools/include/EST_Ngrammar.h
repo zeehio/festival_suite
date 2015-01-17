@@ -40,8 +40,10 @@
 #ifndef __EST_NGRAMMAR_H__
 #define __EST_NGRAMMAR_H__
 
-#include <stdarg.h>
-#include <stdlib.h>
+#include <cstdarg>
+#include <cstdlib>
+
+using namespace std;
 
 #include "EST_String.h"
 #include "EST_Val.h"

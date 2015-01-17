@@ -38,16 +38,17 @@
 /*  of symbols                                                           */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST.h"
 #include "EST_WFST.h"
 
 static int align_main(int argc, char **argv);
 static void nisttool_align(EST_Option &al);
+static void string_align(EST_Option &al);
 static void align_score(EST_Utterance &u, const EST_String &refrel,
 			const EST_String &hyporel, 
 			const EST_String &alignrel,
@@ -59,6 +60,8 @@ void align(EST_Utterance &utt,
 	   const EST_String &alignrel);
 static void load_sentence(EST_Utterance &u, const EST_String &relname,
 			  EST_TokenStream &ts);
+static void load_sentence(EST_Utterance &u, const EST_String &relname,
+			  EST_String &relval);
 
 /** @name <command>align</command> <emphasis>align stream with reference stream</emphasis>
     @id align-manual
@@ -108,10 +111,12 @@ static int align_main(int argc, char **argv)
 	(argc, argv,
 	 EST_String("[options] ...\n")+
 	 "Summary: align an hypothesis with a reference string\n"+
-	 "-ref <ifile>   Reference file\n"+
-	 "-hypo <ifile>  Hypothesis\n"+
+	 "-rfile <ifile>    Reference file\n"+
+	 "-hfile <ifile>    Hypothesis file\n"+
+	 "-rstring <string> Reference string\n"+
+	 "-hstring <string> Hypothesis string\n"+
 	 "-format <string>\n"+
-         "               FIle formats: nisttool, label, ...\n",
+         "               Supported formats: strings, nisttool\n",
 		       files, al);
     
     if (al.present("-o"))
@@ -122,11 +127,14 @@ static int align_main(int argc, char **argv)
     if (al.present("-format"))
 	format = al.val("-format");
     else
-	format = "labels";
+	format = "strings";
 
-    if (format == "nisttool")
+    if (format == "strings")
+        string_align(al);
+    else if (format == "nisttool")
 	nisttool_align(al);
-	
+    else
+        cout << "Unknown or unhandled format: " << format << endl;	
 
     return 0;
 }
@@ -136,12 +144,31 @@ bool dp_match(const EST_Relation &lexical,
 	      EST_Relation &match,
 	      float ins, float del, float sub);
 
+static void string_align(EST_Option &al)
+{
+    EST_String refStr = al.val("-rstring");
+    EST_String hypStr = al.val("-hstring");
+    EST_Utterance u;
+    int total,ins,del,sub,correct;
+
+    load_sentence(u,"ref",refStr);
+    load_sentence(u,"hypo",hypStr);
+    align(u,"ref","hypo","align");
+    align_score(u,"ref","hypo","align",total,ins,del,sub,correct);
+    fprintf(stdout,"words %d\n",total);
+    fprintf(stdout,"insertions %d\n",ins);
+    fprintf(stdout,"deletions %d\n",del);
+    fprintf(stdout,"substitutions %d\n",sub);
+    fprintf(stdout,"correct %d\n",correct);
+    fprintf(stdout,"WER %f\n",(100.0 * (float)(ins+del+sub))/total);
+}
+
 static void nisttool_align(EST_Option &al)
 {
     // Using the format used by the NIST tools for alignment
     // Sentence per line with parenthesized id at end
-    EST_String reffile = al.val("-ref");
-    EST_String hypofile = al.val("-hypo");
+    EST_String reffile = al.val("-rfile");
+    EST_String hypofile = al.val("-hfile");
     EST_TokenStream rts,hts;
     EST_Item *r, *h;
     static EST_Regex id("^(.*)$");
@@ -213,6 +240,22 @@ static void load_sentence(EST_Utterance &u,
 	i->set_name(ts.get());
     }
     while ((!ts.eoln()) && (!ts.eof()));
+}
+
+static void load_sentence(EST_Utterance &u,
+			  const EST_String &relname,
+			  EST_String &relval)
+{
+    EST_Relation *r = u.create_relation(relname);
+    EST_StrList strlist;
+    StringtoStrList(relval, strlist, " ");
+    EST_StrList::Entries iter;
+
+    for (iter.begin(strlist); iter; ++iter)
+    {
+        EST_Item *i = r->append();
+	i->set_name(*iter);
+    }
 }
 
 static void align_score(EST_Utterance &u, const EST_String &refrel,

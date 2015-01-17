@@ -41,7 +41,10 @@
 #ifndef __EST_ULIST_H__
 #define __EST_ULIST_H__
 
-#include <iostream.h>
+#include <iostream>
+
+using namespace std;
+
 #include "EST_common.h"
 #include "EST_String.h"
 

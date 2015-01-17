@@ -36,8 +36,8 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <iostream>
 #include "EST_TDeque.h"
 #include "EST_String.h"
 

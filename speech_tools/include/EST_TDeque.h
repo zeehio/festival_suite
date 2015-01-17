@@ -41,7 +41,7 @@
 /** Double ended queue.
   * 
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TDeque.h,v 1.2 2001/04/04 13:11:27 awb Exp $
+  * @version $Id: EST_TDeque.h,v 1.3 2006/07/19 21:52:12 awb Exp $
   */
 
 template <class T>
@@ -110,11 +110,11 @@ public:
   T &shift() { return back_pop(); }
   //@}
 
-  friend ostream& operator << (ostream &st, const EST_TDeque< T > &deq);
+  friend ostream& operator << (ostream &st, const EST_TDeque< T > &deq)
+    {
+        return deq.print(st);
+    }
 };
-
-template<class T> 
-extern ostream& operator << (ostream &st, const EST_TDeque< T > &deq);
 
 #endif
 

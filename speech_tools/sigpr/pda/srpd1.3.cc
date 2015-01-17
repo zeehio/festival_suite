@@ -66,9 +66,9 @@
  * include header files *
  ************************/
 
-#include <math.h>
-#include <stdlib.h>
-#include <iostream.h>
+#include <cmath>
+#include <cstdlib>
+#include <iostream>
 #include "srpd.h"
 #include "EST_cutils.h"
 #include "EST_Wave.h"

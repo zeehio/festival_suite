@@ -34,10 +34,10 @@
 /*                   Date   :  June 1998                                 */
 /*************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
 #include "EST_math.h"
 #include "ling_class/EST_Utterance.h"
 

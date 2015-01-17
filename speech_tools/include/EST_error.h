@@ -41,10 +41,18 @@
 #ifndef __EST_ERROR_H__
 #define __EST_ERROR_H__
 
+/* may get included from C */
+#ifdef __cplusplus
+#include <cstdarg>
+#include <cstdio>
+#else
 #include <stdarg.h>
 #include <stdio.h>
+#endif
+
 #include <setjmp.h>
 #include "EST_unix.h"
+
 
 #ifdef __cplusplus
 extern "C" {

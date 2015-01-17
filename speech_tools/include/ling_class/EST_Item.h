@@ -254,8 +254,10 @@ protected:
     const EST_Val f(const EST_String &name) const
     { 
 	EST_Val v;
-	if (this == 0) 
+	if (this == 0)
+        {
 	    EST_error("item is null so has no %s feature",(const char *)name);
+        }
         else
         {
 	    for (v=p_contents->f.val_path(name);
@@ -323,8 +325,8 @@ protected:
        { return (this == 0) ? 0 : p_relation; }
 
     /// True if li is the same item ignoring its relation viewpoint
-    int same_item(const EST_Item *li) const
-    { return contents() && li->contents() && (contents() == li->contents()); }
+      int same_item(const EST_Item *li) const
+      { return contents() && li->contents() && (contents() == li->contents()); }
     //@}
 
     // The remaining functions should not be accessed, they are should be
@@ -384,9 +386,7 @@ protected:
     // Verification, double links are consistent (used after reading in)
     int verify() const;
 	
-    friend int same_item(const EST_Item *l1,const EST_Item *l2)
-    { return l1->contents() && l2->contents() && 
-	  (l1->contents() == l2->contents()); }
+    friend int i_same_item(const EST_Item *l1,const EST_Item *l2);
     friend int move_item(EST_Item *from, EST_Item *to);
     friend int merge_item(EST_Item *from, EST_Item *to);
     friend int move_sub_tree(EST_Item *from, EST_Item *to);
@@ -395,13 +395,20 @@ protected:
     EST_Item &operator=(const EST_Item &s);
     friend ostream& operator << (ostream &s, const EST_Item &a);
     friend bool operator !=(const EST_Item &a, const EST_Item &b)
-    { return !::same_item(&a,&b); }
+    { return !i_same_item(&a,&b); }
     friend bool operator ==(const EST_Item &a, const EST_Item &b)
-    { return ::same_item(&a,&b); }
+    { return i_same_item(&a,&b); }
 
     friend class EST_Relation;
     friend class ling_class_init;
 };
+
+inline int i_same_item(const EST_Item *l1,const EST_Item *l2)
+{
+  return l1->contents() && l2->contents() && 
+    (l1->contents() == l2->contents()); 
+}
+
 
 inline EST_Item *as(const EST_Item *n,const char *relname)
      { return n->as_relation(relname); }

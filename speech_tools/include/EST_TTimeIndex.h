@@ -35,14 +35,14 @@
 #ifndef __EST_TTIMEINDEX_H__
 #define __EST_TTIMEINDEX_H__
 
-#include <iostream.h>
+#include <iostream>
 
 /** A time index for a container. The container defines how to get an
   * object and so on, this lets you find a point in the container not
   * far before the entry you want.
   * 
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TTimeIndex.h,v 1.2 2001/04/04 13:11:27 awb Exp $
+  * @version $Id: EST_TTimeIndex.h,v 1.3 2004/09/29 08:24:17 robert Exp $
   */
 
 template<class  CONTAINER>

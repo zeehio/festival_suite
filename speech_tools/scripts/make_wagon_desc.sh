@@ -55,6 +55,8 @@ do
             printf("\"%s\"\n",n)
          else if (n ~ /'"'"'/)
             printf("\"%s\"\n",n)
+         else if (n ~ /"/)
+            printf("\"\\%s\"\n",n)
          else
             printf("%s\n",n)}' $1 | 
    sort -u | fold -s >> $3

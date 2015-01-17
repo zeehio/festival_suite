@@ -209,7 +209,13 @@ Append each list to the first list in turn."
 (defun append2 (a b)
   (if (null a)
       b
-    (cons (car a) (append2 (cdr a) b))))
+      (begin
+        (let ((x (reverse a))
+              (y b))
+          (while x
+            (set! y (cons (car x) y))
+            (set! x (cdr x)))
+          y))))
 
 (defun rplacd (a b)
 "(replacd A B)

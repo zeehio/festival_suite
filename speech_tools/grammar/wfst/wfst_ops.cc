@@ -38,8 +38,8 @@
 /*   union, composition                                                  */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
-#include <stdlib.h>
+#include <iostream>
+#include <cstdlib>
 #include "EST_WFST.h"
 #include "wfst_aux.h"
 #include "EST_String.h"

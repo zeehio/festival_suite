@@ -40,9 +40,9 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <stdlib.h>
-#include <iostream.h>
-#include <string.h>
+#include <cstdlib>
+#include <iostream>
+#include <cstring>
 #include "EST_Chunk.h"
 
 EST_Chunk::EST_Chunk ()
@@ -59,6 +59,7 @@ EST_Chunk::~EST_Chunk ()
       cerr << "deleting chunk with non-zero count\n";
       exit(1);
     }
+
   //  cerr << "deleted "<< hex << (int)&memory << "," << dec << size <<"\n";
 }
 
@@ -73,11 +74,18 @@ EST_Chunk *EST_Chunk::operator & ()
 
 void EST_Chunk:: operator ++ ()
 {
+#if 0
   if (++count > MAX_CHUNK_COUNT) 
     { 
       cerr<<"max count exceeded\n";
       exit(1);
     }
+#endif
+
+  if (count < MAX_CHUNK_COUNT) 
+  {
+      ++count; 
+  }
 }
 
 void EST_Chunk::operator -- ()
@@ -105,6 +113,7 @@ void *EST_Chunk::operator new (size_t size, int bytes)
 
 #if defined(__CHUNK_USE_WALLOC__)
   void *it = walloc(char, size+bytes);
+  ((EST_Chunk *)it) -> malloc_flag = 1;
 #else
   void *it = new char[size + bytes];
 #endif
@@ -152,7 +161,9 @@ EST_ChunkPtr::EST_ChunkPtr (const EST_ChunkPtr &cp)
 EST_ChunkPtr::~EST_ChunkPtr (void)
 {
   if (ptr)
+  {
     -- *ptr;
+  }
 }
 
 EST_ChunkPtr &EST_ChunkPtr::operator = (EST_ChunkPtr cp)
@@ -185,6 +196,11 @@ EST_ChunkPtr::operator const char*() const
     return NULL;
 }
 
+EST_ChunkPtr::operator char const*() 
+{
+    return ptr?&(ptr->memory[0]):(const char *)NULL;
+}
+
 EST_ChunkPtr::operator char*()
 {
   if (ptr)
@@ -192,7 +208,7 @@ EST_ChunkPtr::operator char*()
       if (ptr->count > 1)
 	{
 	CHUNK_WARN("getting writable version of shared chunk");
-	make_updatable(*this); 
+	cp_make_updatable(*this); 
 	}
 
       return &(ptr->memory[0]);
@@ -205,7 +221,7 @@ char &EST_ChunkPtr::operator () (int i) {
       if (ptr->count>1) 
 	{
 	  CHUNK_WARN("getting writable version of shared chunk");
-	  make_updatable(*this); 
+	  cp_make_updatable(*this); 
 	}
       return ptr->memory[i]; 
     }
@@ -267,7 +283,7 @@ EST_ChunkPtr chunk_allocate(int bytes, const EST_ChunkPtr &initial, int initial_
  /*                                                                      */
  /************************************************************************/
 
-void make_updatable(EST_ChunkPtr &cp, EST_Chunk::EST_chunk_size inuse)
+void cp_make_updatable(EST_ChunkPtr &cp, EST_Chunk::EST_chunk_size inuse)
 {
   if (cp.ptr && cp.ptr->count > 1)
     {
@@ -279,7 +295,7 @@ void make_updatable(EST_ChunkPtr &cp, EST_Chunk::EST_chunk_size inuse)
     }
 }
 
-void make_updatable(EST_ChunkPtr &cp)
+void cp_make_updatable(EST_ChunkPtr &cp)
 {
   if (cp.ptr && cp.ptr->count > 1)
     {
@@ -303,7 +319,7 @@ void grow_chunk(EST_ChunkPtr &cp, EST_Chunk::EST_chunk_size newsize)
   if (!cp.ptr || cp.ptr->size < newsize)
     {
       if (cp.ptr)
-	make_updatable(cp);
+	cp_make_updatable(cp);
       EST_Chunk *newchunk = new(newsize) EST_Chunk;
       memcpy(newchunk->memory, cp.ptr->memory, cp.ptr->size);
       cp = newchunk;
@@ -315,7 +331,7 @@ void grow_chunk(EST_ChunkPtr &cp, EST_Chunk::EST_chunk_size inuse, EST_Chunk::ES
   if (!cp.ptr || cp.ptr->size < newsize)
     {
       if (cp.ptr)
-	make_updatable(cp, inuse);
+	cp_make_updatable(cp, inuse);
       EST_Chunk *newchunk = new(newsize) EST_Chunk;
       memcpy(newchunk->memory, cp.ptr->memory, inuse);
       cp = newchunk;

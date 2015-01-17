@@ -37,13 +37,13 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_system.h"
 #include "EST_FMatrix.h"
 #include "EST_cluster.h"
-#include <fstream.h>
+#include <fstream>
 #include "EST_string_aux.h"
-#include <float.h>
+#include <cfloat>
 
 int fn_cluster(EST_FMatrix &m, EST_CBK &cbk, float d);
 int nn_cluster(EST_FMatrix &m, EST_CBK &cbk, float d);
@@ -186,7 +186,7 @@ void collapse3(EST_FMatrix &d, EST_CBK &cbk, int row, int col, EST_String method
 int nn_cluster2(EST_FMatrix &m, EST_CBK &cbk, float d)
 {
     static float smallest = 0.0;
-    int row, col;
+    int row=0, col=0;
     (void)d;
 
 // Change so that all values aprt from lowest in codebook get set to
@@ -208,7 +208,7 @@ int nn_cluster2(EST_FMatrix &m, EST_CBK &cbk, float d)
 float nn_cluster3(EST_FMatrix &m, EST_CBK &cbk, EST_String method)
 {
     static float smallest = 0.0;
-    int row, col;
+    int row=0, col=0;
 
 // Change so that all values aprt from lowest in codebook get set to
 // Nan (or whatever)

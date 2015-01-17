@@ -40,7 +40,7 @@
 /*=======================================================================*/
 #include "EST_String.h"
 #include "EST_StringTrie.h"
-#include <string.h>
+#include <cstring>
 
 #define TRIEWIDTH 256
 

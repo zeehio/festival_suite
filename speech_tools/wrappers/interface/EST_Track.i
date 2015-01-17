@@ -49,6 +49,7 @@
 %}
 
 %include "typemaps.i"
+%include "EST_rw_status.i"
 
 %import "EST_FVector.i"
 %include "EST_typemaps.i"
@@ -178,6 +179,9 @@ public:
 
   // return amplitude of frame i, channel c.
   float a(int i, int c=0) const;
+
+  // return amplitude at frame nearest t, channel c.
+  float a(float t, int c=0) const;
   
   // return time position of frame i
   float  t(int i=0) const;
@@ -208,8 +212,31 @@ public:
   // return time of last value in track
   float end() const;
 
-  EST_read_status load(const EST_String name, float ishift = 0.0, float startt = 0.0);
-  EST_write_status save(const EST_String name, const EST_String EST_filetype = "");
+//  EST_read_status load(const EST_String name, float ishift = 0.0, float startt = 0.0);
+ // EST_write_status save(const EST_String name, const EST_String EST_filetype = "");
+
+  EST_read_status load(const char *name, float ishift = 0.0, float startt = 0.0);
+  EST_write_status save(const char *name, const char* EST_filetype = "");
+
+  // set frame i to be a break
+  void set_break(int i);
+  
+  // set frame i to be a value
+  void set_value(int i);
+
+  // return true if frame i is a value
+  int val(int i) const;
+
+  // return true if frame i is a break
+  int track_break(int i) const { return (p_is_val(i)); }
+
+  /** starting at frame i, return the frame index of the first
+  	value frame before i. If frame i is a value, return i */
+  int prev_non_break(int i) const;
+
+  /** starting at frame i, return the frame index of the first
+  	value frame after i. If frame i is a value, return i */
+  int next_non_break(int i) const;
 
   int empty() const;
   

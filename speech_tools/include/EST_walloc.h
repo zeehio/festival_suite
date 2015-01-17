@@ -52,6 +52,8 @@ void *safe_wrealloc(void *ptr, int size);
 char *wstrdup(const char *s);
 void wfree(void *p);
 
+void debug_memory_summary();
+
 #if defined(__cplusplus)
 }
 #endif

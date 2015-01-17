@@ -60,6 +60,9 @@ public:
     EST_TSimpleVector(const EST_TSimpleVector<T> &v);
     /// "size" constructor
     EST_TSimpleVector(int n): EST_TVector<T>(n) {}; 
+    /// memory constructor
+    EST_TSimpleVector(int n, T* memory, int offset=0, 
+		      int free_when_destroyed=0): EST_TVector<T>(n,memory) {}; 
 
     /// resize vector
     void resize(int n, int set=1); 
@@ -73,8 +76,8 @@ public:
     /// Fill entire array with 0 bits. 
     void zero(void);
 
-    /// Fill vector with default value
-    void empty(void) { if (*this->def_val == 0) zero(); else fill(*this->def_val); }
+    //    /// Fill vector with default value
+    //    void empty(void) { if (*this->def_val == 0) zero(); else fill(*this->def_val); }
 };
 
 #endif

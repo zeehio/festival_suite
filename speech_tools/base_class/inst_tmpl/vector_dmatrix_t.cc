@@ -46,9 +46,6 @@
 
 template class EST_TVector<EST_DMatrix>;
 
-
-template ostream& operator << (ostream &st, const EST_TVector<EST_DMatrix> &v);
-
 #endif
 static const EST_DMatrix def_val_DMatrix;
 static EST_DMatrix error_return_DMatrix;

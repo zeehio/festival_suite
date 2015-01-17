@@ -37,16 +37,20 @@
 /* An EST_Ngram class for building and manipulating bigrams trigrams etc */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
-#include <math.h>
-#include <limits.h>
-#include <float.h>
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <cmath>
+#include <climits>
+#include <cfloat>
+
+using namespace std;
+
 #include "EST_Ngrammar.h"
 #include "EST_Pathname.h"
 #include "EST_Token.h"
 #include "EST_io_aux.h"
+
 
 const EST_DiscreteProbDistribution PSTnullProbDistribution;
 static EST_String NOVOCAB("NOVOCAB");
@@ -302,7 +306,7 @@ void EST_BackoffNgrammarState::print_freqs(ostream &os,
     // not right - just print out, then recurse through children
     // change to use 'backoff_traverse'
     
-    int k;
+    EST_Litem *k;
     double freq;
     EST_String name;
     for (k=p_pdf.item_start();
@@ -369,7 +373,7 @@ void EST_BackoffNgrammarState::zap()
 {
 
     // recursively delete this state and all its children
-    int k;
+    EST_Litem *k;
     double freq;
     EST_String name;
     for (k=p_pdf.item_start();
@@ -452,7 +456,8 @@ bool EST_BackoffNgrammarState::set_backoff_weight(const EST_StrVector &words, co
 
 void EST_BackoffNgrammarState::frequency_of_frequencies(EST_DVector &ff)
 {
-    int k,max=ff.n();
+    int max=ff.n();
+    EST_Litem *k;
     double freq;
     EST_String name;
     for (k=p_pdf.item_start();
@@ -579,7 +584,7 @@ bool EST_Ngrammar::init_dense_representation()
 	return false;
     }
     
-    p_num_states = (int)pow(vocab->length(),p_order-1);
+    p_num_states = (int)pow(float(vocab->length()),float(p_order-1));
     p_states = new EST_NgrammarState[p_num_states];
     for (i=0; i < p_num_states; i++)
 	p_states[i].init(i,pred_vocab);
@@ -597,7 +602,7 @@ bool EST_Ngrammar::init_sparse_representation()
 	return false;
     }
     
-    p_num_states = (int)pow(vocab->length(),p_order-1);
+    p_num_states = (int)pow(float(vocab->length()),float(p_order-1));
     p_states = new EST_NgrammarState[p_num_states];
     
     return (bool)(p_states != NULL);
@@ -1581,7 +1586,7 @@ void EST_Ngrammar::prune_backoff_representation(EST_BackoffNgrammarState *start_
     // remove any branches with zero frequency count
     
     // find children of this state with zero freq and zap them
-    int k;
+    EST_Litem *k;
     double freq;
     EST_String name;
     for (k=start_state->pdf_const().item_start();
@@ -2320,7 +2325,8 @@ void EST_Ngrammar::print_freqs(ostream &os,double floor)
 	backoff_representation->print_freqs(os,p_order);
     else
     {
-	int i,j,k;
+	int i,j;
+        EST_Litem *k;
 	EST_IVector window(p_order-1);
 	
 	for (i=0; i < p_num_states; i++)
@@ -2661,7 +2667,7 @@ EST_Ngrammar::backoff_traverse(EST_BackoffNgrammarState *start_state,
     function(start_state,params);
     
     // and recurse down the tree
-    int k;
+    EST_Litem *k;
     double freq;
     EST_String name;
     for (k=start_state->pdf_const().item_start();
@@ -2692,7 +2698,7 @@ EST_Ngrammar::backoff_traverse(EST_BackoffNgrammarState *start_state,
     {
 	// and recurse down the tree if we haven't
 	// reached the level yet
-	int k;
+	EST_Litem *k;
 	double freq;
 	EST_String name;
 	

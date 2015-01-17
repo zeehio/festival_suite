@@ -37,7 +37,7 @@
 /*                        Tracks and Tracks                              */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_Track.h"
 #include "EST_Wave.h"
 # define MAX_DELTA_ORDER 2

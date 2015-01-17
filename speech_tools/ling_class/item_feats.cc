@@ -36,10 +36,10 @@
 /*  Support for feature functions for EST_Items                          */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
 #include "EST_THash.h"
 #include "ling_class/EST_Item.h"
 #include "ling_class/EST_Item_Content.h"
@@ -78,7 +78,7 @@ EST_String get_featname(const EST_Item_featfunc func)
    EST_String name = EST_FeatureFunctionContext::global->get_featfunc_name(func, found);
 
    if (!found)
-	EST_error("featfunc 0x%x has no name", (int)func);
+	EST_error("featfunc %p has no name", func);
 
     return name;
 }

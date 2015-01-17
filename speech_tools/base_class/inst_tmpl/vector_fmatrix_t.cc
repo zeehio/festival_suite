@@ -47,8 +47,6 @@
 template class EST_TVector<EST_FMatrix>;
 
 
-template ostream& operator << (ostream &st, const EST_TVector<EST_FMatrix> &v);
-
 #endif
 static const EST_FMatrix def_val_FMatrix;
 static EST_FMatrix error_return_FMatrix;

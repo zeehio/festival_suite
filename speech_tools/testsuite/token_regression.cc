@@ -38,7 +38,7 @@
 /*                                                                      */
 /************************************************************************/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_Token.h"
 
 static void binary_read_test();

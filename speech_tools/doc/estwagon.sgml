@@ -15,7 +15,7 @@ The construction of CARTs (classification and regression trees) is
 best described in <cite>breiman84</cite> and has become a common basic
 method for building statistical models from simple feature data.
 CART is powerful because it can deal with incomplete data, multiple
-types of features (floats, unumerated sets) both in input features and
+types of features (floats, enumerated sets) both in input features and
 predicted features, and the trees it produces often contain rules
 which are humanly readable.
 </para><para>
@@ -273,6 +273,8 @@ reals (e.g. duration of phones)</para></listitem>
 list of possible values (e.g. phone names)</para></listitem>
 <listitem><para><command>string</command> for features with an open
 class of discrete values (e.g. words)</para></listitem>
+<listitem><para><command>vectors</command> like floats but as vectors
+of floats, (e.g. MFCC data)</para></listitem>
 </itemizedlist>
 </para><para>
 The data description consists of a parenthesized list of feature

@@ -8,7 +8,7 @@
  * System functions
 
 */
-#include <stdio.h>
+#include <cstdio>
 #include "siod.h"
 #include "siodp.h"
 
@@ -59,7 +59,7 @@ static LISP lchdir(LISP args, LISP env)
     }
     else
     {
-	chdir(get_c_string(car(args)));
+	chdir(get_c_string(leval(car(args),env)));
 	return (car(args));
     }
 }

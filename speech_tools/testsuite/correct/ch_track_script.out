@@ -27,7 +27,7 @@ use "-" to make input and output files stdin/out
 -itype <string>  Input file type (optional).  If no type is
                  specified type is automatically derived from
                  file's header. Supported types
-                 are: none, esps, est, est_binary, htk, htk_fbank, htk_mfcc, htk_user, htk_discrete, ssff, xmg, xgraph, ema, ema_swapped, ascii
+                 are: none, esps, est, est_binary, htk, htk_fbank, htk_mfcc, htk_mfcc_e, htk_user, htk_discrete, ssff, xmg, xgraph, ema, ema_swapped, ascii
 
 -ctype <string>  Contour type: F0, track
 
@@ -53,7 +53,7 @@ use "-" to make input and output files stdin/out
 
 -otype <string> {ascii}
     Output file type, if unspecified ascii is
-    assumed, types are: none, esps, est, est_binary, htk, htk_fbank, htk_mfcc, htk_user, htk_discrete, ssff, xmg, xgraph, ema, ema_swapped, ascii, label
+    assumed, types are: none, esps, est, est_binary, htk, htk_fbank, htk_mfcc, htk_mfcc_e, htk_user, htk_discrete, ssff, xmg, xgraph, ema, ema_swapped, ascii, label
 
 -S <float>       Frame spacing of output in seconds. If this is 
     different from the internal spacing, the contour is 
@@ -97,22 +97,23 @@ use "-" to make input and output files stdin/out
 -pc <string>  Combine given tracks in parallel.  If option 
      is longest, pad shorter tracks to longest, else if 
      first pad/cut to match first input track 
-Available track file formats:
-        none        unknown track file type
-        esps        entropic sps file
-        est         Edinburgh Speech Tools track file
-        est_binary  Edinburgh Speech Tools track file
-        htk         htk file
-        htk_fbank   htk file (as FBANK)
-        htk_mfcc    htk file (as MFCC)
-        htk_user    htk file (as USER)
-        htk_discretehtk file (as DISCRETE)
-        ssff        Macquarie University's Simple Signal File Format
-        xmg         xmg file viewer
-        xgraph      xgraph display program format
-        ema         ema
-        ema_swapped ema, swapped
-        ascii       ascii decimal numbers
+AvailablE track file formats:
+        none         unknown track file type
+        esps         entropic sps file
+        est          Edinburgh Speech Tools track file
+        est_binary   Edinburgh Speech Tools track file
+        htk          htk file
+        htk_fbank    htk file (as FBANK)
+        htk_mfcc     htk file (as MFCC)
+        htk_mfcc_e   htk file (as MFCC_E)
+        htk_user     htk file (as USER)
+        htk_discrete htk file (as DISCRETE)
+        ssff         Macquarie University's Simple Signal File Format
+        xmg          xmg file viewer
+        xgraph       xgraph display program format
+        ema          ema
+        ema_swapped  ema, swapped
+        ascii        ascii decimal numbers
 
 ../lib/example_data/ch_track.htk
 Number of frames: 200

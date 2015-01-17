@@ -45,8 +45,8 @@
 /*  1987                                                                 */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
-#include <string.h>
+#include <iostream>
+#include <cstring>
 #include "EST_Wagon.h"
 #include "EST_FMatrix.h"
 #include "EST_multistats.h"

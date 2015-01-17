@@ -17,7 +17,7 @@ extend() {
 	eval "export $var"
 	}
 
-extend LD_LIBRARY_PATH "__LIB__:__LDPATH__"
+extend __LDVAR__ "__LIB__:__LDPATH__"
 
 exec __MAIN__/__PROGRAM__ "$@"
 

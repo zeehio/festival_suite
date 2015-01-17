@@ -46,7 +46,6 @@ relink:
 	@echo Config not checked for VC
 
 .sub_directories: $(BUILD_DIRS)
-	
 
 .remove_links:
 	@echo Links not made for Visual C++

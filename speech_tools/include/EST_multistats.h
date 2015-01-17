@@ -66,6 +66,7 @@ EST_FMatrix confusion(EST_StrStr_KVL &list, EST_StrList &lex);
 void print_confusion(const EST_FMatrix &a, EST_StrStr_KVL &list, 
 		     EST_StrList &lex);
 
+#define OLS_IGNORE 100
 int ols(const EST_FMatrix &X,const EST_FMatrix &Y, EST_FMatrix &coeffs);
 int robust_ols(const EST_FMatrix &X,
 	       const EST_FMatrix &Y, 
@@ -80,7 +81,8 @@ int stepwise_ols(const EST_FMatrix &X,
 		 float limit,
 		 EST_FMatrix &coeffs,
 		 const EST_FMatrix &Xtest,
-		 const EST_FMatrix &Ytest);
+		 const EST_FMatrix &Ytest,
+                 EST_IVector &included);
 int ols_apply(const EST_FMatrix &samples,
 	      const EST_FMatrix &coeffs,
 	      EST_FMatrix &res);

@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_tilt.h"
 #include "sigpr/EST_sigpr_utt.h"
 #include "EST_cmd_line_options.h"

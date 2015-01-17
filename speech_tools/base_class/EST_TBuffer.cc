@@ -39,9 +39,9 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include "EST_unix.h"
 #include "EST_TBuffer.h"
 

@@ -36,10 +36,10 @@
 /*                   File I/O functions for EST_Track class              */
 /*                                                                       */
 /*=======================================================================*/
-#include <fstream.h>
-#include <iostream.h>
-#include <stdlib.h>
-#include <math.h>
+#include <fstream>
+#include <iostream>
+#include <cstdlib>
+#include <cmath>
 #include <time.h>
 #include "EST_unix.h"
 #include "EST_types.h"
@@ -461,10 +461,12 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
     float *frame=0; 
     float frame_buffer[BINARY_CHANNEL_BUFFER_SIZE];
     if( !ascii )
+    {
       if( num_channels > BINARY_CHANNEL_BUFFER_SIZE )
 	frame = new float[num_channels];
       else
 	frame = frame_buffer;
+    }
 
     // there are too many ifs here
     for (i = 0; i < num_frames; ++i)
@@ -684,7 +686,7 @@ EST_write_status EST_TrackFile::save_esps(const EST_String filename, EST_Track t
 	return write_fail;
     }
     
-    if (include_time = (track_tosave.equal_space() != TRUE))
+    if ((include_time = (track_tosave.equal_space() != TRUE)))
     {
 	shift = EST_Track::default_frame_shift;
 	extra_channels++;
@@ -1251,6 +1253,11 @@ EST_write_status EST_TrackFile::save_htk_fbank(const EST_String filename, EST_Tr
 EST_write_status EST_TrackFile::save_htk_mfcc(const EST_String filename, EST_Track tmp)
 {
     return save_htk_as(filename, tmp, HTK_MFCC);
+}
+
+EST_write_status EST_TrackFile::save_htk_mfcc_e(const EST_String filename, EST_Track tmp)
+{
+    return save_htk_as(filename, tmp, HTK_MFCC | HTK_ENERGY);
 }
 
 EST_write_status EST_TrackFile::save_htk_user(const EST_String filename, EST_Track tmp)
@@ -2096,14 +2103,14 @@ EST_String EST_TrackFile::options_short(void)
 
 EST_String EST_TrackFile::options_supported(void)
 {
-    EST_String s("Available track file formats:\n");
+    EST_String s("AvailablE track file formats:\n");
     
     for(int n=0; n< EST_TrackFile::map.n() ; n++)
     {
 	const char *nm = EST_TrackFile::map.name(EST_TrackFile::map.token(n));
 	const char *d = EST_TrackFile::map.info(EST_TrackFile::map.token(n)).description;
 	
-	s += EST_String::cat("        ", nm, EST_String(" ")*(12-strlen(nm)), d, "\n");
+	s += EST_String::cat("        ", nm, EST_String(" ")*(13-strlen(nm)), d, "\n");
     }
     return s;
 }
@@ -2136,6 +2143,9 @@ static EST_TValuedEnumDefinition<EST_TrackFileType, const char *, EST_TrackFile:
 {tff_htk_mfcc,	{ "htk_mfcc" }, 
 {FALSE, EST_TrackFile::load_htk, EST_TrackFile::save_htk_mfcc,
  "htk file (as MFCC)"}},
+{tff_htk_mfcc_e,	{ "htk_mfcc_e" }, 
+{FALSE, EST_TrackFile::load_htk, EST_TrackFile::save_htk_mfcc_e,
+ "htk file (as MFCC_E)"}},
 {tff_htk_user,	{ "htk_user" }, 
 {FALSE, EST_TrackFile::load_htk, EST_TrackFile::save_htk_user,
  "htk file (as USER)"}},

@@ -36,10 +36,10 @@
 /*  A program for testing a OLS                                          */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST_Wagon.h"
 #include "EST_cutils.h"
 #include "EST_multistats.h"

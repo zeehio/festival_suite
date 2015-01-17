@@ -48,7 +48,7 @@
 /*                                                                          */
 /****************************************************************************/
 
-/*  $Revision: 1.4 $
+/*  $Revision: 1.5 $
 **
 **  Main editing routines for editline library.
 */
@@ -1176,7 +1176,8 @@ STATIC STATUS emacs(unsigned int c)
     STATUS		s;
     KEYMAP		*kp;
 
-    if (ISMETA(c)) {
+    if (ISMETA(c) && rl_meta_chars) 
+    {    
 	el_Pushed = 1;
 	el_PushBack = UNMETA(c);
 	return meta();

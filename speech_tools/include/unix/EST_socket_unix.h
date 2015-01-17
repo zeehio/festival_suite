@@ -58,8 +58,7 @@ typedef int socklen_t;
 typedef int socklen_t;
 #endif
 
-#if defined(__APPLE__)
-typedef int socklen_t;
+#if defined(__APPLE__) 
 #endif
 
 #if defined(__CYGWIN__) &&  __GNUC__ < 3

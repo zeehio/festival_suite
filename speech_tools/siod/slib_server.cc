@@ -8,7 +8,7 @@
  * Client/server functions
 
 */
-#include <stdio.h>
+#include <cstdio>
 #include "EST_io_aux.h"
 #include "siod.h"
 #include "siodp.h"

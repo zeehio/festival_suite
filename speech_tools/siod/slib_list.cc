@@ -8,7 +8,7 @@
  * General list functions
 
 */
-#include <stdio.h>
+#include <cstdio>
 #include "siod.h"
 #include "siodp.h"
 

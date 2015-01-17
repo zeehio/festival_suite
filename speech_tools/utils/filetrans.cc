@@ -39,7 +39,7 @@
 /*                                                                       */
 /*=======================================================================*/
 #include "EST_unix.h"
-#include <stdio.h>
+#include <cstdio>
 #include "EST_String.h"
 #include "EST_io_aux.h"
 

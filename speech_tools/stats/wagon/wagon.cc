@@ -42,10 +42,10 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST_Token.h"
 #include "EST_FMatrix.h"
 #include "EST_multistats.h"
@@ -57,7 +57,9 @@ Discretes wgn_discretes;
 WDataSet wgn_dataset;
 WDataSet wgn_test_dataset;
 EST_FMatrix wgn_DistMatrix;
-EST_Track *wgn_UnitTracks = 0;
+EST_Track wgn_VertexTrack;
+EST_Track wgn_VertexFeats;
+EST_Track wgn_UnitTrack;
 
 int wgn_min_cluster_size = 50;
 int wgn_held_out = 0;
@@ -71,11 +73,15 @@ EST_String wgn_predictee_name = "";
 float wgn_float_range_split = 10;
 float wgn_balance = 0;
 EST_String wgn_opt_param = "";
+EST_String wgn_vertex_output = "mean";
+EST_String wgn_vertex_otype = "mean";
 
 static float do_summary(WNode &tree,WDataSet &ds,ostream *output);
 static float test_tree_float(WNode &tree,WDataSet &ds,ostream *output);
 static float test_tree_class(WNode &tree,WDataSet &ds,ostream *output);
 static float test_tree_cluster(WNode &tree,WDataSet &dataset, ostream *output);
+static float test_tree_vector(WNode &tree,WDataSet &dataset,ostream *output);
+static float test_tree_trajectory(WNode &tree,WDataSet &dataset,ostream *output);
 static int wagon_split(int margin,WNode &node);
 static WQuestion find_best_question(WVectorVector &dset);
 static void construct_binary_ques(int feat,WQuestion &test_ques);
@@ -145,8 +151,18 @@ void wgn_load_dataset(WDataSet &dataset,EST_String fname)
 	    }
 	    else if (type == wndt_binary)
 		v->set_int_val(i,atoi(ts.get().string()));
-	    else if (type == wndt_cluster)
+	    else if (type == wndt_cluster)  /* index into distmatrix */
 		v->set_int_val(i,atoi(ts.get().string()));
+	    else if (type == wndt_vector)   /* index into VertexTrack */
+		v->set_int_val(i,atoi(ts.get().string()));
+	    else if (type == wndt_trajectory) /* index to index and length */
+            {   /* a number pointing to a vector in UnitTrack that */
+                /* has an idex into VertexTrack and a number of Vertices */
+                /* Thus if its 15, UnitTrack.a(15,0) is the start frame in */
+                /* VertexTrack and UnitTrack.a(15,1) is the number of */
+                /* frames in the unit                                 */
+		v->set_int_val(i,atoi(ts.get().string()));
+            }
 	    else if (type == wndt_ignore)
 	    {
 		ts.get();  // skip it
@@ -203,6 +219,10 @@ static float do_summary(WNode &tree,WDataSet &ds,ostream *output)
 {
     if (wgn_dataset.ftype(wgn_predictee) == wndt_cluster)
 	return test_tree_cluster(tree,ds,output);
+    else if (wgn_dataset.ftype(wgn_predictee) == wndt_vector)
+	return test_tree_vector(tree,ds,output);
+    else if (wgn_dataset.ftype(wgn_predictee) == wndt_trajectory)
+	return test_tree_trajectory(tree,ds,output);
     else if (wgn_dataset.ftype(wgn_predictee) >= wndt_class)
 	return test_tree_class(tree,ds,output);
     else
@@ -307,6 +327,183 @@ static float test_tree_class(WNode &tree,WDataSet &dataset,ostream *output)
 	return -pow(2.0,(-1*(H/total)));
     else
 	return (float)correct/(float)total;
+}
+
+static float test_tree_vector(WNode &tree,WDataSet &dataset,ostream *output)
+{
+    // Test tree against data to get summary of results VECTOR
+    // distance is calculated in zscores (as the values in vector may
+    // have quite different ranges 
+    WNode *leaf;
+    EST_Litem *p;
+    float predict, actual;
+    EST_SuffStats x,y,xx,yy,xy,se,e;
+    EST_SuffStats b;
+    int i,j,pos;
+    double cor,error;
+    double count;
+    EST_Litem *pp;
+
+    for (p=dataset.head(); p != 0; p=next(p))
+    {
+	leaf = tree.predict_node((*dataset(p)));
+	pos = dataset(p)->get_int_val(wgn_predictee);
+        for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+            if (wgn_VertexFeats.a(0,j) > 0.0)
+            {
+                b.reset();
+                for (pp=leaf->get_impurity().members.head(); pp != 0; pp=next(pp))
+                {
+                    i = leaf->get_impurity().members.item(pp);
+                    b += wgn_VertexTrack.a(i,j);
+                }
+                predict = b.mean();
+                actual = wgn_VertexTrack.a(pos,j);
+                if (wgn_count_field == -1)
+                    count = 1.0;
+                else
+                    count = dataset(p)->get_flt_val(wgn_count_field);
+                x.cumulate(predict,count);
+                y.cumulate(actual,count);
+                /* Normalized the error by the standard deviation */
+                if (b.stddev() == 0)
+                    error = predict-actual;
+                else
+                    error = (predict-actual)/b.stddev();
+                error = predict-actual; /* awb_debug */
+                se.cumulate((error*error),count);
+                e.cumulate(fabs(error),count);
+                xx.cumulate(predict*predict,count);
+                yy.cumulate(actual*actual,count);
+                xy.cumulate(predict*actual,count);
+            }
+    }
+
+    // Pearson's product moment correlation coefficient
+//    cor = (xy.mean() - (x.mean()*y.mean()))/
+//	(sqrt(xx.mean()-(x.mean()*x.mean())) *
+//	 sqrt(yy.mean()-(y.mean()*y.mean())));
+    // Because when the variation is X is very small we can
+    // go negative, thus cause the sqrt's to give FPE
+    double v1 = xx.mean()-(x.mean()*x.mean());
+    double v2 = yy.mean()-(y.mean()*y.mean());
+
+    double v3 = v1*v2;
+
+    if (v3 <= 0)
+	// happens when there's very little variation in x
+	cor = 0;
+    else
+	cor = (xy.mean() - (x.mean()*y.mean()))/ sqrt(v3);
+    
+    if (output != NULL)
+    {
+	if (output != &cout)   // save in output file
+	    *output 
+		<< ";; RMSE " << ftoString(sqrt(se.mean()),4,1)
+		<< " Correlation is " << ftoString(cor,4,1)
+		<< " Mean (abs) Error " << ftoString(e.mean(),4,1)
+		<< " (" << ftoString(e.stddev(),4,1) << ")" << endl;
+	
+	cout << "RMSE " << ftoString(sqrt(se.mean()),4,1)
+	    << " Correlation is " << ftoString(cor,4,1)
+	    << " Mean (abs) Error " << ftoString(e.mean(),4,1)
+	    << " (" << ftoString(e.stddev(),4,1) << ")" << endl;
+    }
+
+    if (wgn_opt_param == "rmse")
+	return -sqrt(se.mean());  // * -1 so bigger is better 
+    else
+	return cor;  // should really be % variance, I think
+}
+
+static float test_tree_trajectory(WNode &tree,WDataSet &dataset,ostream *output)
+{
+    // Test tree against data to get summary of results TRAJECTORY
+    // distance is calculated in zscores (as the values in vector may
+    // have quite different ranges)
+    // NOT WRITTEN YET
+    WNode *leaf;
+    EST_Litem *p;
+    float predict, actual;
+    EST_SuffStats x,y,xx,yy,xy,se,e;
+    EST_SuffStats b;
+    int i,j,pos;
+    double cor,error;
+    double count;
+    EST_Litem *pp;
+
+    for (p=dataset.head(); p != 0; p=next(p))
+    {
+	leaf = tree.predict_node((*dataset(p)));
+	pos = dataset(p)->get_int_val(wgn_predictee);
+        for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+            if (wgn_VertexFeats.a(0,j) > 0.0)
+            {
+                b.reset();
+                for (pp=leaf->get_impurity().members.head(); pp != 0; pp=next(pp))
+                {
+                    i = leaf->get_impurity().members.item(pp);
+                    b += wgn_VertexTrack.a(i,j);
+                }
+                predict = b.mean();
+                actual = wgn_VertexTrack.a(pos,j);
+                if (wgn_count_field == -1)
+                    count = 1.0;
+                else
+                    count = dataset(p)->get_flt_val(wgn_count_field);
+                x.cumulate(predict,count);
+                y.cumulate(actual,count);
+                /* Normalized the error by the standard deviation */
+                if (b.stddev() == 0)
+                    error = predict-actual;
+                else
+                    error = (predict-actual)/b.stddev();
+                error = predict-actual; /* awb_debug */
+                se.cumulate((error*error),count);
+                e.cumulate(fabs(error),count);
+                xx.cumulate(predict*predict,count);
+                yy.cumulate(actual*actual,count);
+                xy.cumulate(predict*actual,count);
+            }
+    }
+
+    // Pearson's product moment correlation coefficient
+//    cor = (xy.mean() - (x.mean()*y.mean()))/
+//	(sqrt(xx.mean()-(x.mean()*x.mean())) *
+//	 sqrt(yy.mean()-(y.mean()*y.mean())));
+    // Because when the variation is X is very small we can
+    // go negative, thus cause the sqrt's to give FPE
+    double v1 = xx.mean()-(x.mean()*x.mean());
+    double v2 = yy.mean()-(y.mean()*y.mean());
+
+    double v3 = v1*v2;
+
+    if (v3 <= 0)
+	// happens when there's very little variation in x
+	cor = 0;
+    else
+	cor = (xy.mean() - (x.mean()*y.mean()))/ sqrt(v3);
+    
+    if (output != NULL)
+    {
+	if (output != &cout)   // save in output file
+	    *output 
+		<< ";; RMSE " << ftoString(sqrt(se.mean()),4,1)
+		<< " Correlation is " << ftoString(cor,4,1)
+		<< " Mean (abs) Error " << ftoString(e.mean(),4,1)
+		<< " (" << ftoString(e.stddev(),4,1) << ")" << endl;
+	
+	cout << "RMSE " << ftoString(sqrt(se.mean()),4,1)
+	    << " Correlation is " << ftoString(cor,4,1)
+	    << " Mean (abs) Error " << ftoString(e.mean(),4,1)
+	    << " (" << ftoString(e.stddev(),4,1) << ")" << endl;
+    }
+
+    if (wgn_opt_param == "rmse")
+	return -sqrt(se.mean());  // * -1 so bigger is better 
+    else
+	return cor;  // should really be % variance, I think
 }
 
 static float test_tree_cluster(WNode &tree,WDataSet &dataset,ostream *output)
@@ -422,8 +619,12 @@ static int wagon_split(int margin, WNode &node)
 	   q.get_score(),
 	   node.get_impurity().measure()); */
 
-    if ((q.get_score() < WGN_HUGE_VAL) &&
-	(q.get_score() < node.get_impurity().measure()))
+    double impurity_measure = node.get_impurity().measure();   
+    double question_score = q.get_score();       
+
+    if ((question_score < WGN_HUGE_VAL) && 
+        (question_score < impurity_measure))
+
     {
 	// Ok its worth a split
 	l = new WNode();
@@ -655,7 +856,7 @@ static float construct_float_ques(int feat,WQuestion &ques,WVectorVector &ds)
     // Find out a split of the range that gives the best score 
     // Naively does this by partitioning the range into float_range_split slots
     float tscore,bscore = WGN_HUGE_VAL;
-    int d;
+    int d, i;
     float p;
     WQuestion test_q;
     float max,min,val,incr;
@@ -677,7 +878,9 @@ static float construct_float_ques(int feat,WQuestion &ques,WVectorVector &ds)
 	return WGN_HUGE_VAL;
     incr = (max-min)/wgn_float_range_split;  
     // so do float_range-1 splits
-    for (p=min+incr; p <= max; p += incr )
+    /* We calculate this based on the number splits, not the increments, */
+    /* becuase incr can be so small it doesn't increment p */
+    for (i=0,p=min+incr; i < wgn_float_range_split; i++,p += incr )
     {
 	test_q.set_operand1(EST_Val(p));
 	tscore = wgn_score_question(test_q,ds);

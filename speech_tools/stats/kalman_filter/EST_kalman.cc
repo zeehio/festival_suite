@@ -37,9 +37,9 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <fstream>
 #include "EST.h"
 #include "EST_kalman.h"
 

@@ -135,7 +135,7 @@ enum EST_CoefficientType
   * D  = Number of levels of differentiation.
   * SE = Start=0 end=1
   */
-#define EST_CoefChannelId(CT,D,SE) ( (CT)<<3 | (D)<<1 & 6 | (SE)&1 )
+#define EST_CoefChannelId(CT,D,SE) ( (CT)<<3 | ((D)<<1 & 6) | ((SE)&1) )
 
 /** Build a number representing a channel type for a single value which can
   * N = count starting from 0
@@ -162,7 +162,7 @@ enum EST_CoefficientType
   * @see EST_Track
   * @see EST_TrackMap:example
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_ChannelType.h,v 1.3 2004/05/04 00:00:16 awb Exp $
+  * @version $Id: EST_ChannelType.h,v 1.4 2009/07/03 17:13:56 awb Exp $
   */
 
 enum EST_ChannelType {

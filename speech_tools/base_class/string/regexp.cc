@@ -32,10 +32,10 @@
  * precedence is structured in regular expressions.  Serious changes in
  * regular-expression syntax might require a total rethink.
  */
-#include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
 #include "regexp.h"
 #include "regmagic.h"
 

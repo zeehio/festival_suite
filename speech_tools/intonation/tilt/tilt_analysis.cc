@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_math.h"
 #include "EST_tilt.h"
 #include "tilt.h"

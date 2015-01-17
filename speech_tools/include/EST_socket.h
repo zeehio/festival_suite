@@ -39,6 +39,8 @@
  /*                                                                       */
  /*************************************************************************/
 
+#include "EST_system.h"
+
 #if defined(SYSTEM_IS_UNIX)
 #   include <sys/types.h>
 #   include <sys/socket.h>

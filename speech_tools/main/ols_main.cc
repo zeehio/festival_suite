@@ -36,10 +36,10 @@
 /*  Ordinary least squares                                               */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST_Wagon.h"
 #include "EST_multistats.h"
 #include "EST_cmd_line.h"
@@ -90,6 +90,7 @@ static int ols_main(int argc, char **argv)
     WDataSet dataset,test_dataset;
     EST_FMatrix coeffs;
     EST_FMatrix X,Y,Xtest,Ytest;
+    LISP ignores = NIL;
 
     parse_command_line
 	(argc, argv,
@@ -104,15 +105,27 @@ static int ols_main(int argc, char **argv)
 	 "-swlimit <float> {0.0}\n"+
 	 "                  Percentage necessary improvement for stepwise\n"+
 	 "-quiet            No summary\n"+
+	 "-o      <ofile>   \n"+
 	 "-output <ofile>   Output file for coefficients\n"+
-	 "-otype <string>   Output types: festival or raw\n",
+	 "-ignore <string>  Filename or bracket list of fields to ignore\n",
 	 files, al);
 
 
     if (al.present("-output"))
 	ofile = al.val("-output");
+    if (al.present("-o"))
+	ofile = al.val("-o");
 
     siod_init();
+
+    if (al.present("-ignore"))
+    {
+        EST_String ig = al.val("-ignore");
+        if (ig[0] == '(')
+            ignores = read_from_string(ig);
+        else
+            ignores = vload(ig,1);
+    }
 
     // Load in the data
     if (!al.present("-desc"))
@@ -121,7 +134,10 @@ static int ols_main(int argc, char **argv)
 	return -1;
     }
     else
-	dataset.load_description(al.val("-desc"),NIL);
+    {
+	dataset.load_description(al.val("-desc"),ignores);
+        dataset.ignore_non_numbers();
+    }
     if (!al.present("-data"))
     {
 	cerr << "ols: no data file specified\n";
@@ -131,7 +147,8 @@ static int ols_main(int argc, char **argv)
 	wgn_load_dataset(dataset,al.val("-data"));
     if (al.present("-test"))
     {
-	test_dataset.load_description(al.val("-desc"),NIL);
+	test_dataset.load_description(al.val("-desc"),ignores);
+        test_dataset.ignore_non_numbers();
 	wgn_load_dataset(test_dataset,al.val("-test"));
 	load_ols_data(Xtest,Ytest,test_dataset);
     }
@@ -145,12 +162,24 @@ static int ols_main(int argc, char **argv)
     {
 	EST_StrList names;
 	float swlimit = al.fval("-swlimit");
+        EST_IVector included;
+        int i;
 
 	names.append("Intercept");
-	for (int i=1; i < dataset.width(); i++)
+	for (i=1; i < dataset.width(); i++)
 	    names.append(dataset.feat_name(i));
 
-	if (!stepwise_ols(X,Y,names,swlimit,coeffs,Xtest,Ytest))
+        included.resize(X.num_columns());
+        included[0] = TRUE;  // always guarantee interceptor
+        for (i=1; i<included.length(); i++)
+        {
+            if (dataset.ignore(i) == TRUE)
+                included.a_no_check(i) = OLS_IGNORE;
+            else
+                included.a_no_check(i) = FALSE;
+        }
+
+	if (!stepwise_ols(X,Y,names,swlimit,coeffs,Xtest,Ytest,included))
 	{
 	    cerr << "OLS: failed stepwise ols" << endl;
 	    return -1;
@@ -158,7 +187,20 @@ static int ols_main(int argc, char **argv)
     }
     else if (al.present("-robust"))
     {
-	if (!robust_ols(X,Y,coeffs))
+        EST_IVector included;
+        int i;
+
+        included.resize(X.num_columns());
+        included[0] = TRUE;  // always guarantee interceptor
+        for (i=1; i<included.length(); i++)
+        {
+            if (dataset.ignore(i) == TRUE)
+                included.a_no_check(i) = OLS_IGNORE;
+            else
+                included.a_no_check(i) = TRUE;
+        }
+
+	if (!robust_ols(X,Y,included,coeffs))
 	{
 	    cerr << "OLS: failed robust ols" << endl;
 	    return -1;
@@ -204,7 +246,14 @@ static void load_ols_data(EST_FMatrix &X, EST_FMatrix &Y, WDataSet &d)
 	Y.a_no_check(n,0) = d(p)->get_flt_val(0);
 	X.a_no_check(n,0) = 1;
 	for (m=1; m < d.width(); m++)
-	    X.a_no_check(n,m) = d(p)->get_flt_val(m);
+        {
+            if (d.ignore(m))
+            {
+                X.a_no_check(n,m) = 0;
+            }
+            else
+                X.a_no_check(n,m) = d(p)->get_flt_val(m);
+        }
     }
 
 }

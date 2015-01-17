@@ -67,7 +67,12 @@ typedef EST_TList<WVector *> WVectorList;
 typedef EST_TVector<WVector *> WVectorVector;
 
 /* Different types of feature */
-enum wn_dtype {wndt_binary, wndt_float, wndt_cluster, wndt_class, wndt_ignore};
+enum wn_dtype {/* for predictees and predictors */
+               wndt_binary, wndt_float, wndt_class, 
+               /* for predictees only */
+               wndt_cluster, wndt_vector, wndt_matrix, wndt_trajectory,
+               /* for ignored features */
+               wndt_ignore};
 
 class WDataSet : public WVectorList {
   private:
@@ -77,6 +82,7 @@ class WDataSet : public WVectorList {
     EST_StrVector p_name;
   public:
     void load_description(const EST_String& descfname,LISP ignores);
+    void ignore_non_numbers();
 
     int ftype(const int &i) const {return p_type(i);}
     int ignore(int i) const {return p_ignore(i); }
@@ -123,7 +129,9 @@ class WQuestion {
     friend ostream& operator<<(ostream& s, const WQuestion &q);
 };
 
-enum wnim_type {wnim_unset, wnim_float, wnim_class, wnim_cluster};
+enum wnim_type {wnim_unset, wnim_float, wnim_class, 
+                wnim_cluster, wnim_vector, wnim_matrix,
+                wnim_trajectory};
 
 //  Impurity measure for cumulating impurities from set of data
 class WImpurity {
@@ -131,13 +139,38 @@ class WImpurity {
     wnim_type t;
     EST_SuffStats a;
     EST_DiscreteProbDistribution p;
-    EST_IList members;            // Maybe there should be a cluster class
 
     float cluster_impurity();
     float cluster_member_mean(int i);
+    float vector_impurity();
+    float trajectory_impurity();
   public:
-    WImpurity() { t=wnim_unset; a.reset(); }
+    EST_IList members;            // Maybe there should be a cluster class
+    EST_SuffStats **trajectory;
+    float score;
+    int l,width;
+
+    WImpurity() { t=wnim_unset; a.reset(); trajectory=0; l=0; width=0; }
+    ~WImpurity();
     WImpurity(const WVectorVector &ds);
+    void copy(const WImpurity &s) 
+    {
+        int i,j; 
+        t=s.t; a=s.a; p=s.p; members=s.members; l=s.l; width=s.width;
+        score = s.score;
+        if (s.trajectory)
+        {
+            trajectory = new EST_SuffStats *[l];
+            for (i=0; i<l; i++)
+            {
+                trajectory[i] = new EST_SuffStats[width];
+                for (j=0; j<width; j++)
+                    trajectory[i][j] = s.trajectory[i][j];
+            }
+        }
+    }
+    WImpurity &operator = (const WImpurity &a) { copy(a); return *this; }
+
     float measure(void);
     double samples(void);
     wnim_type type(void) const { return t;}
@@ -205,7 +238,9 @@ extern Discretes wgn_discretes;
 extern WDataSet wgn_dataset;
 extern WDataSet wgn_test_dataset;
 extern EST_FMatrix wgn_DistMatrix;
-extern EST_Track *wgn_UnitTracks;
+extern EST_Track wgn_VertexTrack;
+extern EST_Track wgn_UnitTrack;
+extern EST_Track wgn_VertexFeats;
 
 void wgn_load_datadescription(EST_String fname,LISP ignores);
 void wgn_load_dataset(WDataSet &ds,EST_String fname);
@@ -229,6 +264,7 @@ extern EST_String wgn_predictee_name;
 extern float wgn_float_range_split;
 extern float wgn_balance;
 extern EST_String wgn_opt_param;
+extern EST_String wgn_vertex_output;
 
 #define wgn_ques_feature(X) (get_c_string(car(X)))
 #define wgn_ques_oper_str(X) (get_c_string(car(cdr(X))))

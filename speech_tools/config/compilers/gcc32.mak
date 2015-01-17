@@ -40,7 +40,7 @@
 
 include $(EST)/config/compilers/gcc_defaults.mak
 
-COMPILER_DESC=gcc-3.2
+COMPILER_DESC=gcc-3.[23]
 
 ifndef GCC32
     GCC32 = gcc
@@ -49,7 +49,7 @@ endif
 CC= $(GCC32)
 CXX = g++
 
-WARN_CXXFLAGS  +=  -Wno-non-template-friend -Wno-deprecated
+WARN_CXXFLAGS  +=  -Wno-non-template-friend
 
 STATIC_LINKFLAGS = -Dstatic
 

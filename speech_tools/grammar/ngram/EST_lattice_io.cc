@@ -37,8 +37,8 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <fstream.h>
-#include <stdlib.h>
+#include <fstream>
+#include <cstdlib>
 #include "EST_lattice.h"
 #include "EST_types.h"
 #include "EST_Token.h"

@@ -111,6 +111,8 @@ public:
   static EST_write_status save_htk_fbank(SaveTrackFileArgs);
   static EST_read_status load_htk_fbank(LoadTrackFileArgs);
 
+  static EST_write_status save_htk_mfcc_e(SaveTrackFileArgs);
+
   static EST_write_status save_htk_mfcc(SaveTrackFileArgs);
   static EST_read_status load_htk_mfcc(LoadTrackFileArgs);
 

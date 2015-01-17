@@ -36,9 +36,9 @@
 /*                  EST_DMatrix Class auxiliary functions                */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_DMatrix.h"
-#include <limits.h>
+#include <climits>
 #include "EST_math.h"
 #include "EST_unix.h"
 

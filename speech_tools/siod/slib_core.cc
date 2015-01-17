@@ -8,7 +8,7 @@
  * System functions
 
 */
-#include <stdio.h>
+#include <cstdio>
 #include "siod.h"
 #include "siodp.h"
 
@@ -26,13 +26,20 @@ static LISP leval_setq(LISP args,LISP env)
 {return(setvar(car(args),leval(car(cdr(args)),env),env));}
 
 static LISP syntax_define(LISP args)
-{if SYMBOLP(car(args)) return(args);
- return(syntax_define(
-        cons(car(car(args)),
-	cons(cons(sym_lambda,
-	     cons(cdr(car(args)),
-		  cdr(args))),
-	     NIL))));}
+{
+    if SYMBOLP(car(args)) 
+                  return(args);
+    else
+    {
+        need_n_cells(4);
+        return(syntax_define(
+                             cons(car(car(args)),
+                             cons(cons(sym_lambda,
+                             cons(cdr(car(args)),
+                                  cdr(args))),
+                                  NIL))));
+    }
+}
       
 static LISP leval_define(LISP args,LISP env)
 {LISP tmp,var,val;
@@ -76,9 +83,16 @@ static LISP leval_lambda(LISP args,LISP env)
 static LISP leval_progn(LISP *pform,LISP *penv)
 {LISP env,l,next;
  env = *penv;
+ gc_protect(&env);
  l = cdr(*pform);
  next = cdr(l);
- while(NNULLP(next)) {leval(car(l),env);l=next;next=cdr(next);}
+ while (NNULLP(next)) 
+ {
+     leval(car(l),env);
+     l=next;
+     next=cdr(next);
+ }
+ gc_unprotect(&env);
  *pform = car(l); 
  return(truth);}
 
@@ -233,6 +247,7 @@ static LISP l_unwind_protect(LISP args, LISP env)
 
     if (setjmp(*est_errjmp) != 0)
     {
+	wfree(est_errjmp);
 	est_errjmp = local_errjmp;
 	errjmp_ok = local_errjmp_ok;
 	siod_reset_prompt();
@@ -245,6 +260,7 @@ static LISP l_unwind_protect(LISP args, LISP env)
     else
     {
 	r = leval(car(args),env);
+	wfree(est_errjmp);
 	est_errjmp = local_errjmp;
 	errjmp_ok = local_errjmp_ok;
     }

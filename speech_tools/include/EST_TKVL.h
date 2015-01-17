@@ -39,7 +39,10 @@
 #ifndef __EST_TKVL_H__
 #define __EST_TKVL_H__
 
-#include <math.h>
+#include <cmath>
+
+using namespace std;
+
 #include "EST_TList.h"
 #include "instantiate/EST_TKVLI.h"
 #include "EST_TIterator.h"
@@ -58,7 +61,8 @@ template<class K, class V> class EST_TKVI {
 	return( (i.k == k) && (i.v == v) );
     }
 
-    friend  ostream& operator << (ostream& s, EST_TKVI<K,V> const &i);
+    friend  ostream& operator << (ostream& s, EST_TKVI<K,V> const &i)
+        {  return s << i.k << "\t" << i.v << "\n"; }
 };
 
 
@@ -143,7 +147,12 @@ template<class K, class V> class EST_TKVL {
     /// apply function to each pair
     void map(void (*func)(K&, V&));
     
-    friend ostream& operator << (ostream& s, EST_TKVL<K,V> const &kv);
+    friend ostream& operator << (ostream& s, EST_TKVL<K,V> const &l)
+    {EST_Litem *p; 
+        for (p = l.list.head(); p ; p = next(p)) 
+            s << l.list(p).k << "\t" << l.list(p).v << endl; 
+        return s;
+    } 
     
     /// full copy of KV list.
     EST_TKVL<K, V> & operator =  (const EST_TKVL<K,V> &kv);
@@ -191,11 +200,5 @@ public:
   typedef EST_TRwIterator< EST_TKVL<K, V>, IPointer_k, KeyEntry> KeyRwEntries;
 
 };
-
-template<class K, class V>
-extern ostream& operator << (ostream& s, EST_TKVI<K,V> const &i);
-
-template<class K, class V>
-extern ostream& operator << (ostream& s,  EST_TKVL<K,V> const &l);
 
 #endif				// __KVL_H__

@@ -91,28 +91,25 @@ void synthesize_rf_event(EST_Track &fz, EST_Features &ev, float peak_f0)
 
 void fill_connection_values(EST_Track &fz, float start_f0, float start_pos,
 		 float end_f0, float end_pos)
-
 {
-    float f_shift, a, m;
+    float f_shift, m;
     int j;
-
     f_shift = fz.shift();
-
     if ((end_pos - start_pos) == 0)
 	m = 0.0;
     else
 	m = (end_f0 - start_f0) / (end_pos - start_pos);
-
-    for (j = 0; j < fz.num_frames(); ++j)
-    {
-	fz.a(j) = (m * (float) j * f_shift) + start_f0;
-	fz.set_value(j);
-    }
-    // hack to fill final values because of timing rounding errors
-    a = fz.a(j -1);
-    for (; j < fz.num_frames(); ++j)
-	fz.a(j) = a;
-
+	for (j = 0; j < fz.num_frames()-1; ++j)
+	{
+		fz.a(j) = (m * (float) j * f_shift) + start_f0;
+		fz.set_value(j);
+	}
+	fz.a(fz.num_frames()-1) = end_f0;
+	fz.set_value(fz.num_frames()-1);
+		// hack to fill final values because of timing rounding errors
+    //a = fz.a(j -1);  // I Think this is ezafi
+    //for (; j < fz.num_frames(); ++j)
+	//fz.a(j) = a;
 }
 
 
@@ -125,7 +122,7 @@ void rfc_synthesis(EST_Track &fz, EST_Relation &ev, float f_shift, int no_conn)
     float end_pos, end_f0;
     int n;
 
-    if (event_item(*ev.tail()))
+    if (event_item(*ev.tail())) 
 	n = (int)(ceil((ev.tail()->F("time") + 
 			ev.tail()->F("rfc.fall_dur",0)) / f_shift)) + 1;
     else
@@ -148,9 +145,14 @@ void rfc_synthesis(EST_Track &fz, EST_Relation &ev, float f_shift, int no_conn)
 	    start_pos = e->F("time") - e->F("rfc.rise_dur");
 	    end_pos = e->F("time") + e->F("rfc.fall_dur");
 
-	    start_index = (int) floor(start_pos / f_shift); 
-	    end_index = (int) ceil(end_pos / f_shift); 
-
+	   	if ((start_pos / f_shift-(int)start_pos / f_shift)>.5)
+			start_index=int(start_pos / f_shift+1);
+		else
+			start_index = (int) start_pos / f_shift;	
+		if(end_pos / f_shift-(int)end_pos / f_shift>.5)
+			end_index = int( end_pos / f_shift+1); 
+		else
+			end_index = (int) end_pos / f_shift; 
 //	    cout << "a: " << fz.equal_space() << endl;
 
 	    fz.sub_track(sub, start_index, (end_index - start_index) + 1, 
@@ -182,13 +184,20 @@ void rfc_synthesis(EST_Track &fz, EST_Relation &ev, float f_shift, int no_conn)
 	end_f0 = nn->F("ev.f0") - nn->F("rfc.rise_amp", 0.0);
 	end_pos = nn->F("time") - nn->F("rfc.rise_dur", 0.0);
 
-	start_index = (int) floor(start_pos / f_shift); 
-	end_index = (int) ceil(end_pos / f_shift); 
+	if ((start_pos / f_shift-(int)start_pos / f_shift)>.5)
+		start_index=int(start_pos / f_shift+1);
+	else
+		start_index = (int) start_pos / f_shift; 
+	if(end_pos / f_shift-(int)end_pos / f_shift>.5)
+		end_index = int( end_pos / f_shift+1); 
+	else
+		end_index = (int) end_pos / f_shift; 
+
 
 	if (start_index >= end_index) // no connection needed
 	    continue;
 
-	fz.sub_track(sub, start_index, end_index - start_index +1, 0, EST_ALL);
+	fz.sub_track(sub, start_index, end_index - start_index+1 , 0, EST_ALL); 
 
 	fill_connection_values(sub, start_f0, start_pos, end_f0, end_pos);
     }

@@ -36,11 +36,11 @@
 /*  Run a WFST on some data, either as a recognizer or as a transducer   */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST.h"
 #include "EST_simplestats.h"
 #include "EST_WFST.h"
@@ -213,7 +213,7 @@ static int wfst_run_main(int argc, char **argv)
 	   (int)R.samples(),R.mean()*100,(1-R.mean())*100);
     if (al.present("-perplexity"))
     {
-	printf("perplexity is %f\n", pow(2.0,(-1 * (sumlogp/count))));
+      printf("perplexity is %f\n", pow(float(2.0),float(-1.0 * (sumlogp/count))));
     }
 
     if (ofd != stdout)

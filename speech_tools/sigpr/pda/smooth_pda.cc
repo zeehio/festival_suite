@@ -35,10 +35,10 @@
 /*-----------------------------------------------------------------------*/
 /*                    Smooth F0 contours                                 */
 /*=======================================================================*/
-/*#include <math.h>
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>*/
+/*#include <cmath>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>*/
 //#include "sigpr/EST_pda.h"
 #include "EST_Track.h"
 #include "EST_Features.h"

@@ -75,7 +75,7 @@ Java_cstr_est_Utterance_create_1cpp_1utterance(JNIEnv *env, jobject self)
 {
   EST_Utterance *utterance = new EST_Utterance;
 
-  // printf("create utterance %x\n", utterance);
+  // printf("create utterance %p\n", utterance);
 
   env->SetLongField(self, handle_field, (jlong)utterance);
 
@@ -87,7 +87,7 @@ Java_cstr_est_Utterance_destroy_1cpp_1utterance (JNIEnv *env, jobject self)
 {
   EST_Utterance *utterance = (EST_Utterance *) env->GetLongField(self, handle_field);
 
-  // printf("destroy utterance  %x\n", utterance);
+  // printf("destroy utterance  %p\n", utterance);
 
   if (utterance)
     delete utterance;

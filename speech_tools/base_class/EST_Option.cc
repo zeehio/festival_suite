@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_Option.h"
 #include "EST_io_aux.h"
 #include "EST_Token.h"

@@ -39,7 +39,10 @@
  ###########################################################################
 
 CC=gcc
-CXX =gcc
+CXX=gcc
+ifeq ($(OSTYPE),Darwin)
+CXX=g++
+endif
 
 COMPILER_DESC=FSF gcc
 COMPILER_VERSION_COMMAND=$(CXX) -v 2>&1 | tail -1 | sed -e 's/^....//'
@@ -73,9 +76,9 @@ PROFILE_gprof_CCFLAGS   = -pg
 PROFILE_gprof_CXXFLAGS  = -pg
 PROFILE_gprof_LINKFLAGS = -pg
 
-SHARED_CCFLAGS  = -fPIC -fno-shared-data
-SHARED_CXXFLAGS  = -fPIC -fno-shared-data
-SHARED_LINKFLAGS = -fno-shared-data
+SHARED_CCFLAGS  = -fPIC 
+SHARED_CXXFLAGS  = -fPIC 
+SHARED_LINKFLAGS = 
 
 ifndef GCC_MAKE_SHARED_LIB
     MAKE_SHARED_LIB = $(CXX) -shared -fno-shared-data -o XXX

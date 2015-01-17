@@ -37,9 +37,9 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <fstream.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include "rxp/XML_Parser.h"
 
 #if defined(DATAC)

@@ -43,17 +43,61 @@
 /*     Apple Computer, Inc.                                               */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdio.h>
-#include <stdlib.h> 
+#include <cstdio>
+#include <cstdlib> 
 #include "EST_unix.h"
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 #include "EST_wave_utils.h"
 #include "EST_wave_aux.h"
 #include "EST_error.h"
 
 static short st_ulaw_to_short(unsigned char ulawbyte);
 static unsigned char st_short_to_ulaw(short sample);
+
+/*
+ * This table is 
+ * Copyright 1992 by Jutta Degener and Carsten Bormann, Technische
+ * Universitaet Berlin.  See the accompanying file "COPYRIGHT" for
+ * details.  THERE IS ABSOLUTELY NO WARRANTY FOR THIS SOFTWARE.
+ * take from speak_freely-7.2/gsm/src/toast_alaw.c
+ */
+static unsigned short a2s[] = {
+         5120,60160,  320,65200,20480,44032, 1280,64192,
+         2560,62848,   64,65456,10240,54784,  640,64864,
+         7168,58112,  448,65072,28672,35840, 1792,63680,
+         3584,61824,  192,65328,14336,50688,  896,64608,
+         4096,61184,  256,65264,16384,48128, 1024,64448,
+         2048,63360,    0,65520, 8192,56832,  512,64992,
+         6144,59136,  384,65136,24576,39936, 1536,63936,
+         3072,62336,  128,65392,12288,52736,  768,64736,
+         5632,59648,  352,65168,22528,41984, 1408,64064,
+         2816,62592,   96,65424,11264,53760,  704,64800,
+         7680,57600,  480,65040,30720,33792, 1920,63552,
+         3840,61568,  224,65296,15360,49664,  960,64544,
+         4608,60672,  288,65232,18432,46080, 1152,64320,
+         2304,63104,   32,65488, 9216,55808,  576,64928,
+         6656,58624,  416,65104,26624,37888, 1664,63808,
+         3328,62080,  160,65360,13312,51712,  832,64672,
+         5376,59904,  336,65184,21504,43008, 1344,64128,
+         2688,62720,   80,65440,10752,54272,  672,64832,
+         7424,57856,  464,65056,29696,34816, 1856,63616,
+         3712,61696,  208,65312,14848,50176,  928,64576,
+         4352,60928,  272,65248,17408,47104, 1088,64384,
+         2176,63232,   16,65504, 8704,56320,  544,64960,
+         6400,58880,  400,65120,25600,38912, 1600,63872,
+         3200,62208,  144,65376,12800,52224,  800,64704,
+         5888,59392,  368,65152,23552,40960, 1472,64000,
+         2944,62464,  112,65408,11776,53248,  736,64768,
+         7936,57344,  496,65024,31744,32768, 1984,63488,
+         3968,61440,  240,65280,15872,49152,  992,64512,
+         4864,60416,  304,65216,19456,45056, 1216,64256,
+         2432,62976,   48,65472, 9728,55296,  608,64896,
+         6912,58368,  432,65088,27648,36864, 1728,63744,
+         3456,61952,  176,65344,13824,51200,  864,64640
+};
+
+#define st_alaw_to_short(a) (a2s[(unsigned char)a])
 
 void ulaw_to_short(const unsigned char *ulaw,short *data,int length)
 {
@@ -63,6 +107,17 @@ void ulaw_to_short(const unsigned char *ulaw,short *data,int length)
     for (i=0; i<length; i++)
 	data[i] = st_ulaw_to_short(ulaw[i]);  /* ulaw convert */
     
+}
+
+void alaw_to_short(const unsigned char *alaw,short *data,int length)
+{
+    /* Convert ulaw to shorts */
+    int i;
+
+    for (i=0; i<length; i++)
+    {
+	data[i] = st_alaw_to_short(alaw[i])-32768;  /* alaw convert */
+    }
 }
 
 void shorten_to_short(unsigned char *ulaw, short *data, int length)
@@ -165,6 +220,13 @@ short *convert_raw_data(unsigned char *file_data,int data_length,
     {
 	d = walloc(short,data_length);
 	ulaw_to_short(file_data,d,data_length);
+	wfree(file_data);
+	return d;
+    }
+    else if (sample_type == st_alaw)
+    {
+	d = walloc(short,data_length);
+	alaw_to_short(file_data,d,data_length);
 	wfree(file_data);
 	return d;
     }

@@ -41,7 +41,7 @@
 #ifndef __EST_BOOL_H__
 #define __EST_BOOL_H__
 
-#ifdef __GNUC__
+#if defined(__GNUC__) ||  defined(SYSTEM_IS_WIN32)
 
   /* GCC seems to be so very fond of bool -- it's built into
    * the compiler and it chokes on my definition.
@@ -62,7 +62,7 @@ extern "C" {
 }
 #endif
 
-#else
+#else /* __GNUC__ */
 
   /* For a boring type we still #define everything for code
    * which uses ifdef to see if bool is defined.
@@ -98,7 +98,7 @@ extern "C" {
 #define FALSE BoolType(0)
 #define bool BoolType
 
-#else
+#else /* 0 */
 
 /* Because SunCC is stupid we pretend we can't do better than we */
 /* could with C.                                                 */

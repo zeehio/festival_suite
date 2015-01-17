@@ -40,9 +40,9 @@
  /*************************************************************************/
 
 
-#include <stdlib.h>
-#include <fstream.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include "EST_Handleable.h"
 #include "EST_THandle.h"
 #include "EST_TBox.h"

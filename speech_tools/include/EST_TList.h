@@ -43,7 +43,10 @@
 #ifndef __Tlist_H__
 #define __Tlist_H__
 
-#include <iostream.h>
+#include <iostream>
+
+using namespace std;
+
 #include "EST_common.h"
 #include "EST_UList.h"
 #include "EST_TSortable.h"
@@ -60,9 +63,11 @@ private:
   static void *operator new(size_t not_used, void *place)
     {(void)not_used; return place;}
   static void *operator new(size_t size)
-    {return malloc(size);} 
+    {void *p;
+    p = (void *)walloc(char,size);
+     return p;} 
   static void operator delete(void *p)
-    {free(p);}
+    { wfree(p);}
 
   static EST_TItem *s_free;
   static unsigned int s_nfree;
@@ -223,7 +228,12 @@ template <class T> class EST_TList : public EST_UList
     EST_TList<T> &operator +=(const EST_TList<T> &a);
 
   /// print list
-    friend ostream& operator << (ostream &st, EST_TList<T> const &list);
+    friend ostream& operator << (ostream &st, EST_TList<T> const &list) {
+        EST_Litem *ptr; 
+        for (ptr = list.head(); ptr != 0; ptr = next(ptr)) 
+            st << list.item(ptr) << " "; 
+        return st;
+    }
 
   /// remove all items in list
     void clear(void) 
@@ -250,9 +260,6 @@ public:
 
 };
 
-
-template<class T> 
-extern ostream& operator << (ostream &st, EST_TList< T > const &list);
 
 template<class T> 
 bool operator==(const EST_TList<T> &a, const EST_TList<T> &b)

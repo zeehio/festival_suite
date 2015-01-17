@@ -40,18 +40,32 @@
 /*                                                                       */
 /*************************************************************************/
 
+%{
+#if PY_VERSION_HEX < 0x02050000 && !defined(PY_SSIZE_T_MIN)
+typedef int Py_ssize_t;
+#define PY_SSIZE_T_MAX INT_MAX
+#define PY_SSIZE_T_MIN INT_MIN
+#endif
+%}
+
 %typemap(in) EST_String & (EST_String temp) {
-  char *str; int len;
+  char *str; Py_ssize_t len;
   PyString_AsStringAndSize($input, &str, &len);
   temp = EST_String( str, len, 0, len );
   $1 = &temp;
 }
 
+/* new - need typechecking for overloaded function dispatcher */
+%typemap(typecheck) EST_String& = char *;
+
 %typemap(in) EST_String {
-  char *str; int len;
+  char *str; Py_ssize_t len;
   PyString_AsStringAndSize($input, &str, &len);
   $1 = EST_String( str, len, 0, len );
 }
+/* new - need typechecking for overloaded function dispatcher */
+%typemap(typecheck) EST_String = char *;
+
 
 %typemap(out) EST_String {
    int len = $1.length();
@@ -231,3 +245,6 @@
   }
 }
 #endif
+
+
+

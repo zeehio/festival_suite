@@ -38,12 +38,12 @@
 /* EST_TokenStream for strings, FILE *, files, pipes etc                 */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdio.h>
-#include <iostream.h>
+#include <cstdio>
+#include <iostream>
 #include "EST_unix.h"
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
+#include <cstdlib>
+#include <climits>
+#include <cstring>
 #include "EST_math.h"
 #include "EST_Token.h"
 #include "EST_string_aux.h"
@@ -554,23 +554,25 @@ EST_Token EST_TokenStream::get_upto_eoln(void)
 
 EST_Token &EST_TokenStream::must_get(EST_String expected, bool *ok)
 {
-  EST_Token &tok = get();
+    EST_Token &tok = get();
 
-  if (tok != expected)
+    if (tok != expected)
+    {
+        if (ok != NULL)
+        {
+            *ok=FALSE;
+            return tok;
+        }
+        else
+            EST_error("Expected '%s' got '%s' at %s", 
+                      (const char *)expected, 
+                      (const char *)(EST_String)tok,
+                      (const char *)pos_description());
+    }
+
     if (ok != NULL)
-      {
-	*ok=FALSE;
-	return tok;
-      }
-  else
-    EST_error("Expected '%s' got '%s' at %s", 
-	      (const char *)expected, 
-	      (const char *)(EST_String)tok,
-	      (const char *)pos_description());
-
-  if (ok != NULL)
-    *ok=TRUE;
-  return tok;
+        *ok=TRUE;
+    return tok;
 }
 
 void EST_TokenStream::build_table()

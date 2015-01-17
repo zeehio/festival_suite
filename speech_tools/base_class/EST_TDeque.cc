@@ -100,12 +100,6 @@ ostream &EST_TDeque<T>::print(ostream &s) const
 }
 
 template <class T>
-ostream& operator << (ostream &st, const EST_TDeque< T > &deq)
-{
-  return deq.print(st);
-}
-
-template <class T>
 void EST_TDeque<T>::expand()
 {
   EST_TVector<T> tmp(p_vector);

@@ -36,9 +36,9 @@
 /*                    Pitchmarking program                               */
 /*************************************************************************/
 
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
 #include "EST_unix.h"
 #include "EST_cmd_line_options.h"
 #include "EST_cmd_line.h"

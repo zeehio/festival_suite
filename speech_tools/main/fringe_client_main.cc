@@ -37,7 +37,7 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_unix.h"
 #include "EST_error.h"
 #include "EST_ServiceTable.h"

@@ -38,7 +38,7 @@
 /** Instantiate rules for matrix template.
   * 
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TMatrixI.h,v 1.2 2001/04/04 13:11:27 awb Exp $
+  * @version $Id: EST_TMatrixI.h,v 1.3 2006/07/19 21:52:12 awb Exp $
   */
 
 
@@ -47,9 +47,7 @@
 // Instantiation Macros
 
 #define Instantiate_TMatrix(TYPE) \
-	template class EST_TMatrix< TYPE >; \
-	\
-	ostream& operator << (ostream &st, const EST_TMatrix< TYPE > &a) {int i, j; for (i = 0; i < a.num_rows(); ++i) {for (j = 0; j < a.num_columns(); ++j) st << a.a_no_check(i, j) << " "; st << endl;} return st;}
+	template class EST_TMatrix< TYPE >;
 
 #define Declare_TMatrix_T(TYPE,TAG)
 #define Declare_TMatrix_Base_T(TYPE,DEFAULT,ERROR,TAG)

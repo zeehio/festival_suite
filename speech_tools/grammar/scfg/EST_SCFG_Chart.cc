@@ -37,7 +37,7 @@
 /* A SCFG chart parser                                                   */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "siod.h"
 #include "EST_math.h"
 #include "EST_SCFG.h"

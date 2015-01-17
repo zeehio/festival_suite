@@ -34,7 +34,9 @@
 #ifndef __EST_TRACKMAP_H__
 #define __EST_TRACKMAP_H__
 
-#include <limits.h>
+#include <climits>
+using namespace std;
+
 #include "EST_TNamedEnum.h"
 #include "EST_ChannelType.h"
 #include "EST_Handleable.h"
@@ -55,7 +57,7 @@
   * @see EST_ChannelType
   * @see EST_TrackMap:example
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TrackMap.h,v 1.3 2004/05/04 00:00:16 awb Exp $
+  * @version $Id: EST_TrackMap.h,v 1.4 2004/09/29 08:24:17 robert Exp $
   */
 class EST_TrackMap : public EST_Handleable
 {

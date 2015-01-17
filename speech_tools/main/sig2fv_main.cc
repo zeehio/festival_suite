@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_speech_class.h"
 #include "EST_string_aux.h"
 #include "EST_cmd_line.h"

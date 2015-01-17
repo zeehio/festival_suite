@@ -39,8 +39,8 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include "EST_String.h"
 #include "EST_Token.h"
 #include "EST_THash.h"

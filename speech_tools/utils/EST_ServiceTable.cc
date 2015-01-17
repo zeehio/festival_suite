@@ -36,15 +36,18 @@
  /* Table of known services.                                              */
  /*                                                                       */
  /*************************************************************************/
-#include <stdlib.h>
+#include <cstdlib>
+#include <iomanip>
+#include <iostream>
+#include <ctime>
+
+using namespace std;
+
 #include "EST_Pathname.h"
 #include "EST_socket.h"
 #include "EST_error.h"
 #include "EST_Token.h"
 #include "EST_ServiceTable.h"
-#include <iomanip.h>
-#include <iostream.h>
-#include <time.h>
 
 #if defined(SYSTEM_IS_WIN32)
 #    define seed_random() srand((unsigned)time(NULL))
@@ -81,11 +84,6 @@ void EST_ServiceTable::init_random(void)
 bool operator == (const EST_ServiceTable::Entry &a, const EST_ServiceTable::Entry &b)
 {
   return &a == &b;
-}
-
-ostream & operator << (ostream &s, const EST_ServiceTable::Entry &a)
-{
-  return s << (EST_String)a;
 }
 
 EST_ServiceTable::Entry::Entry()
@@ -265,8 +263,7 @@ void EST_ServiceTable::list(ostream &s, const EST_String type)
       s << buff;
       sprintf(buff,"%20s",(const char *)entry.address);
       s << buff;
-      sprintf(buff,"%5s\n",(const char *)entry.port);
-      s << buff;
+      s << entry.port << "\n";
     }
 
   // s.flags(old);

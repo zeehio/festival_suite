@@ -38,7 +38,7 @@
 /** Instantiate rules for vector template.
   * 
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TVectorI.h,v 1.3 2004/05/04 00:00:17 awb Exp $
+  * @version $Id: EST_TVectorI.h,v 1.4 2006/07/19 21:52:12 awb Exp $
   */
 
 
@@ -50,11 +50,7 @@
 	template class EST_TVector< TYPE >;
 
 #define Instantiate_TVector_T(TYPE,TAG) \
-        Instantiate_TVector_T_MIN(TYPE,TAG) \
-	\
-	ostream& operator << (ostream &st, const EST_TVector< TYPE > &a) \
-	{int i; for (i = 0; i < a.n(); ++i) st << a(i) << " "; st << endl; return st;}
-	
+        Instantiate_TVector_T_MIN(TYPE,TAG)
 
 #define Instantiate_TVector(TYPE) Instantiate_TVector_T(TYPE,TYPE)
 

@@ -36,8 +36,8 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <iostream>
 #include "EST_bool.h"
 #include "EST_TList.h"
 #include "EST_String.h"

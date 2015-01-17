@@ -42,10 +42,10 @@ AC_CHECK_TOOL(AR, ar)
 
 AC_C_BIGENDIAN
 
-AC_CHECK_LIB(termcap, tputs, [TERMCAPLIB=-ltermcap], [TERMCAPLIB=-lncurses])
-if test "$TERMCAPLIB" != "-ltermcap"; then
-	AC_CHECK_LIB(ncurses, tputs, [TERMCAPLIB=-lncurses], [TERMCAPLIB=-lcurses])
-fi
+AC_CHECK_LIB(ncurses, tputs, [TERMCAPLIB=-lncurses], [TERMCAPLIB=-lcurses])
+dnl if test "$TERMCAPLIB" != "-ltermcap"; then
+dnl    AC_CHECK_LIB(termcap, tputs, [TERMCAPLIB=-ltermcap], [TERMCAPLIB=-lncurses])
+dnl 
 AC_SUBST(TERMCAPLIB)
 
 dnl Which version of GCC do we have here
@@ -81,5 +81,14 @@ AC_TRY_COMPILE([#include <stdio.h>],
                 #endif ],
                [COMPILERTYPE=gcc28])
 AC_SUBST(COMPILERTYPE)
+
+LINUXAUDIO=none
+AC_TRY_COMPILE([#include <alsa/version.h>],
+               [int j=
+                #if SND_LIB_SUBMINOR >= 11
+                3;
+                #endif],
+              [LINUXAUDIO="alsa"])
+AC_SUBST(LINUXAUDIO)
 
 AC_OUTPUT(config/config)

@@ -36,7 +36,7 @@
 /*           Class to represent ints, floats and strings                 */
 /*                   and other arbitrary objects                         */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_Val.h"
 #include "EST_string_aux.h"
 

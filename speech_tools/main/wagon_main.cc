@@ -2,7 +2,7 @@
 /*                                                                       */
 /*                Centre for Speech Technology Research                  */
 /*                     University of Edinburgh, UK                       */
-/*                      Copyright (c) 1996,1997                          */
+/*                     Copyright (c) 1996-2006                           */
 /*                        All Rights Reserved.                           */
 /*                                                                       */
 /*  Permission is hereby granted, free of charge, to use and distribute  */
@@ -39,11 +39,13 @@
 /*                                                                       */
 /*  Added decision list support, Feb 1997                                */
 /*                                                                       */
+/*  Added vector support for Clustergen 2005/2006                        */
+/*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST_Wagon.h"
 #include "EST_cmd_line.h"
 
@@ -111,6 +113,54 @@ int main(int argc, char **argv)
     return 0;
 }
 
+static int set_Vertex_Feats(EST_Track &wgn_VertexFeats,
+                            EST_String &wagon_track_features)
+{
+    int i,s=0,e;
+    EST_TokenStream ts;
+
+    for (i=0; i<wgn_VertexFeats.num_channels(); i++)
+        wgn_VertexFeats.a(0,i) = 0.0;
+
+    ts.open_string(wagon_track_features);
+    ts.set_WhiteSpaceChars(",- ");
+    ts.set_PunctuationSymbols("");
+    ts.set_PrePunctuationSymbols("");
+    ts.set_SingleCharSymbols("");
+
+    while (!ts.eof())
+    {
+        EST_Token &token = ts.get();
+        const EST_String ws = (const char *)token.whitespace();
+        if (token == "all")
+        {
+            for (i=0; i<wgn_VertexFeats.num_channels(); i++)
+                wgn_VertexFeats.a(0,i) = 1.0;
+            break;
+        } else if ((ws == ",") || (ws == ""))
+        {
+            s = atoi(token.string());
+            wgn_VertexFeats.a(0,s) = 1.0;
+        } else if (ws == "-")
+        {
+            if (token == "")
+                e = wgn_VertexFeats.num_channels()-1;
+            else
+                e = atoi(token.string());
+            for (i=s; i<=e && i<wgn_VertexFeats.num_channels(); i++)
+                wgn_VertexFeats.a(0,i) = 1.0;
+        } else
+        {
+            printf("wagon: track_feats invalid: %s at position %d\n",
+                   (const char *)wagon_track_features,
+                   ts.filepos());
+            exit(-1);
+        }
+    }
+
+    return 0;
+}
+
 static int wagon_main(int argc, char **argv)
 {
     // Top level function sets up data and creates a tree
@@ -119,6 +169,8 @@ static int wagon_main(int argc, char **argv)
     EST_String wgn_oname;
     ostream *wgn_coutput = 0;
     float stepwise_limit = 0;
+    int feats_start=0, feats_end=0;
+    int i;
 
     parse_command_line
 	(argc, argv,
@@ -136,8 +188,17 @@ static int wagon_main(int argc, char **argv)
 	 "-o <ofile>        File to save output tree in\n"+
 	 "-distmatrix <ifile>\n"+
 	 "                  A distance matrix for clustering\n"+
-	 "-unittracks <ifile>\n"+
-         "                  dir with unit tracks in it\n"+
+	 "-track <ifile>\n"+
+         "                  track for vertex indices\n"+
+	 "-track_start <int>\n"+
+         "                  start channel vertex indices\n"+
+	 "-track_end <int>\n"+
+         "                  end (inclusive) channel for vertex indices\n"+
+	 "-track_feats <string>\n"+
+         "                  Track features to use, comma separated list\n"+
+         "                  with feature numbers and/or ranges, 0 start\n"+
+	 "-unittrack <ifile>\n"+
+         "                  track for unit start and length in vertex track\n"+
 	 "-quiet            No questions printed during building\n"+
 	 "-verbose          Lost of information printing during build\n"+
 	 "-predictee <string>\n"+
@@ -148,7 +209,8 @@ static int wagon_main(int argc, char **argv)
 	 "                  Name of field containing count weight for samples\n"+
 	 "-stepwise         Incrementally find best features\n"+
 	 "-swlimit <float> {0.0}\n"+
-	 "                  Percentage necessary improvement for stepwise\n"+
+	 "                  Percentage necessary improvement for stepwise,\n"+
+	 "                  may be negative.\n"+
 	 "-swopt <string>   Parameter to optimize for stepwise, for \n"+
 	 "                  classification options are correct or entropy\n"+
 	 "                  for regression options are rmse or correlation\n"+
@@ -156,6 +218,7 @@ static int wagon_main(int argc, char **argv)
 	 "-balance <float>  For derived stop size, if dataset at node, divided\n"+
 	 "                  by balance is greater than stop it is used as stop\n"+
 	 "                  if balance is 0 (default) always use stop as is.\n"+
+         "-vertex_output <string> Output <mean> or <best> of cluster\n"+
 	 "-held_out <int>   Percent to hold out for pruning\n"+
 	 "-heap <int> {210000}\n"+
 	 "              Set size of Lisp heap, should not normally need\n"+
@@ -193,6 +256,8 @@ static int wagon_main(int argc, char **argv)
 	wgn_float_range_split = atof(al.val("-frs"));
     if (al.present("-swopt"))
 	wgn_opt_param = al.val("-swopt");
+    if (al.present("-vertex_output"))
+	wgn_vertex_output = al.val("-vertex_output");
     if (al.present("-output") || al.present("-o"))
     {
 	if (al.present("-o"))
@@ -244,17 +309,61 @@ static int wagon_main(int argc, char **argv)
 	cerr << "wagon: distance matrix is smaller than number of training elements\n";
 	exit(-1);
     }
-    else if (al.present("-unittracks"))
+    else if (al.present("-track"))
     {
-	// This wont do when the list is pruned
-	int i;
-	wgn_UnitTracks = new EST_Track[wgn_dataset.length()];
-	for (i=0; i<wgn_dataset.length(); i++)
-	{
-	    char num[1024];
-	    sprintf(num,"%d",i);
-	    wgn_UnitTracks[i].load((al.val("-unittracks"))+"/"+num+".unit");
-	}
+        wgn_VertexTrack.load(al.val("-track"));
+        wgn_VertexFeats.resize(1,wgn_VertexTrack.num_channels());
+        for (i=0; i<wgn_VertexFeats.num_channels(); i++)
+            wgn_VertexFeats.a(0,i) = 1.0;
+    }
+
+    if (al.present("-track_start"))
+    {
+        feats_start = al.ival("-track_start");
+        if ((feats_start < 0) ||
+            (feats_start > wgn_VertexTrack.num_channels()))
+        {
+            printf("wagon: track_start invalid: %d out of %d channels\n",
+                   feats_start,
+                   wgn_VertexTrack.num_channels());
+            exit(-1);
+        }
+        for (i=0; i<feats_start; i++)
+            wgn_VertexFeats.a(0,i) = 0.0; /* don't do feats up to start */
+            
+    }
+
+    if (al.present("-track_end"))
+    {
+        feats_end = al.ival("-track_end");
+        if ((feats_end < feats_start) ||
+            (feats_end > wgn_VertexTrack.num_channels()))
+        {
+            printf("wagon: track_end invalid: %d between start %d out of %d channels\n",
+                   feats_end,
+                   feats_start,
+                   wgn_VertexTrack.num_channels());
+            exit(-1);
+        }
+        for (i=feats_end+1; i<wgn_VertexTrack.num_channels(); i++)
+            wgn_VertexFeats.a(0,i) = 0.0; /* don't do feats after end */
+    }
+    if (al.present("-track_feats"))
+    {   /* overrides start and end numbers */
+        EST_String wagon_track_features = al.val("-track_feats");
+        set_Vertex_Feats(wgn_VertexFeats,wagon_track_features);
+    }
+
+    //    printf("Track feats\n");
+    //    for (i=0; i<wgn_VertexTrack.num_channels(); i++)
+    //        if (wgn_VertexFeats.a(0,i) > 0.0)
+    //            printf("%d ",i);
+    //    printf("\n");
+
+    if (al.present("-unittrack"))
+    {   /* contains two features, a start and length.  start indexes */
+        /* into VertexTrack to the first vector in the segment */
+        wgn_UnitTrack.load(al.val("-unittrack"));
     }
 
     if (al.present("-test"))

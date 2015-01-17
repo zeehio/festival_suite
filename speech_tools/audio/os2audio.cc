@@ -7,6 +7,8 @@
 /*                                          Samuel Audet <guardia@cam.org>  */
 /* DeviceID is setup in here.  Can be used as an external variable!         */
 
+#ifdef SUPPORT_OS2AUDIO 
+
 #include "EST_cutils.h" 
 
 #include "EST_Wave.h" 
@@ -18,10 +20,6 @@
 #include "EST_io_aux.h" 
 
 #include "EST_unix.h" 
-
-
-#ifdef SUPPORT_OS2AUDIO 
-
 
 int os2audio_supported = TRUE; 
 
@@ -252,6 +250,9 @@ int play_os2audio_wave(EST_Wave &inwave, EST_Option &al)
 }
 
 #else 
+
+# include "EST_Wave.h"
+# include "EST_Option.h"
 
 int os2audio_supported = FALSE;
 

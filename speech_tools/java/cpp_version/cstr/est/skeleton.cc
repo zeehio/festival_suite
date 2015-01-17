@@ -68,7 +68,7 @@ Java_cstr_est_Skeleton_create_11skeleton(JNIEnv *env, jobject self)
 {
   EST_Skeleton *skeleton = new EST_Skeleton;
 
-  // printf("create skeleton %x\n", skeleton);
+  // printf("create skeleton %p\n", skeleton);
 
   env->SetLongField(self, handle_field, (jlong)skeleton);
 
@@ -80,7 +80,7 @@ Java_cstr_est_Skeleton_destroy_11skeleton (JNIEnv *env, jobject self)
 {
   EST_Skeleton *skeleton = (EST_Skeleton *) env->GetLongField(self, handle_field);
 
-  // printf("destroy skeleton  %x\n", skeleton);
+  // printf("destroy skeleton  %p\n", skeleton);
 
   delete skeleton;
   return 1;

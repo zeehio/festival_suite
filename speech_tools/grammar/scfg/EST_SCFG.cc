@@ -37,7 +37,7 @@
 /* A class for representing Stochastic Context Free Grammars             */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
+#include <iostream>
 #include "EST_Pathname.h"
 #include "EST_SCFG.h"
 

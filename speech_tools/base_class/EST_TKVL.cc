@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_TKVL.h"
 #include "EST_error.h"
 
@@ -302,15 +302,3 @@ template<class K, class V> EST_TKVL<K, V> EST_TKVL<K, V>::operator + (const EST_
     return result;
 }
 
-template<class K, class V> 
-ostream &operator<<(ostream &s, EST_TKVI< K , V > const &i)
-{  return s << i.k << "\t" << i.v << "\n"; }
-
-
-template<class K, class V> 
-ostream& operator << (ostream& s,  EST_TKVL< K , V > const &l) 
-{EST_Litem *p; 
- for (p = l.list.head(); p ; p = next(p)) 
-   s << l.list(p).k << "\t" << l.list(p).v << endl; 
- return s;
-} 

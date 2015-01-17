@@ -36,7 +36,7 @@
 /*                Basic Multivariate Statistical Functions               */
 /*                                                                       */
 /*=======================================================================*/
-#include <math.h>
+#include <cmath>
 #include "EST_multistats.h"
 
 float mean(EST_FVector &v)
@@ -89,7 +89,7 @@ EST_FVector sample_variance(EST_FMatrix &m)
     {
 	v[j] = 0.0;
 	for (i = 0; i < m.num_rows(); ++i)
-	    v[j] += pow(m(i, j) - u(j), 2.0);
+	  v[j] += pow(m(i, j) - u(j), float(2.0));
 	v[j] /= m.num_rows() - 1; // sample variance
     }
     
@@ -183,7 +183,7 @@ EST_FMatrix penrose_distance(EST_FMatrix &gu, EST_FVector &gv)
 	{
 	    P(i, j) = 0.0;
 	    for (k = 0; k < p; ++k)
-		P(i, j) += pow(gu(i, k) - gu(j, k), 2.0) / gv(k);
+	      P(i, j) += pow(gu(i, k) - gu(j, k), float(2.0)) / gv(k);
 	    P(i, j) /= p;
 	}
     return P;
@@ -228,7 +228,7 @@ float simple_penrose(EST_FVector &ui, EST_FVector &uj, EST_FVector &v)
     float P = 0.0;
     
     for (k = 0; k < n; ++k)
-	P += pow(ui(k) - uj(k), 2.0) / v(k);
+      P += pow(ui(k) - uj(k), float(2.0)) / v(k);
     P /= n;
     
     return P;

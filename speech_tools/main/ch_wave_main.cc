@@ -36,9 +36,9 @@
 /*                     Change EST_Wave utility main                      */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <iostream.h>
-#include <math.h>
+#include <cstdlib>
+#include <iostream>
+#include <cmath>
 #include "EST_Wave.h"
 #include "EST_cmd_line.h"
 #include "EST_cmd_line_options.h"

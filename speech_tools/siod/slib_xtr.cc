@@ -9,11 +9,11 @@ Array-hacking code moved to another source file.
  *   arrays, hash tables, 
 
 */
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <setjmp.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cctype>
 
 #include "siod.h"
 #include "siodp.h"

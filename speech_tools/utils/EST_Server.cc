@@ -39,7 +39,7 @@
 
 #include "EST_system.h"
 #include "EST_socket.h"
-#include <signal.h>
+#include <csignal>
 #include "EST_unix.h"
 #include "EST_TKVL.h"
 #include "EST_ServiceTable.h"
@@ -47,8 +47,8 @@
 #include "EST_Pathname.h"
 #include "EST_error.h"
 #include "EST_Token.h"
-#include <iomanip.h>
-#include <iostream.h>
+#include <iomanip>
+#include <iostream>
 
 static EST_Regex ipnum("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+");
 
@@ -383,6 +383,7 @@ EST_connect_status EST_Server::disconnect(void)
     EST_error("Not Connected");
 
   if (p_trace)
+  {
     if (p_mode == sm_client)
       *p_trace << "Disconnect from  "
 	       << p_entry.name
@@ -391,6 +392,7 @@ EST_connect_status EST_Server::disconnect(void)
       *p_trace << "Close down service "
 	       << p_entry.name
 	       << "\n";
+  }
 
   if (p_buffered_socket)
     {

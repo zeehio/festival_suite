@@ -41,8 +41,8 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include "EST_cutils.h"
 #include "siod.h"
 #include "siodp.h"

@@ -39,13 +39,16 @@
 /** Instantiate rules for list template.
   * 
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TListI.h,v 1.3 2004/05/04 00:00:17 awb Exp $
+  * @version $Id: EST_TListI.h,v 1.5 2006/07/19 21:52:12 awb Exp $
   */
 
 
 // Instantiation Macros
 
-#include <iostream.h>
+#include <iostream>
+
+using namespace std;
+
 #include "instantiate/EST_TIteratorI.h"
 
 #define Instantiate_TList_T_MIN(TYPE, TAG) \
@@ -55,10 +58,7 @@
         Instantiate_TIterator_T( EST_TList<TYPE>, EST_TList<TYPE>::IPointer, TYPE, TList_ ## TAG ## _itt);
 
 #define Instantiate_TList_T(TYPE, TAG) \
-	Instantiate_TList_T_MIN(TYPE, TAG) \
-	\
-	ostream& operator << (ostream &st, EST_TList< TYPE > const &list) { EST_Litem *ptr; for (ptr = list.head(); ptr != 0; ptr = next(ptr)) st << list.item(ptr) << " "; return st;} 
-
+	Instantiate_TList_T_MIN(TYPE, TAG)
 
 #define Instantiate_TList(TYPE) Instantiate_TList_T(TYPE, TYPE)
 

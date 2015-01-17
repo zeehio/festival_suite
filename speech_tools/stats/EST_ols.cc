@@ -36,7 +36,7 @@
 /* Ordinary Least Squares/Linear regression                              */
 /*                                                                       */
 /*=======================================================================*/
-#include <math.h>
+#include <cmath>
 #include "EST_multistats.h"
 #include "EST_simplestats.h"
 
@@ -50,7 +50,9 @@ static int ols_stepwise_find_best(const EST_FMatrix &X,
 				  float &bscore,
 				  int &best_feat,
 				  const EST_FMatrix &Xtest,
-				  const EST_FMatrix &Ytest);
+				  const EST_FMatrix &Ytest,
+                                  const EST_StrList &feat_names
+                                  );
 
 int ols(const EST_FMatrix &X,const EST_FMatrix &Y, EST_FMatrix &coeffs)
 {
@@ -122,9 +124,11 @@ int robust_ols(const EST_FMatrix &X,
 	    for (s=i=0; i<singularity; i++)
 	    {
 		s++;
-		while (!included(s)) s++;
+		while ((included(s) == FALSE) ||
+                       (included(s) == OLS_IGNORE))
+                       s++;
 	    }
-	    if (!included(s))
+	    if (included(s) == FALSE)
 	    {   // oops
 		cerr << "OLS: found singularity twice, shouldn't happen" 
 		    << endl;
@@ -161,14 +165,14 @@ static void ols_load_selected_feats(const EST_FMatrix &X,
     int i,j,k,width;
 
     for (width=i=0; i<included.length(); i++)
-	if (included(i))
+	if (included(i) == TRUE)
 	    width++;
 
     Xl.resize(X.num_rows(),width);
 
     for (i=0; i<X.num_rows(); i++)
 	for (k=j=0; j < X.num_columns(); j++)
-	    if (included(j))
+	    if (included(j) == TRUE)
 	    {
 		Xl.a_no_check(i,k) = X.a_no_check(i,j);
 		k++;
@@ -196,26 +200,22 @@ int stepwise_ols(const EST_FMatrix &X,
 		 float limit,
 		 EST_FMatrix &coeffs,
 		 const EST_FMatrix &Xtest,
-		 const EST_FMatrix &Ytest)
+		 const EST_FMatrix &Ytest,
+                 EST_IVector &included)
 {
     // Find the features that contribute to the correlation using a
     // a greedy algorithm
 
     EST_FMatrix coeffsl;
-    EST_IVector included;
     float best_score=0.0,bscore;
     int i,best_feat;
     int nf=1;  // for nice printing of progress
 
-    included.resize(X.num_columns());
-    included[0] = TRUE;  // always guarantee interceptor
-    for (i=1; i<included.length(); i++)
-	 included.a_no_check(i) = FALSE;
-
     for (i=1; i < X.num_columns(); i++)
     {
 	if (!ols_stepwise_find_best(X,Y,included,coeffsl,
-				    bscore,best_feat,Xtest,Ytest))
+				    bscore,best_feat,Xtest,Ytest,
+                                    feat_names))
 	{
 	    cerr << "OLS: stepwise failed" << endl;
 	    return FALSE;
@@ -246,7 +246,9 @@ static int ols_stepwise_find_best(const EST_FMatrix &X,
 				  float &bscore,
 				  int &best_feat,
 				  const EST_FMatrix &Xtest,
-				  const EST_FMatrix &Ytest)
+				  const EST_FMatrix &Ytest,
+                                  const EST_StrList &feat_names
+                                  )
 {
     EST_FMatrix coeffsl;
     bscore = 0;
@@ -263,10 +265,12 @@ static int ols_stepwise_find_best(const EST_FMatrix &X,
 	    if (!robust_ols(X,Y,included,coeffsl))
 		return FALSE;  // failed for some reason
 	    ols_apply(Xtest,coeffsl,pred);
-	    ols_test(Ytest,pred,cor,rmse);
-	    if (cor > bscore)
+            ols_test(Ytest,pred,cor,rmse);
+            printf("tested %d %s %f best %f\n",
+                   i,(const char *)feat_names.nth(i),cor,bscore);
+	    if (fabs(cor) > bscore)
 	    {
-		bscore = cor;
+		bscore = fabs(cor);
 		coeffs = coeffsl;
 		best_feat = i;
 	    }
@@ -316,7 +320,7 @@ int ols_test(const EST_FMatrix &real,
 
     if (v3 <= 0)
     {   // happens when there's very little variation in x
-	correlation = -3;
+	correlation = 0;
 	rmse = se.mean();
 	return FALSE;
     }

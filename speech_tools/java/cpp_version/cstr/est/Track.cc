@@ -120,7 +120,7 @@ Java_cstr_est_Track_create_1cpp_1track(JNIEnv *env, jobject self)
 {
   EST_Track *track = new EST_Track;
 
-  // printf("create track %x\n", track);
+  // printf("create track %p\n", track);
 
   env->SetLongField(self, handle_field, (jlong)track);
 
@@ -132,7 +132,7 @@ Java_cstr_est_Track_destroy_1cpp_1track (JNIEnv *env, jobject self)
 {
   EST_Track *track = (EST_Track *) env->GetLongField(self, handle_field);
 
-  // printf("destroy track  %x\n", track);
+  // printf("destroy track  %p\n", track);
 
   delete track;
   return 1;

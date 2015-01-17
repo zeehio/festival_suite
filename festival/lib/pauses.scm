@@ -40,7 +40,8 @@ Insert pauses where required."
     (cond
      (rval rval) ;; new style
      (t
-      (Classic_Pauses utt)))))
+      (Classic_Pauses utt))))
+  (Pause_optional_deleting_B_X utt))
 
 (define (Classic_Pauses utt)
   "(Pauses UTT)
@@ -78,7 +79,23 @@ Predict pause insertion."
 		     (item.relation.remove w 'Word)
 		     ;; can't refer to w as we've just deleted it
 		     (item.relation.remove wp 'Phrase)))))
-	   words)))
+	   words)
+          ;; 12/01/2006 V.Strom: Even more embarrasing: Delete all silences
+          ;; that are followed by a silence.  These silence sequences 
+          ;; emerge if 'punc of phrase-final words consists of more than one 
+          ;; character, e.g. period+quote.  That in turn causes problems in 
+          ;; build_utts: the 2nd silence ends up with no features but its name, 
+          ;; because there is no corresponding 2nd silence in the phone 
+          ;; segmentation to align with.
+          ;; This schould be fixed in the functions below, but it is easier for
+          ;; me to clean up at the end:
+          (set! sil (car (car (cdr (car (PhoneSet.description '(silences)))))))
+          (set! seg (item.next(utt.relation.first utt 'Segment)))
+          (while seg
+             (if(and(equal? sil (item.name seg))
+                    (equal? sil (item.name (item.prev seg))))
+                (item.delete (item.prev seg)))
+             (set! seg (item.next seg)))))
   utt))
 
 (define (insert_pause utt word)
@@ -99,6 +116,21 @@ Insert a silence segment after the last segment in WORDITEM in UTT."
     (if firstseg
 	(item.relation.insert 
 	 firstseg 'Segment (list silence) 'before))))
+
+(define (insert_final_pause utt)
+"(insert_final_pause UTT)
+Always have a final silence if the utterance is non-empty."
+  (let ((lastseg (utt.relation.last utt 'Segment))
+        (silence (car (car (cdr (car (PhoneSet.description '(silences))))))))
+    (set! silence (format nil "%l" silence)) ; to make the symbol a string
+    ;(format t "silence is %l\n" silence)
+    ;(format t "lastseg is %l\n" (item.name lastseg))
+    (if lastseg
+       (if (not(equal? (item.name lastseg) silence))
+          (begin
+             (format t "iserted final pause %s\n" silence)
+             (item.relation.insert lastseg 'Segment (list silence) 'after))))))
+     
 
 (define (find_last_seg word)
 ;;; Find the segment that is immediately at this end of this word
@@ -186,5 +218,25 @@ Insert a silence segment after the last segment in WORDITEM in UTT."
 	  'SylStructure)
 	 'Segment)
 	(us_find_last_seg (item.relation.prev word 'Word))))))
+
+(define (Pause_optional_deleting_B_X utt)
+"(Pause_optional_deleting_B_X utt)
+
+Delete all phone symbols starting with 'B_' from the segemt relation 
+(a B_150 e.g. is a 150ms pause) if symbol 'Pause_delete_B_X is defined.  
+"
+; The B_X never occur in the phone segmentation but are predicted by 
+; some pause methods, in particular the default I used to produce the 
+; .utt files for the 2009 test sentences for the  Blizzard challange.
+; Some participants complained about them and I had to fix it quickly.
+   (if (symbol-bound? 'Pause_delete_B_X)
+      (let(seg )
+         (set! seg (item.next(utt.relation.first utt 'Segment)))
+         (while seg
+             (set! next_seg (item.next seg))
+             ;(format t "segment %l\n" (item.name seg))
+             (if(string-matches (item.name seg) "B_[0-9]*")
+                 (item.delete seg))
+             (set! seg next_seg)))))
 
 (provide 'pauses)

@@ -41,7 +41,9 @@
 
 // Standard include files.
 #include "EST_system.h"
-#include <stdlib.h>
+#include <cstdlib>
+
+using namespace std;
 
 #include "EST_String.h"
 #include "EST_string_aux.h"

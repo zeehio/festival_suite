@@ -38,7 +38,7 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <iostream.h>
+#include <iostream>
 #include "EST_TNamedEnum.h"
 #include "EST_String.h"
 

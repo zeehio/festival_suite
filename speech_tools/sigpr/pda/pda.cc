@@ -296,7 +296,7 @@ EST_String options_pda_srpd(void)
 	"    times, then the frame is classified as representing silence. \n"
 	"    Must be a positive number. Default is 120 ADC units.\n\n"
 
-	"-h <float> unvoiced to voiced coeff threshold\n"
+	"-H <float> unvoiced to voiced coeff threshold\n"
 	"    set the correlation coefficient threshold which must be \n"
 	"    exceeded in a transition from an unvoiced classified frame \n"
 	"    of speech to a voiced frame as the unvoiced to voiced coeff \n"
@@ -311,7 +311,7 @@ EST_String options_pda_srpd(void)
 	"    range zero to <parameter>unvoiced to voiced coeff threshold</parameter> \n"
 	"    inclusive. Default is 0.75.\n\n"
 
-	"-r <float> voiced to unvoiced coeff threshold-ratio  \n"
+	"-R <float> voiced to unvoiced coeff threshold-ratio  \n"
 	"    set the scaling factor used in determining the correlation\n"
 	"    coefficient threshold which must not be exceeded in a voiced \n"
 	"    frame to unvoiced frame transition, as <parameter>voiced to unvoiced</parameter> \n"

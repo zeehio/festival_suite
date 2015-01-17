@@ -45,8 +45,8 @@
 #include "EST_Token.h"
 #include "EST_FileType.h"
 #include "EST_error.h"
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 
 #include "EST_THash.h"
 

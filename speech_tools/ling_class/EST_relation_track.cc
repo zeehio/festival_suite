@@ -37,10 +37,10 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <math.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <cmath>
 #include "EST_types.h"
 #include "ling_class/EST_Relation.h"
 #include "ling_class/EST_relation_aux.h"
@@ -102,7 +102,7 @@ void track_to_pm(const EST_Track &tr, int sample_rate, EST_Relation &lab)
     
     for (i = 0; i < tr.num_frames(); ++i)
     {
-	float c, b, e;
+	float c, b, e=0.0;
 	if (have_length)
 	    if (have_offset)
 		get_frame_o(tr, sample_rate, i, b, c, e);

@@ -76,7 +76,7 @@ ifeq ($(DIRNAME),wrappers)
 endif
 
 ifeq ($(DIRNAME),.)
-    EXTRA_LIB_BUILD_DIRS := $(EXTRA_LIB_BUILD_DIRS) wrappers
+    EXTRA_BUILD_DIRS := $(EXTRA_BUILD_DIRS) wrappers
 endif
 
 

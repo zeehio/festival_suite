@@ -38,9 +38,9 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <fstream>
 #include "ling_class/EST_Item_Content.h"
 #include "ling_class/EST_Item.h"
 #include "EST_error.h"

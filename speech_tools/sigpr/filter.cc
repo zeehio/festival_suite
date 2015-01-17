@@ -36,7 +36,7 @@
 /*                         Filter functions                              */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_math.h"
 #include "sigpr/EST_filter.h"
 #include "sigpr/EST_fft.h"
@@ -427,7 +427,7 @@ EST_FVector design_FIR_filter(const EST_FVector &frequency_response,
 	
     // check frequency_response has dimension 2^N
     int N = fastlog2(frequency_response.n());
-    if(frequency_response.n() !=  (int)pow(2,(float)N)){
+    if(frequency_response.n() !=  (int)pow(float(2.0),(float)N)){
 	cerr << "Desired frequency response must have dimension 2^N" << endl;
 	return EST_FVector(0);
     }
@@ -478,10 +478,10 @@ EST_FVector design_high_or_low_pass_FIR_filter(int sample_rate,
     int i;
     int N=10;			// good minimum size
     
-    int fft_size = (int)pow(2, N);
+    int fft_size = (int)pow(float(2.0), float(N));
     while(fft_size < order*4){	// rule of thumb !?
 	N++;
-	fft_size = (int)pow(2, N);
+	fft_size = (int)pow(float(2.0), float(N));
     }
     
     // freq response is from 0 to sampling freq and therefore

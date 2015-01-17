@@ -37,9 +37,9 @@
 /*   Interface to various low level waveform functions from Lisp         */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdio.h>
+#include <cstdio>
 #include "EST_unix.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include "festival.h"
 #include "festivalP.h"
 
@@ -154,6 +154,43 @@ static LISP wave_info(LISP w1)
 			       NIL))));
 }
 
+static LISP wave_set(LISP lwave,LISP lx, LISP ly, LISP lv)
+{
+    EST_Wave *t = wave(lwave);
+
+    t->a(get_c_int(lx),get_c_int(ly)) = (short)get_c_float(lv);
+    return lv;
+}
+
+static LISP wave_set_sample_rate(LISP lwave,LISP lsr)
+{
+    EST_Wave *t = wave(lwave);
+
+    t->set_sample_rate(get_c_int(lsr));
+    return lsr;
+}
+
+static LISP wave_get(LISP lwave,LISP lx, LISP ly)
+{
+    EST_Wave *t = wave(lwave);
+
+    return flocons(t->a(get_c_int(lx),get_c_int(ly)));
+}
+
+static LISP wave_resize(LISP lwave,LISP lsamples, LISP lchannels)
+{
+    EST_Wave *t;
+
+    if (lwave)
+	t = wave(lwave);
+    else
+	t = new EST_Wave;
+
+    t->resize(get_c_int(lsamples),get_c_int(lchannels));
+    
+    return siod(t);
+}
+
 static LISP wave_resample(LISP w1,LISP newrate)
 {
     EST_Wave *w = wave(w1);
@@ -212,7 +249,7 @@ static LISP track_save(LISP ltrack,LISP fname,LISP ftype)
     EST_String filename,filetype;
 
     filename = (fname == NIL) ? "save.track" : get_c_string(fname);
-    filetype = (ftype == NIL) ? "save.track" : get_c_string(ftype);
+    filetype = (ftype == NIL) ? "est" : get_c_string(ftype);
     
     if (t->save(filename, filetype) != write_ok)
     {
@@ -494,6 +531,45 @@ static LISP utt_send_wave_client(LISP utt)
     return utt;
 }
 
+/*  Asterisk support, see http://www.asterisk.org */
+
+static LISP utt_send_wave_asterisk(LISP utt)
+{
+    // Send the waveform to a client (must be acting as server)
+    EST_Utterance *u = utterance(utt);
+    EST_Wave *w;
+    EST_String tmpfile = make_tmp_filename();
+    LISP ltype;
+    EST_String type;
+
+    w = get_utt_wave(u);
+    if (ft_server_socket == -1)
+    {
+       cerr << "utt_send_wave_asterisk: not in server mode" << endl;
+       festival_error();
+    }
+
+    ltype = ft_get_param("Wavefiletype");
+    if (ltype == NIL)
+       type = "nist";
+    else
+       type = get_c_string(ltype);
+    w->resample(8000);
+    w->rescale(5);
+
+    w->save(tmpfile,type);
+#ifdef WIN32
+    send(ft_server_socket,"WV\n",3,0);
+#else
+    write(ft_server_socket,"WV\n",3);
+#endif
+    socket_send_file(ft_server_socket,tmpfile);
+    unlink(tmpfile);
+
+    return utt;
+}
+
+
 static LISP send_sexpr_to_client(LISP l)
 {
     EST_String tmpfile = make_tmp_filename();
@@ -549,10 +625,25 @@ void festival_wave_init(void)
     init_subr_1("wave.play",wave_play,
   "(wave.play WAVE)\n\
   Play wave of selected audio");
+    init_subr_3("wave.resize",wave_resize,
+ "(wave.resize WAVE NEWSAMPLES NEWCHANNELS)\n\
+ Resize WAVE to have NEWSAMPLES number of frames and NEWCHANNELS\n\
+ number of channels.  If WAVE is nil a new wave is made of the\n\
+ requested size.");
+    init_subr_4("wave.set",wave_set,
+ "(wave.set WAVE X Y V)\n\
+ Set position X Y to V in WAVE.")
+;    init_subr_3("wave.get",wave_get,
+ "(wave.get WAVE X Y)\n\
+ Get value of X Y in WAVE.");
+    init_subr_2("wave.set_sample_rate",wave_set_sample_rate,
+ "(wave.set_sample_rate WAVE SR)\n\
+set sample rate to SR.");
+
 
     init_subr_3("track.save",track_save,
  "(track.save TRACK FILENAME FILETYPE)\n\
-  Save TRACK in FILENAME, in formar FILETYPE, est is used if FILETYPE\n\
+  Save TRACK in FILENAME, in format FILETYPE, est is used if FILETYPE\n\
   is unspecified or nil.");
     init_subr_3("track.load",track_load,
  "(track.load FILENAME FILETYPE ISHIFT)\n\
@@ -595,6 +686,11 @@ void festival_wave_init(void)
  "(utt.send.wave.client UTT)\n\
   Sends wave in UTT to client.  If not in server mode gives an error\n\
   Note the client must be expecting to receive the waveform.");
+    init_subr_1("utt.send.wave.asterisk",utt_send_wave_asterisk,
+"(utt.send.wave.asterisk UTT)\n\
+  Sends wave in UTT to client.  If not in server mode gives an error\n\
+  Note the client must be expecting to receive the waveform. The waveform\n\
+  is rescaled and resampled according to what asterisk needs");
     init_subr_1("send_sexpr_to_client", send_sexpr_to_client,
  "(send_sexpr_to_client SEXPR)\n\
 Sends given sexpression to currently connected client.");

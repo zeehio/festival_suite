@@ -42,7 +42,7 @@
 /* Stream_Items, Waves and Tracks in your binary                         */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
+#include <iostream>
 #include "siod.h"
 #include "ling_class/EST_Utterance.h"
 #include "ling_class/EST_Item.h"
@@ -52,7 +52,7 @@
 #include "EST_Track.h"
 #include "EST_track_aux.h"
 
-Declare_TStringHash_Base(LISP,NIL,NIL)
+Declare_TStringHash_Base(LISP,(LISP)0,NIL)
 
 #if defined(INSTANTIATE_TEMPLATES)
 #include "../base_class/EST_THash.cc"

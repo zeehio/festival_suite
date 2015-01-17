@@ -43,9 +43,15 @@
 #if !defined(__EST_IOSTREAM_WIN32_H__)
 #    define __EST_IOSTREAM_WIN32_H__ 1
 
-#include <iostream.h>
+/* This gets incuded from C */
+#ifdef __cplusplus
+#include <iostream>
+using namespace std;
 
 #undef read
 #undef write
+
+#endif
+
 
 #endif

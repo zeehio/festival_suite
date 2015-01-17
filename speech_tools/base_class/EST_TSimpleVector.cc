@@ -42,7 +42,7 @@
 
 #include "EST_TSimpleVector.h"
 #include "EST_matrix_support.h"
-#include <fstream.h>
+#include <fstream>
 #include "EST_cutils.h"
 
 template<class T> void EST_TSimpleVector<T>::copy(const EST_TSimpleVector<T> &a)
@@ -68,6 +68,7 @@ template<class T> void EST_TSimpleVector<T>::resize(int newn, int set)
   int oldn = this->n();
   T *old_vals =NULL;
   int old_offset = this->p_offset;
+  unsigned int q;
 
   just_resize(newn, &old_vals);
 
@@ -77,7 +78,8 @@ template<class T> void EST_TSimpleVector<T>::resize(int newn, int set)
       if (this->p_memory != NULL)
 	{
 	  copy_c = Lof(this->n(), oldn);
-	  memcpy((void *)this->p_memory, (const void *)old_vals,  copy_c* sizeof(T));
+          for (q=0; q<copy_c* sizeof(T); q++) /* for memcpy */
+              ((char *)this->p_memory)[q] = ((char *)old_vals)[q];
 	}
       
       for (int i=copy_c; i < this->n(); ++i)
@@ -92,6 +94,7 @@ template<class T> void EST_TSimpleVector<T>::resize(int newn, int set)
 template<class T>
 void EST_TSimpleVector<T>::copy_section(T* dest, int offset, int num) const
 {
+  unsigned int q;
   if (num<0)
     num = this->num_columns()-offset;
 
@@ -99,7 +102,10 @@ void EST_TSimpleVector<T>::copy_section(T* dest, int offset, int num) const
     return;
 
   if (!this->p_sub_matrix && this->p_column_step==1)
-    memcpy((void *)dest, (const void *)(this->p_memory+offset), num*sizeof(T));
+  {
+      for (q=0; q<num* sizeof(T); q++)  /* for memcpy */
+          ((char *)dest)[q] = ((char *)(this->p_memory+offset))[q];
+  }
   else
     for(int i=0; i<num; i++)
       dest[i] = this->a_no_check(offset+i);
@@ -108,6 +114,7 @@ void EST_TSimpleVector<T>::copy_section(T* dest, int offset, int num) const
 template<class T>
 void EST_TSimpleVector<T>::set_section(const T* src, int offset, int num)
 {
+  unsigned int q;
   if (num<0)
     num = this->num_columns()-offset;
 
@@ -115,7 +122,10 @@ void EST_TSimpleVector<T>::set_section(const T* src, int offset, int num)
     return;
   
   if (!this->p_sub_matrix && this->p_column_step==1)
-    memcpy((void *)(this->p_memory+offset), (void *)src, num*sizeof(T));
+  {
+      for (q=0; q<num* sizeof(T); q++)  /* for memcpy */
+          ((char *)(this->p_memory+offset))[q] = ((char *)(src))[q];
+  }
   else
     for(int i=0; i<num; i++)
       this->a_no_check(offset+i) = src[i];
@@ -134,4 +144,5 @@ template<class T> void EST_TSimpleVector<T>::zero()
   else
     ((EST_TVector<T> *)this)->fill(*this->def_val);
 }
+
 

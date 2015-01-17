@@ -38,13 +38,13 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <fstream.h>
-#include <iostream.h>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include "EST_unix.h"
-#include <string.h>
-#include <limits.h>
-#include <float.h>
+#include <cstring>
+#include <climits>
+#include <cfloat>
 #include "EST_String.h"
 #include "EST_Ngrammar.h"
 #include "EST_Token.h"
@@ -281,7 +281,8 @@ EST_read_status
 load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
 {
     EST_TokenStream ts;
-    int i,j,k,order;
+    int i,j,order;
+    EST_Litem *k;
     int num_entries;
     double approx_num_samples = 0.0;
     long freq_data_start, freq_data_end;
@@ -369,7 +370,7 @@ load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
 	    return misc_read_error;	
 	}
 	for (k=n.p_states[i].pdf().item_start();
-	     !n.p_states[i].pdf().item_end(k);
+	     (!n.p_states[i].pdf().item_end(k)) && (j < num_entries) ;
 	     k = n.p_states[i].pdf().item_next(k))
 	{
 	    n.p_states[i].pdf().set_frequency(k,dd[j]);
@@ -407,7 +408,7 @@ EST_write_status
 save_ngram_htk_ascii_sub(const EST_String &word, ostream *ost, 
 			 EST_Ngrammar &n, double floor)
 {
-    int k;
+    EST_Litem *k;
     EST_String name;
     double freq;
     EST_StrVector this_ngram(2); // assumes bigram
@@ -734,7 +735,8 @@ save_ngram_cstr_ascii(const EST_String filename, EST_Ngrammar &n,
     // awb's format
     (void)trace;
     ostream *ost;
-    int i,k;
+    int i;
+    EST_Litem *k;
     
     if (filename == "-")
 	ost = &cout;
@@ -756,7 +758,7 @@ save_ngram_cstr_ascii(const EST_String filename, EST_Ngrammar &n,
 	n.print_freqs(*ost,floor);
     else if (n.representation() == EST_Ngrammar::backoff)
     {
-	int total_ngrams = (int)pow(n.get_vocab_length(),n.order()-1);
+      int total_ngrams = (int)pow(float(n.get_vocab_length()),float(n.order()-1));
 	
 	for(i=0;i<total_ngrams;i++)
 	{
@@ -831,7 +833,8 @@ save_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n,
     if (n.representation() == EST_Ngrammar::sparse)
 	return misc_write_error;
     
-    int i,k;
+    int i;
+    EST_Litem *k;
     FILE *ofd;
     double lfreq = -1;
     double count = -1;
@@ -903,7 +906,7 @@ save_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n,
 	// word in the ngram is the least significant 'bit'
 	
 	// number of ngrams, excluding last word, is
-	int total_ngrams = (int)pow(n.get_vocab_length(),n.order()-1);
+      int total_ngrams = (int)pow(float(n.get_vocab_length()),float(n.order()-1));
 	
 	for(i=0;i<total_ngrams;i++)
 	{

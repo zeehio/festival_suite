@@ -38,8 +38,8 @@
 /*=======================================================================*/
 #include "EST_IMatrix.h"
 #include "EST_system.h"
-#include <stdlib.h>
-#include <limits.h>
+#include <cstdlib>
+#include <climits>
 #include "EST_unix.h"
 #include "EST_math.h"
 #include <time.h>

@@ -51,6 +51,7 @@ extern int mplayer_supported;
 extern int win32audio_supported;
 extern int os2audio_supported;
 extern int irix_supported;
+extern int macosx_supported;
 
 int play_wave(EST_Wave &wave, EST_Option &al);
 int record_wave(EST_Wave &wave, EST_Option &al);

@@ -36,10 +36,10 @@
 /*                EST_Utterance class source file                        */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
 #include "EST_error.h"
 #include "EST_string_aux.h"
 #include "ling_class/EST_Utterance.h"

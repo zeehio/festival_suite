@@ -37,9 +37,9 @@
 /*  Various method functions                                             */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <iostream.h>
-#include <string.h>
+#include <cstdlib>
+#include <iostream>
+#include <cstring>
 #include "EST_unix.h"
 #include "EST_cutils.h"
 #include "EST_Token.h"
@@ -155,6 +155,25 @@ ostream & operator <<(ostream &s, WNode &n)
     return s;
 }
 
+void WDataSet::ignore_non_numbers()
+{
+    /* For ols we want to ignore anything that is categorial */
+    int i;
+
+    for (i=0; i<dlength; i++)
+    {
+        if ((p_type[i] == wndt_binary) ||
+            (p_type[i] == wndt_float))
+            continue;
+        else
+        {
+            p_ignore[i] = TRUE;
+        }
+    }
+             
+    return;
+}
+
 void WDataSet::load_description(const EST_String &fname, LISP ignores)
 {
     // Initialise a dataset with sizes and types
@@ -212,13 +231,19 @@ void WDataSet::load_description(const EST_String &fname, LISP ignores)
 	    p_type[i] = wndt_binary;
 	else if (tname == "cluster")
 	    p_type[i] = wndt_cluster;
+	else if (tname == "vector")
+	    p_type[i] = wndt_vector;
+	else if (tname == "trajectory")
+	    p_type[i] = wndt_trajectory;
+	else if (tname == "matrix")
+	    p_type[i] = wndt_matrix;
 	else if (tname == "float")
 	    p_type[i] = wndt_float;
 	else 
 	{
 	    wagon_error(EST_String("Unknown type \"")+tname+
 			"\" for field number "+itoString(i)+
-                        " in description file \""+fname+"\"");
+                        "/"+p_name[i]+" in description file \""+fname+"\"");
 	}
     }
 
@@ -342,6 +367,10 @@ EST_Val WImpurity::value(void)
 	return EST_Val(p.most_probable(&prob));
     else if (t==wnim_cluster)
 	return EST_Val(a.mean());
+    else if (t==wnim_vector)
+	return EST_Val(a.mean()); /* wnim_vector */
+    else if (t==wnim_trajectory)
+	return EST_Val(a.mean()); /* NOT YET WRITTEN */
     else
 	return EST_Val(a.mean());
 }
@@ -354,6 +383,10 @@ double WImpurity::samples(void)
 	return (int)p.samples();
     else if (t==wnim_cluster)
 	return members.length();
+    else if (t==wnim_vector)
+	return members.length();
+    else if (t==wnim_trajectory)
+	return members.length();
     else
 	return 0;
 }
@@ -363,11 +396,12 @@ WImpurity::WImpurity(const WVectorVector &ds)
     int i;
 
     t=wnim_unset;
+    a.reset(); trajectory=0; l=0; width=0;
     for (i=0; i < ds.n(); i++)
     {
 	if (wgn_count_field == -1)
 	    cumulate((*(ds(i)))[wgn_predictee],1);
-	else
+        else
 	    cumulate((*(ds(i)))[wgn_predictee],
 		     (*(ds(i)))[wgn_count_field]);
     }
@@ -376,6 +410,12 @@ WImpurity::WImpurity(const WVectorVector &ds)
 float WImpurity::measure(void)
 {
     if (t == wnim_float)
+	return a.variance()*a.samples();
+    else if (t == wnim_vector)
+	return vector_impurity();
+    else if (t == wnim_trajectory)
+	return trajectory_impurity();
+    else if (t == wnim_matrix)
 	return a.variance()*a.samples();
     else if (t == wnim_class)
 	return p.entropy()*p.samples();
@@ -386,6 +426,277 @@ float WImpurity::measure(void)
 	cerr << "WImpurity: can't measure unset object" << endl;
 	return 0.0;
     }
+}
+
+float WImpurity::vector_impurity()
+{
+    // Find the mean/stddev for all values in all vectors
+    // sum the variances and multiply them by the number of members
+    EST_Litem *pp;
+    int i,j;
+    EST_SuffStats b;
+    double count = 1;
+
+    a.reset();
+
+#if 1
+    /* simple distance */
+    for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+    {
+        if (wgn_VertexFeats.a(0,j) > 0.0)
+        {
+            b.reset();
+            for (pp=members.head(); pp != 0; pp=next(pp))
+            {
+                i = members.item(pp);
+                b += wgn_VertexTrack.a(i,j);
+            }
+            a += b.stddev();
+            count = b.samples();
+        }
+    }
+#endif
+
+#if 0
+    /* full covariance */
+    /* worse in listening experiments */
+    EST_SuffStats **cs;
+    int mmm;
+    cs = new EST_SuffStats *[wgn_VertexTrack.num_channels()+1];
+    for (j=0; j<=wgn_VertexTrack.num_channels(); j++)
+        cs[j] = new EST_SuffStats[wgn_VertexTrack.num_channels()+1];
+    /* Find means for diagonal */
+    for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+    {
+        if (wgn_VertexFeats.a(0,j) > 0.0)
+        {
+            for (pp=members.head(); pp != 0; pp=next(pp))
+                cs[j][j] += wgn_VertexTrack.a(members.item(pp),j);
+        }
+    }
+    for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+    {
+        for (i=j+1; i<wgn_VertexFeats.num_channels(); i++)
+            if (wgn_VertexFeats.a(0,j) > 0.0)
+            {
+                for (pp=members.head(); pp != 0; pp=next(pp))
+                {
+                    mmm = members.item(pp);
+                    cs[i][j] += (wgn_VertexTrack.a(mmm,i)-cs[j][j].mean())*
+                        (wgn_VertexTrack.a(mmm,j)-cs[j][j].mean());
+                }
+            }
+    }
+    for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+    {
+        for (i=j+1; i<wgn_VertexFeats.num_channels(); i++)
+            if (wgn_VertexFeats.a(0,j) > 0.0)
+                a += cs[i][j].stddev();
+    }
+    count = cs[0][0].samples();
+#endif
+
+#if 0
+    // look at mean euclidean distance between vectors 
+    EST_Litem *qq;
+    int x,y;
+    double d,q;
+    count = 0;
+    for (pp=members.head(); pp != 0; pp=next(pp))
+    {
+        x = members.item(pp);
+        count++;
+        for (qq=next(pp); qq != 0; qq=next(qq))
+        {
+            y = members.item(qq);
+            for (q=0.0,j=0; j<wgn_VertexFeats.num_channels(); j++)
+                if (wgn_VertexFeats.a(0,j) > 0.0)
+                {
+                    d = wgn_VertexTrack(x,j)-wgn_VertexTrack(y,j);
+                    q += d*d;
+                }
+            a += sqrt(q);
+        }
+
+    }
+#endif
+
+    // This is sum of stddev*samples
+    return a.mean() * count; 
+}
+
+WImpurity::~WImpurity()
+{
+    int j;
+
+    if (trajectory != 0)
+    {
+        for (j=0; j<l; j++)
+            delete [] trajectory[j];
+        delete [] trajectory;
+        trajectory = 0;
+        l = 0;
+    }
+}
+
+
+float WImpurity::trajectory_impurity()
+{
+    // Find the mean length of all the units in the cluster
+    // Create that number of points
+    // Interpolate each unit to that number of points
+    // collect means and standard deviations for each point
+    // impurity is sum of the variance for each point and each coef
+    // multiplied by the number of units.
+    EST_Litem *pp;
+    int i, j;
+    int s, ti, ni, q;
+    int s1l, s2l;
+    double n, m, m1, m2, w;
+    EST_SuffStats lss, stdss;
+    EST_SuffStats l1ss, l2ss;
+    int l1, l2;
+    int ola=0;
+
+    if (trajectory != 0)
+    {   /* already done this */
+        return score;
+    }
+
+    lss.reset();
+    l = 0;
+    for (pp=members.head(); pp != 0; pp=next(pp))
+    {
+        i = members.item(pp);
+        for (q=0; q<wgn_UnitTrack.a(i,1); q++)
+        {
+            ni = (int)wgn_UnitTrack.a(i,0)+q;
+            if (wgn_VertexTrack.a(ni,0) == -1.0)
+            {
+                l1ss += q;
+                ola = 1;
+                break;
+            }
+        }
+        if (q==wgn_UnitTrack.a(i,1))
+        {   /* can't find -1 center point, so put all in l2 */
+            l1ss += 0;
+            l2ss += q;
+        }
+        else
+            l2ss += wgn_UnitTrack.a(i,1) - (q+1) - 1;
+        lss += wgn_UnitTrack.a(i,1); /* length of each unit in the cluster */
+        if (wgn_UnitTrack.a(i,1) > l)
+            l = (int)wgn_UnitTrack.a(i,1);
+    }
+
+    if (ola==0)  /* no -1's so its not an ola type cluster */
+    {
+        l = ((int)lss.mean() < 7) ? 7 : (int)lss.mean();
+
+        /* a list of SuffStats on for each point in the trajectory */
+        trajectory = new EST_SuffStats *[l];
+        width = wgn_VertexTrack.num_channels()+1;
+        for (j=0; j<l; j++)
+            trajectory[j] = new EST_SuffStats[width];
+
+        for (pp=members.head(); pp != 0; pp=next(pp))
+        {   /* for each unit */
+            i = members.item(pp);
+            m = (float)wgn_UnitTrack.a(i,1)/(float)l; /* find interpolation */
+            s = (int)wgn_UnitTrack.a(i,0); /* start point */
+            for (ti=0,n=0.0; ti<l; ti++,n+=m)
+            {
+                ni = (int)n;  // hmm floor or nint ??
+                for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+                {
+                    if (wgn_VertexFeats.a(0,j) > 0.0)
+                        trajectory[ti][j] += wgn_VertexTrack.a(s+ni,j);
+                }
+            }
+        }
+
+        /* find sum of sum of stddev for all coefs of all traj points */
+        stdss.reset();
+        for (ti=0; ti<l; ti++)
+            for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+            {
+                if (wgn_VertexFeats.a(0,j) > 0.0)
+                    stdss += trajectory[ti][j].stddev();
+            }
+
+        // This is sum of all stddev * samples
+        score = stdss.mean() * members.length();
+    }
+    else
+    {   /* OLA model */
+        l1 = (l1ss.mean() < 10.0) ? 10 : (int)l1ss.mean();
+        l2 = (l2ss.mean() < 10.0) ? 10 : (int)l2ss.mean();
+        l = l1 + l2 + 1 + 1;
+
+        /* a list of SuffStats on for each point in the trajectory */
+        trajectory = new EST_SuffStats *[l];
+        for (j=0; j<l; j++)
+            trajectory[j] = new EST_SuffStats[wgn_VertexTrack.num_channels()+1];
+
+        for (pp=members.head(); pp != 0; pp=next(pp))
+        {   /* for each unit */
+            i = members.item(pp);
+            s1l = 0;
+            s = (int)wgn_UnitTrack.a(i,0); /* start point */
+            for (q=0; q<wgn_UnitTrack.a(i,1); q++)
+                if (wgn_VertexTrack.a(s+q,0) == -1.0)
+                {
+                    s1l = q; /* printf("awb q is -1 at %d\n",q); */
+                    break;
+                }
+            s2l = (int)wgn_UnitTrack.a(i,1) - (s1l + 2);
+            m1 = (float)(s1l)/(float)l1; /* find interpolation step */
+            m2 = (float)(s2l)/(float)l2; /* find interpolation step */
+            /* First half */
+            for (ti=0,n=0.0; s1l > 0 && ti<l1; ti++,n+=m1)
+            {
+                ni = s + (((int)n < s1l) ? (int)n : s1l - 1);
+                for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+                    if (wgn_VertexFeats.a(0,j) > 0.0)
+                        trajectory[ti][j] += wgn_VertexTrack.a(ni,j);
+            }
+            ti = l1; /* do it explicitly in case s1l < 1 */
+            for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+                if (wgn_VertexFeats.a(0,j) > 0.0)
+                    trajectory[ti][j] += -1;
+            /* Second half */
+            s += s1l+1;
+            for (ti++,n=0.0; s2l > 0 && ti<l-1; ti++,n+=m2)
+            {
+                ni = s + (((int)n < s2l) ? (int)n : s2l - 1);
+                for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+                    if (wgn_VertexFeats.a(0,j) > 0.0)
+                        trajectory[ti][j] += wgn_VertexTrack.a(ni,j);
+            }
+            for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+                if (wgn_VertexFeats.a(0,j) > 0.0)
+                    trajectory[ti][j] += -2;
+        }
+
+        /* find sum of sum of stddev for all coefs of all traj points */
+        /* windowing the sums with a triangular weight window         */
+        stdss.reset();
+        m = 1.0/(float)l1;
+        for (w=0.0,ti=0; ti<l1; ti++,w+=m)
+            for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+                if (wgn_VertexFeats.a(0,j) > 0.0)
+                stdss += trajectory[ti][j].stddev() * w;
+        m = 1.0/(float)l2;
+        for (w=1.0,ti++; ti<l-1; ti++,w-=m)
+            for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+                if (wgn_VertexFeats.a(0,j) > 0.0)
+                    stdss += trajectory[ti][j].stddev() * w;
+    
+        // This is sum of all stddev * samples
+        score = stdss.mean() * members.length();
+    }
+    return score;
 }
 
 float WImpurity::cluster_impurity()
@@ -413,7 +724,10 @@ float WImpurity::cluster_impurity()
 
     // This is sum distance between cross product of members
 //    return a.sum();
-    return a.stddev() * a.samples();
+    if (a.samples() > 1)
+        return a.stddev() * a.samples();
+    else
+        return 0.0;
 }
 
 float WImpurity::cluster_distance(int i)
@@ -492,6 +806,16 @@ void WImpurity::cumulate(const float pv,double count)
 	t = wnim_cluster;
 	members.append((int)pv);
     }
+    else if (wgn_dataset.ftype(wgn_predictee) == wndt_vector)
+    {
+	t = wnim_vector;
+	members.append((int)pv);
+    }
+    else if (wgn_dataset.ftype(wgn_predictee) == wndt_trajectory)
+    {
+	t = wnim_trajectory;
+	members.append((int)pv);
+    }
     else if (wgn_dataset.ftype(wgn_predictee) >= wndt_class)
     {
 	if (t == wnim_unset)
@@ -517,8 +841,103 @@ void WImpurity::cumulate(const float pv,double count)
 
 ostream & operator <<(ostream &s, WImpurity &imp)
 {
+    int j,i;
+    EST_SuffStats b;
+
     if (imp.t == wnim_float)
 	s << "(" << imp.a.stddev() << " " << imp.a.mean() << ")";
+    else if (imp.t == wnim_vector)
+    {
+	EST_Litem *p;
+	s << "((";
+        imp.vector_impurity();
+        if (wgn_vertex_output == "mean")  //output means
+        {
+            for (j=0; j<wgn_VertexTrack.num_channels(); j++)
+            {
+                b.reset();
+                for (p=imp.members.head(); p != 0; p=next(p))
+                {
+                    b += wgn_VertexTrack.a(imp.members.item(p),j);
+                }
+                s << "(" << b.mean() << " " << b.stddev() << ")";
+                if (j+1<wgn_VertexTrack.num_channels())
+                    s << " ";
+            }
+        }
+        else /* output best in the cluster */
+        {
+            /* print out vector closest to center, rather than average */
+            double best = WGN_HUGE_VAL;
+            double x,d;
+            int bestp = 0;
+            EST_SuffStats *cs;
+
+            cs = new EST_SuffStats [wgn_VertexTrack.num_channels()+1];
+            
+            for (j=0; j<wgn_VertexFeats.num_channels(); j++)
+                if (wgn_VertexFeats.a(0,j) > 0.0)
+                {
+                    cs[j].reset();
+                    for (p=imp.members.head(); p != 0; p=next(p))
+                    {
+                        cs[j] += wgn_VertexTrack.a(imp.members.item(p),j);
+                    }
+                }
+
+            for (p=imp.members.head(); p != 0; p=next(p))
+            {
+                for (x=0.0,j=0; j<wgn_VertexFeats.num_channels(); j++)
+                    if (wgn_VertexFeats.a(0,j) > 0.0)
+                    {
+                        d = (wgn_VertexTrack.a(imp.members.item(p),j)-cs[j].mean())
+                            /* / cs[j].stddev() */ ; /* seems worse 061218 */
+                        x += d*d;
+                    }
+                if (x < best)
+                {
+                    bestp = imp.members.item(p);
+                    best = x;
+                }
+            }
+            for (j=0; j<wgn_VertexTrack.num_channels(); j++)
+            {
+                s << "( ";
+                s << wgn_VertexTrack.a(bestp,j);
+                //                s << " 0 "; // fake stddev
+                s << " ";
+                if (finite(cs[j].stddev()))
+                    s << cs[j].stddev();
+                else
+                    s << "0";
+                s << " ) ";
+                if (j+1<wgn_VertexTrack.num_channels())
+                    s << " ";
+            }
+
+            delete [] cs;
+        }
+	s << ") ";
+	s << imp.a.mean() << ")";
+    }
+    else if (imp.t == wnim_trajectory)
+    {   
+	s << "((";
+        imp.trajectory_impurity();
+        for (i=0; i<imp.l; i++)
+        {
+            s << "(";
+            for (j=0; j<wgn_VertexTrack.num_channels(); j++)
+            {
+                s << "(" << imp.trajectory[i][j].mean() << " " 
+                  << imp.trajectory[i][j].stddev() << " " << ")";
+            }
+            s << ")\n";
+        }
+	s << ") ";
+	// Mean of cross product of distances (cluster score)
+	s << imp.a.mean() << ")";
+    }
     else if (imp.t == wnim_cluster)
     {
 	EST_Litem *p;
@@ -537,7 +956,7 @@ ostream & operator <<(ostream &s, WImpurity &imp)
     }
     else if (imp.t == wnim_class)
     {
-	int i;
+	EST_Litem *i;
 	EST_String name;
 	double prob;
 

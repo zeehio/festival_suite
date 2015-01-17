@@ -45,6 +45,42 @@
 #include <string.h>
 #include "EST_cutils.h"
 
+/* #define CST_DEBUG_MALLOC 1 */
+
+#ifdef CST_DEBUG_MALLOC
+/* use the debug malloc in flite */
+#include "cst_alloc.h"
+
+void *safe_walloc(int size)
+{
+    return cst_safe_alloc(size);
+}
+void *safe_wrealloc(void *ptr, int size)
+{
+    return cst_safe_realloc(ptr,size);
+}
+void *safe_wcalloc(int size)
+{
+    return cst_safe_calloc(size);
+}
+void wfree(void *p)
+{
+    cst_free(p);
+    return;
+}
+char *wstrdup(const char *s)
+{
+    char *t = cst_alloc(char,strlen(s)+1);
+    strcpy(t,s);
+    return t;
+}
+
+void debug_memory_summary(void)
+{
+    cst_alloc_debug_summary();
+}
+
+#else
 void *safe_walloc(int size)
 {
     char *p;
@@ -113,3 +149,4 @@ void wfree(void *p)
 	free(p);
 }
 
+#endif

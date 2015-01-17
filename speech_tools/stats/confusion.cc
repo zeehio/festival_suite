@@ -36,7 +36,7 @@
 /*                   Confusion Matrix Calculation                        */
 /*                                                                       */
 /*=======================================================================*/
-#include <math.h>
+#include <cmath>
 #include "EST_multistats.h"
 #include "EST_math.h"
 #include "EST_types.h"

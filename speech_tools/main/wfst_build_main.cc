@@ -49,11 +49,11 @@
 /*  Also allow determinizing and minimization as required                */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST.h"
 #include "EST_WFST.h"
 

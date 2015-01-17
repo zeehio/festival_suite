@@ -254,7 +254,6 @@ class EST_Val {
 inline const char *error_name(const EST_Val val) { return (EST_String)val;}
 
 // For consistency with other (user-defined) types in val
-inline EST_String string(const EST_Val &v) { return v.string(); }
 inline EST_Val est_val(const EST_String s) { return EST_Val(s); }
 inline EST_Val est_val(const char *s) { return EST_Val(s); }
 inline int Int(const EST_Val &v) { return v.Int(); }

@@ -37,11 +37,11 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <iostream.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
 #include "EST_cutils.h"
 #include "EST_Wave.h"
 #include "EST_wave_utils.h"
@@ -462,7 +462,10 @@ void EST_Wave::rescale(float gain, int normalize)
 	  for (int j = 0; j < num_channels(); ++j)
 	    if (abs(a_no_check(i,j)) > max)
 		max = abs(a_no_check(i,j));
-	factor *= 32766.0/(float)max;
+	if (fabs(max/32766.0-gain) < 0.001)
+	    return; /* already normalized */
+	else
+	    factor *= 32766.0/(float)max;
     }
     
     for (int i = 0; i < num_samples(); ++i)

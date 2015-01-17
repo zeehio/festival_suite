@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST.h"
 #include "EST_Ngrammar.h"
 #include "EST_Pathname.h"

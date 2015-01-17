@@ -1,5 +1,5 @@
 /*
- *	$Id: rateconv.cc,v 1.3 2004/05/04 00:00:16 awb Exp $
+ *	$Id: rateconv.cc,v 1.4 2004/09/29 08:24:16 robert Exp $
  *
  *	RATECONV.C
  *
@@ -159,10 +159,10 @@
  *	    Springer-Verlag, Berlin, Heidelberg, New-York, Tokyo, 1990
  */
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 #include <fcntl.h>
-#include <string.h>
+#include <cstring>
 #include "rateconv.h"
 
 /*

@@ -37,8 +37,8 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include "EST_THash.h"
 #include "EST_error.h"
 #include "apml.h"
@@ -46,7 +46,7 @@
 
 static EST_Regex simpleIDRegex(".*#id(w\\([0-9]+\\))");
 static EST_Regex rangeIDRegex(".*#id(w\\([0-9]+\\)).*id(w\\([0-9]+\\))");
-static EST_Regex RXpunc("[\\.,\\?\\!]+");
+static EST_Regex RXpunc("[\\.,\\?\\!\"]+");
 
 class Parse_State
   {
@@ -54,7 +54,7 @@ public:
     int depth;
     int maxid;
     EST_Utterance *utt;
-    EST_Relation *words;
+    EST_Relation *tokens;
     EST_Relation *perf;
     EST_Relation *com;
     EST_Relation *semstruct;
@@ -63,7 +63,7 @@ public:
     EST_Relation *pause;
     EST_Item *parent;
     EST_Item *pending;
-    EST_Item *last_word;
+    EST_Item *last_token;
   };
 
 class Apml_Parser_Class : public XML_Parser_Class
@@ -163,12 +163,12 @@ void Apml_Parser_Class::document_open(XML_Parser_Class &c,
   state->depth=1;
   state->parent=NULL;
   state->pending=NULL;
-  state->last_word=NULL;
+  state->last_token=NULL;
 
   // create relations:
   state->perf = state->utt->create_relation("Perfomative");
   state->com = state->utt->create_relation("Communicative");
-  state->words = state->utt->create_relation("Word");
+  state->tokens = state->utt->create_relation("Token");
   state->semstruct = state->utt->create_relation("SemStructure");
   state->emphasis = state->utt->create_relation("Emphasis");
   state->boundary = state->utt->create_relation("Boundary");
@@ -237,14 +237,14 @@ void Apml_Parser_Class::element_open(XML_Parser_Class &c,
       else if(strcmp(name, "boundary")==0 )
 	{
 	  item = state->boundary->append();
-	  if(state->last_word)
-	    item->append_daughter(state->last_word);
+	  if(state->last_token)
+	    item->append_daughter(state->last_token);
 	}
       else if(strcmp(name, "pause")==0 )
 	{
 	  item = state->pause->append();
-	  if(state->last_word)
-	    item->append_daughter(state->last_word);
+	  if(state->last_token)
+	    item->append_daughter(state->last_token);
 	}
       else
 	{
@@ -326,10 +326,12 @@ void Apml_Parser_Class::pcdata(XML_Parser_Class &c,
    {
      if(strings[s].length() > 0 )
        {
+	 // Just Punctuation
 	 if(strings[s].matches(RXpunc))
 	   {
-	     state->last_word->set("punc",strings[s]);
+	     state->last_token->set("punc",strings[s]);
 	   }
+	 // Text and possibly punc
 	 else	   
 	   {
 	     EST_Item_Content *cont = new EST_Item_Content();
@@ -340,20 +342,39 @@ void Apml_Parser_Class::pcdata(XML_Parser_Class &c,
 	     else
 	       item = state->parent->append_daughter();
 	     item->set_contents(cont);
-
-	     // strip punc here.
+	     
+	     // strip pre-punc here.
+	     int i = strings[s].index(RXpunc);
 	     EST_String ps = strings[s].at(RXpunc);
+	     EST_String intermediate;
+	     if( ps.length() > 0 && i == 0)
+	       {
+		 cout << "Got pre punc: " << ps << endl;
+		 intermediate = strings[s].after(RXpunc);
+		 // cont->set_name(strings[s].before(RXpunc));
+		 item->set("prepunctuation",ps);
+	       }
+	     else
+	       {
+		 intermediate = strings[s];
+		 item->set("prepunctuation","");
+	       }
+	     // now strip punc
+	     ps = intermediate.at(RXpunc);
 	     if( ps.length() > 0 )
 	       {
-		 //cout << "Got punc: " << ps << endl;
-		 cont->set_name(strings[s].before(RXpunc));
+		 cout << "Got punc: " << ps << endl;
+		 cont->set_name(intermediate.before(RXpunc));
 		 item->set("punc",ps);
 	       }
-		 else
-		   cont->set_name(strings[s]);
-	     
-	   state->words->append(item);
-	   state->last_word = item;
+	     else
+	       {
+		 cont->set_name(intermediate);
+		 item->set("punc","");
+	       }
+
+	   state->tokens->append(item);
+	   state->last_token = item;
 	   
 	   if(state->pending)
 	     {
@@ -361,9 +382,9 @@ void Apml_Parser_Class::pcdata(XML_Parser_Class &c,
 	     }
 	   
 	   //  if (state->parent != NULL && p.context(0) == "w")
-	   //  state->parent->set(EST_String("word"), chars);
+	   //  state->parent->set(EST_String("token"), chars);
 	   
-	   //cout << "  got word: " << item->name() << "\n";
+	   //cout << "  got token: " << item->name() << "\n";
 	   }
        }
      ++s;
@@ -379,7 +400,7 @@ void Apml_Parser_Class::cdata(XML_Parser_Class &c,
   (void)c; (void)p; (void)data; (void)chars;
   // Parse_State *state = (Parse_State *)data;
 
-  //   printf("SOLE XML Parser [cdata[%s]] %d\n", chars, state->depth);
+  //   printf("APML XML Parser [cdata[%s]] %d\n", chars, state->depth);
 }
 
 
@@ -391,7 +412,7 @@ void Apml_Parser_Class::processing(XML_Parser_Class &c,
   (void)c; (void)p; 
   Parse_State *state = (Parse_State *)data;
 
-  printf("SOLE XML Parser [proc[%s]] %d\n", instruction, state->depth);
+  printf("APML XML Parser [proc[%s]] %d\n", instruction, state->depth);
 }
 
 

@@ -42,7 +42,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <iostream.h>
+#include <iostream>
 #include "EST_Pathname.h"
 #include "EST_cutils.h"
 #include "EST_Token.h"
@@ -183,7 +183,7 @@ int EST_WFST::transduce(int state,const EST_String &in,EST_String &out) const
 {
     int nstate;
     int in_i = p_in_symbols.name(in);
-    int out_i;
+    int out_i=0;
 
     if (in_i == -1)
     {

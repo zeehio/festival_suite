@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdio.h>
+#include <cstdio>
 #include "EST_cutils.h"
 #include "EST_Wave.h"
 #include "EST_Option.h"
@@ -89,30 +89,31 @@ struct riff_header {
 
 int play_win32audio_wave(EST_Wave &inwave, EST_Option &al)
 {
-  char *buffer = new char[sizeof(riff_header) + inwave.length()*inwave.num_channels() * sizeof(short)];
+    char *buffer = new char[sizeof(riff_header) + inwave.length()*inwave.num_channels() * sizeof(short)];
 
-  struct riff_header *hdr = (struct riff_header *)buffer;
-  char *data = buffer + sizeof(struct riff_header);
+    struct riff_header *hdr = (struct riff_header *)buffer;
+    char *data = buffer + sizeof(struct riff_header);
 
-  strncpy(hdr->riff, "RIFF", 4);
-  hdr->file_size = sizeof(riff_header) + inwave.length()*sizeof(short);
-  strncpy(hdr->wave, "WAVE", 4);
-  strncpy(hdr->fmt, "fmt ", 4);
-  hdr->header_size = 16;
-  hdr->sample_format = WAVE_FORMAT_PCM;
-  hdr->n_channels = inwave.num_channels();
-  hdr->sample_rate = inwave.sample_rate();
-  hdr->bytes_per_second = hdr->sample_rate * hdr->n_channels * 2;
-  hdr->block_align =  hdr->n_channels * 2;
-  hdr->bits_per_sample = 16;
-  strncpy(hdr->data, "data", 4);
-  hdr->data_size = hdr->n_channels * 2 * inwave.num_samples();
+    strncpy(hdr->riff, "RIFF", 4);
+    hdr->file_size = sizeof(riff_header) + inwave.length()*sizeof(short);
+    strncpy(hdr->wave, "WAVE", 4);
+    strncpy(hdr->fmt, "fmt ", 4);
+    hdr->header_size = 16;
+    hdr->sample_format = WAVE_FORMAT_PCM;
+    hdr->n_channels = inwave.num_channels();
+    hdr->sample_rate = inwave.sample_rate();
+    hdr->bytes_per_second = hdr->sample_rate * hdr->n_channels * 2;
+    hdr->block_align =  hdr->n_channels * 2;
+    hdr->bits_per_sample = 16;
+    strncpy(hdr->data, "data", 4);
+    hdr->data_size = hdr->n_channels * 2 * inwave.num_samples();
   
-  memcpy(data, inwave.values().memory(), hdr->n_channels * 2 * inwave.num_samples());
-  PlaySound( buffer,
-	     NULL,
-	     SND_MEMORY);
-  return 1;
+    memcpy(data, inwave.values().memory(), hdr->n_channels * 2 * inwave.num_samples());
+    PlaySound( buffer,
+               NULL,
+               SND_MEMORY);
+    delete [] buffer;
+    return 1;
 }
 
 #else

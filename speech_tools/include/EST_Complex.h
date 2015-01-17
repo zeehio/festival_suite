@@ -40,8 +40,10 @@
 #ifndef __EST_COMPLEX_H__
 #define __EST_COMPLEX_H__
 
-#include "EST_iostream.h"
-#include <math.h>
+#include <iostream>
+#include <cmath>
+using namespace std;
+
 
 #ifndef PI
 #define PI 3.14159265358979323846

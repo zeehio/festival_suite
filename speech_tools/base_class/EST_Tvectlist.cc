@@ -37,7 +37,7 @@
 /* only include this if you define both vectors and lists for the class  */
 /*                                                                       */
 /*=======================================================================*/
-#include <fstream.h>
+#include <fstream>
 #include "EST_TList.h"
 #include "EST_TVector.h"
 #include "EST_cutils.h"

@@ -1,5 +1,3 @@
-
-
  /************************************************************************/
  /*                                                                      */
  /*                Centre for Speech Technology Research                 */
@@ -45,7 +43,10 @@
 #define __EST_UNIX_WIN32_H__ 1
 
 /* force this to be loaded first */
-#include "win32/EST_iostream_win32.h"
+#ifdef __cplusplus
+#include <iostream>
+using namespace std;
+#endif
 
 #ifdef __cplusplus
 static inline int getpid(void)

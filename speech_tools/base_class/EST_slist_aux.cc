@@ -37,12 +37,12 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fstream.h>
-#include <iostream.h>
+#include <cstdio>
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <iostream>
 #include "EST_types.h"
 #include "EST_String.h"
 #include "EST_Pathname.h"

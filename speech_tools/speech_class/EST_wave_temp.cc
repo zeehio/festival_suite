@@ -40,8 +40,8 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 #include "EST_Wave.h"
 #include "EST_wave_aux.h"
 #include "EST_simplestats.h"
@@ -83,7 +83,7 @@ void meansd(EST_Wave &tr, float &mean, float &sd, int channel)
     mean /= n;
     
     for (i = 0, mean = 0.0; i < tr.num_samples(); ++i)
-	var += pow(tr.a(i, channel) - mean, 2.0);
+      var += pow(tr.a(i, channel) - mean, float(2.0));
     
     var /= n;
     sd = sqrt(var);
@@ -96,7 +96,7 @@ float rms_error(EST_Wave &a, EST_Wave &b, int channel)
     float sum = 0;
     
     for (i = 0; i < size; ++i)
-      sum += pow((a.a(i, channel) - b.a(i, channel)), 2.0);
+      sum += pow(float(a.a(i, channel) - b.a(i, channel)), float(2.0));
     
     sum = sqrt(sum / size);
     return sum;
@@ -110,7 +110,7 @@ float abs_error(EST_Wave &a, EST_Wave &b, int channel)
     for (i = 0; i < size; ++i)
     {
       // cout << i << " " << a.a(i, channel) << " " << b.a(i, channel) << endl;
-	sum += fabs(a.a(i, channel) - b.a(i, channel));
+      sum += fabs(float(a.a(i, channel) - b.a(i, channel)));
     }
     return sum / size;
 }

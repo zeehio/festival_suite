@@ -40,33 +40,47 @@
 TOP=../..
 DIRNAME=wrappers/perl5
 
-SWIG_COMMAND = $(CONFIG_SWIG_COMPILER) -c -c++ -perl -shadow -Wall
-SWIG_RUNTIMELIBS = -lswigpl
-
-INTERFACE_DIRS = ../interface/ ../interface/perl5/
-INTERFACE_DIRS_SWG = $(foreach d,$(INTERFACE_DIRS),-I$(d))
 WRAPPERS = EST_Utterance.i EST_Relation.i EST_Item.i \
 	   EST_Wave.i EST_Track.i 
 
-vpath %.i $(INTERFACE_DIRS)
 
 WRAPPER_SRCS = $(WRAPPERS:.i=_wrap.cc)
 OBJS = $(WRAPPER_SRCS:.cc=.o)
 ALL_WRAPPERS = $(WRAPPERS:.i=.so)
+WRAPPER_PM = $(WRAPPERS:.i=.pm)
 
-FILES= Makefile
+FILES= Makefile $(WRAPPER_SRCS) $(WRAPPER_PM) 
 ALL = .make_wrappers
 LOCAL_INCLUDES = $(CONFIG_PERL_INCLUDES)
-LOCAL_LIBS += $(SWIG_RUNTIMELIBS)
-LOCAL_CLEAN = $(WRAPPER_SRCS) $(WRAPPERS:.i=.pm) $(ALL_WRAPPERS)
+
+# following flag switches off GCC's strict aliasing rules assumption
+# when performing optimization (hence, that optimisiation is no
+# longer available).  This is necessary because swig generated wrapper
+# code contains lots of type punning in the course of doing its magic,
+# which violates the strict aliasing and so can generate duff code
+CC_OTHER_FLAGS += -fno-strict-aliasing
 
 include $(TOP)/config/common_make_rules
 include $(TOP)/config/rules/bin_process.mak
 
-# implicit build rules 
-$(WRAPPER_SRCS) : %_wrap.cc : %.i
-	$(SWIG_COMMAND) $(INTERFACE_DIRS_SWG) -o $@ $<
+# if the user gives a path to swig in $EST/config/config file, then
+# test *.i interface files, and use swig to rebuild wrappers, otherwise
+# use the default pre-swigged versions (and not delete them on make clean!)
+ifdef CONFIG_SWIG_COMPILER
+  SWIG_COMMAND = $(CONFIG_SWIG_COMPILER) -c++ -perl -shadow -Wall
+  INTERFACE_DIRS = ../interface/ ../interface/perl5/
+  INTERFACE_DIRS_SWG = $(foreach d,$(INTERFACE_DIRS),-I$(d))
+  vpath %.i $(INTERFACE_DIRS)
 
+  $(WRAPPER_SRCS) : %_wrap.cc : %.i
+	  $(SWIG_COMMAND) $(INTERFACE_DIRS_SWG) -o $@ $<
+
+  LOCAL_CLEAN = $(WRAPPER_SRCS) $(WRAPPERS:.i=.pm) $(ALL_WRAPPERS)
+else
+  LOCAL_CLEAN = $(ALL_WRAPPERS)
+endif
+
+# implicit build rules 
 $(ALL_WRAPPERS) : %.so : %_wrap.o
 	$(CXX) -shared $(LIBS) -o $@ $<
 

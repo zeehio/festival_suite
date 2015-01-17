@@ -37,8 +37,8 @@
 /* Auxiliary functions for EST_Ngram class                               */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
-#include <string.h>
+#include <iostream>
+#include <cstring>
 #include "EST_String.h"
 #include "EST_Ngrammar.h"
 
@@ -110,14 +110,14 @@ smooth_ExponentialFit(EST_DVector &N, int first, int last)
     }
   
   for(int r=first;r<=last;r++)
-    N[r] = exp(a)* pow((float)r, b);
+    N[r] = exp(a)* pow((double)r, b);
   
   return true;
 }
 
 void make_f_of_f(EST_BackoffNgrammarState *s,void *params)
 {
-    int k;
+    EST_Litem *k;
     double freq;
     EST_String name;
 
@@ -138,7 +138,7 @@ void make_f_of_f(EST_BackoffNgrammarState *s,void *params)
 
 void get_max_f(EST_BackoffNgrammarState *s,void *params)
 {
-    int k;
+    EST_Litem *k;
     double freq;
     EST_String name;
 
@@ -158,7 +158,7 @@ void get_max_f(EST_BackoffNgrammarState *s,void *params)
 
 void map_f_of_f(EST_BackoffNgrammarState *s,void *params)
 {
-    int k;
+    EST_Litem *k;
     double freq;
     EST_String name;
 
@@ -184,7 +184,7 @@ void map_f_of_f(EST_BackoffNgrammarState *s,void *params)
 
 void zero_small_f(EST_BackoffNgrammarState *s,void *params)
 {
-    int k;
+    EST_Litem *k;
     double freq;
     EST_String name;
 
@@ -204,7 +204,8 @@ void zero_small_f(EST_BackoffNgrammarState *s,void *params)
 
 void frequency_of_frequencies(EST_DVector &ff, EST_Ngrammar &n,int this_order)
 {
-  int i,k,size;
+  int i,size;
+  EST_Litem *k;
   double max=0.0;
 
   // if ff has zero size, do complete frequency of frequencies
@@ -252,7 +253,7 @@ void frequency_of_frequencies(EST_DVector &ff, EST_Ngrammar &n,int this_order)
 		  for (i=1;i<ff.n();i++)
 		    total += ff(i);
 		  
-		  ff[0] = pow(n.get_vocab_length(),n.order()) - total;
+		  ff[0] = pow(float(n.get_vocab_length()),float(n.order())) - total;
 	      }
 	}
 	break;
@@ -285,7 +286,7 @@ void frequency_of_frequencies(EST_DVector &ff, EST_Ngrammar &n,int this_order)
 		  double total=0;
 		  for (i=1;i<ff.n();i++)
 		    total += ff(i);
-		  ff[0] = pow(n.get_vocab_length(),this_order) - total;
+		  ff[0] = pow(float(n.get_vocab_length()),float(this_order)) - total;
 
 
 
@@ -302,8 +303,8 @@ void frequency_of_frequencies(EST_DVector &ff, EST_Ngrammar &n,int this_order)
 
 void map_frequencies(EST_Ngrammar &n, const EST_DVector &map, const int this_order)
 {
-  int i,k;
-
+    int i;
+    EST_Litem *k;
 
   switch(n.representation())
     {

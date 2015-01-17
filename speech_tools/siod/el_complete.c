@@ -37,7 +37,7 @@
 /*  awb Dec 30 1998                                                         */
 /*                                                                          */
 /****************************************************************************/
-/*  $Revision: 1.2 $
+/*  $Revision: 1.3 $
 **
 **  History and file completion functions for editline library.
 */
@@ -79,7 +79,7 @@ STATIC int FindMatches(char *dir,char *file,char ***avp)
 {
 #if !defined(SYSTEM_IS_WIN32)
     char	**av;
-    char	**new;
+    char	**neww;
     char	*p;
     DIR		*dp;
     DIRENTRY	*ep;
@@ -100,13 +100,13 @@ STATIC int FindMatches(char *dir,char *file,char ***avp)
 	    continue;
 
 	if ((ac % MEM_INC) == 0) {
-	    if ((new = NEW(char*, ac + MEM_INC)) == NULL)
+	    if ((neww = NEW(char*, ac + MEM_INC)) == NULL)
 		break;
 	    if (ac) {
-		COPYFROMTO(new, av, ac * sizeof (char **));
+		COPYFROMTO(neww, av, ac * sizeof (char **));
 		DISPOSE(av);
 	    }
-	    *avp = av = new;
+	    *avp = av = neww;
 	}
 
 	if ((av[ac] = STRDUP(p)) == NULL) {
@@ -173,7 +173,7 @@ char *rl_complete(char *pathname,int *unique)
     char	**av;
     char	*dir;
     char	*file;
-    char	*new;
+    char	*neww;
     char	*p;
     ESIZE_T	ac;
     ESIZE_T	end;
@@ -197,12 +197,12 @@ char *rl_complete(char *pathname,int *unique)
 	j = strlen(av[0]) - len + 2;
 	if ((p = NEW(char, j + 1)) != NULL) {
 	    COPYFROMTO(p, av[0] + len, j);
-	    if ((new = NEW(char, strlen(dir) + strlen(av[0]) + 2)) != NULL) {
-		(void)strcpy(new, dir);
-		(void)strcat(new, "/");
-		(void)strcat(new, av[0]);
-		rl_add_slash(new, p);
-		DISPOSE(new);
+	    if ((neww = NEW(char, strlen(dir) + strlen(av[0]) + 2)) != NULL) {
+		(void)strcpy(neww, dir);
+		(void)strcat(neww, "/");
+		(void)strcat(neww, av[0]);
+		rl_add_slash(neww, p);
+		DISPOSE(neww);
 	    }
 	}
     }

@@ -38,11 +38,11 @@
 /*=======================================================================*/
 #include "EST_FMatrix.h"
 #include "EST_system.h"
-#include <stdlib.h>
-#include <limits.h>
+#include <cstdlib>
+#include <climits>
 #include "EST_unix.h"
 #include "EST_math.h"
-#include <time.h>
+#include <ctime>
 
 bool polynomial_fit(EST_FVector &x, EST_FVector &y, 
 		    EST_FVector &co_effs, int order)
@@ -461,7 +461,7 @@ float determinant(const EST_FMatrix &a)
     {
 	p = (float)(i + j + 2);	// because i & j should start at 1
 	//	cout << "power " <<p << endl;
-	A[i] = pow(-1.0, p) * determinant(sub(a, i, j));
+	A[i] = pow((float)-1.0, p) * determinant(sub(a, i, j));
     }
     //    cout << "cofactor " << A;
     
@@ -503,44 +503,38 @@ void eye(EST_FMatrix &a)
 
 EST_FVector add(const EST_FVector &a,const EST_FVector &b)
 {
-    // a - b
-    EST_FVector *ans = new EST_FVector;
-    int i;
+  // a + b
+  int a_len = a.length();
+  EST_FVector ans( a_len );
+  
+  if(a_len != b.length()){
+    cerr << "Can't add vectors of differing lengths !" << endl;
+    ans.resize(0);
+    return ans;
+  };
 
-    if(a.length() != b.length())
-    {
-	cerr << "Can't subtract vectors of differing lengths !" << endl;
-	ans->resize(0);
-	return *ans;
-    };
+  for( int i=0; i<a_len; i++ )
+    ans.a_no_check(i) = a.a_no_check(i) + b.a_no_check(i);
 
-    ans->resize(a.length());
-
-    for(i=0;i<a.length();i++)
-	ans->a_no_check(i) = a.a_no_check(i) + b.a_no_check(i);
-
-    return *ans;
+  return ans;
 }
 
 EST_FVector subtract(const EST_FVector &a,const EST_FVector &b)
 {
-    // a - b
-    EST_FVector *ans = new EST_FVector;
-    int i;
+  // a - b
+  int a_len = a.length();
+  EST_FVector ans( a_len );
+  
+  if(a_len != b.length()){
+    cerr << "Can't subtract vectors of differing lengths !" << endl;
+    ans.resize(0);
+    return ans;
+  };
 
-    if(a.length() != b.length())
-    {
-	cerr << "Can't subtract vectors of differing lengths !" << endl;
-	ans->resize(0);
-	return *ans;
-    };
+  for( int i=0; i<a_len; i++ )
+    ans.a_no_check(i) = a.a_no_check(i) - b.a_no_check(i);
 
-    ans->resize(a.length());
-
-    for(i=0;i<a.length();i++)
-	ans->a_no_check(i) = a.a_no_check(i) - b.a_no_check(i);
-
-    return *ans;
+  return ans;
 }
 
 EST_FVector diagonal(const EST_FMatrix &a)

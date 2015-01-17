@@ -42,14 +42,15 @@
 int play_nas_wave(EST_Wave &inwave, EST_Option &al);
 int play_esd_wave(EST_Wave &inwave, EST_Option &al);
 int play_sun16_wave(EST_Wave &inwave, EST_Option &al);
-int play_voxware_wave(EST_Wave &inwave, EST_Option &al);
+int play_linux_wave(EST_Wave &inwave, EST_Option &al);
 int play_mplayer_wave(EST_Wave &inwave, EST_Option &al);
 int play_win32audio_wave(EST_Wave &inwave, EST_Option &al);
 int play_irix_wave(EST_Wave &inwave, EST_Option &al);
+int play_macosx_wave(EST_Wave &inwave, EST_Option &al);
 
 int record_nas_wave(EST_Wave &inwave, EST_Option &al);
 int record_esd_wave(EST_Wave &inwave, EST_Option &al);
 int record_sun16_wave(EST_Wave &inwave, EST_Option &al);
-int record_voxware_wave(EST_Wave &inwave, EST_Option &al);
+int record_linux_wave(EST_Wave &inwave, EST_Option &al);
 
 #endif /* __AUDIOP_H__ */

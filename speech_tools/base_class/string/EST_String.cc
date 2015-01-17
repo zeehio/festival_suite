@@ -43,10 +43,10 @@
  /*************************************************************************/
 
 
-#include <iostream.h>
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <cctype>
 #include "EST_String.h"
 // #include "EST_error.h"
 #include "string_version.h"
@@ -245,7 +245,7 @@ EST_String EST_String::chop_internal(const char *it, int len, int from, EST_chop
 
 EST_String EST_String::chop_internal (EST_Regex &it, int from, EST_chop_direction mode) const
 {
-  int start, end;
+  int start=0, end=0;
   
   if (locate(it, from, start, end))
     switch (mode)
@@ -312,7 +312,7 @@ int EST_String::gsub_internal (const char *os, int olength, const char *s, int l
 	}
       else
 	{
-	  ::make_updatable(memory, size);
+	  cp_make_updatable(memory, size);
 	  to = memory;
 	}
 
@@ -416,7 +416,7 @@ int EST_String::gsub_internal (EST_Regex &ex, const char *s, int length)
 	}
       else
 	{
-	  ::make_updatable(memory, size);
+	  cp_make_updatable(memory, size);
 	  to = memory;
 	}
 
@@ -526,7 +526,7 @@ int EST_String::subst(EST_String source,
 	}
       else
 	{
-	  ::make_updatable(memory, size);
+	  cp_make_updatable(memory, size);
 	  to = memory;
 	}
 
@@ -927,7 +927,7 @@ EST_String &EST_String::operator = (const char c)
 EST_String &EST_String::operator = (const EST_String &s) 
 {
 #if 1
-  static EST_ChunkPtr hack = s.memory;
+/*  static EST_ChunkPtr hack = s.memory;  */
   memory = NON_CONST_CHUNKPTR(s.memory);
   size = s.size;
 #else
@@ -1001,7 +1001,7 @@ EST_String::freq(EST_Regex &ex) const
 {
   int pos=0;
   int n=0;
-  int start, end;
+  int start, end=0;
 
   while (locate(ex, pos, start, end))
     {
@@ -1268,6 +1268,7 @@ long EST_String::Long(bool *valid) const
   long val = strtol(str(), &end, 10);
 
   if (end==NULL|| *end != '\0')
+  {
     if (valid != NULL)
       {
 	*valid=0;
@@ -1279,6 +1280,7 @@ long EST_String::Long(bool *valid) const
 		(const char *)str());
 	exit(0);
       }
+  }
 
   if (valid)
     *valid=1;
@@ -1294,6 +1296,7 @@ int EST_String::Int(bool *valid) const
     return 0L;
 
   if (val > INT_MAX || val < INT_MIN)
+  {
     if (valid != NULL)
       {
 	*valid=0;
@@ -1305,6 +1308,7 @@ int EST_String::Int(bool *valid) const
 	       val);
 	exit(0);
       }
+  }
 
   return val;
 }
@@ -1316,6 +1320,7 @@ double EST_String::Double(bool *valid) const
   double val = strtod(str(), &end);
 
   if (end==NULL|| *end != '\0')
+  {
     if (valid != NULL)
       {
 	*valid=0;
@@ -1327,6 +1332,7 @@ double EST_String::Double(bool *valid) const
 		(const char *)str());
 	exit(0);
       }
+  }
 
   if (valid)
     *valid=1;
@@ -1342,6 +1348,7 @@ float EST_String::Float(bool *valid) const
     return 0.0;
 
   if (val > FLT_MAX || val < -FLT_MAX) 
+  {
     if (valid != NULL)
       {
 	*valid=0;
@@ -1353,6 +1360,7 @@ float EST_String::Float(bool *valid) const
 	       val);
 	exit(0);
       }
+  }
 
   return val;
 }

@@ -37,9 +37,9 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <string.h>
+#include <cstring>
 #include "EST_unix.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_cutils.h"
 #include "EST_string_aux.h"
 #include "EST_Wave.h"

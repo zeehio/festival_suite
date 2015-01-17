@@ -78,6 +78,10 @@ struct gc_protected
     ++gc_cells_allocated;}            \
  (*_into).gc_mark = 0;                \
  (*_into).type = (short) _type;}
+#if 0
+#define NEWCELL(_into,_type) NNEWCELL(&_into,_type)
+void NNEWCELL (LISP *_into,long _type);
+#endif
 
 #ifdef THINK_C
 extern int ipoll_counter;
@@ -117,6 +121,8 @@ void init_subrs_sys(void);
 void init_subrs_srv(void);
 void init_subrs_str(void);
 void init_subrs_xtr(void);
+
+void need_n_cells(int n);
 
 char *must_malloc(unsigned long size);
 

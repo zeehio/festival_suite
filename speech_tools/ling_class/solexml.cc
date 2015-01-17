@@ -37,8 +37,8 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include "EST_THash.h"
 #include "EST_error.h"
 #include "solexml.h"

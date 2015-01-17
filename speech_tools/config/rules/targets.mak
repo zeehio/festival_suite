@@ -66,9 +66,16 @@ ${SUBDIRECTORIES} dummy_dir_name: FORCE
 ## Clean up junk
 
 clean:
-	$(RM) -fr $(OBJS) $(JAVA_CLASSES_CLASS) $(ALL_EXECS) $(ALL_EXECS:%=%.mak) $(ALL_LIBS) $(LOCAL_CLEAN) .buildlib* *~
+	$(RM) -fr $(OBJS) $(JAVA_CLASSES_CLASS) $(ALL_EXECS) $(ALL_EXECS:%=%.mak) $(ALL_LIBS) $(LOCAL_CLEAN) make.depend .buildlib* *~
 ifdef ALL_DIRS
 	@ for i in $(ALL_DIRS) ; \
+	do \
+	   echo "clean in $(DIRNAME)/$$i" ;\
+	   $(MAKE) --no-print-directory -C $$i clean ; \
+	done
+endif
+ifdef EXTRA_LIB_BUILD_DIRS
+	@ for i in $(EXTRA_LIB_BUILD_DIRS) ; \
 	do \
 	   echo "clean in $(DIRNAME)/$$i" ;\
 	   $(MAKE) --no-print-directory -C $$i clean ; \

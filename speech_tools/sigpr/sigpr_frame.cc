@@ -314,7 +314,7 @@ void lpc2cep(const EST_FVector &lpc, EST_FVector &cep)
     for (n = 0; n < cep.length(); n++) 
     {
 	// check if NaN -- happens on some frames of silence
-	if (isnan(cep[n]) ) cep[n] = 0.0;
+	if (isnanf(cep[n]) ) cep[n] = 0.0;
 	
 	if (cep[n] >  MAX_ABS_CEPS){
 	    cerr << "WARNING : cepstral coeff " << n << " was " << 
@@ -499,7 +499,7 @@ void sig2pow(EST_FVector &frame, float &power)
 {
     power = 0.0;
     for (int i = 0; i < frame.length(); i++)
-	power += pow(frame(i), 2.0);
+      power += pow(frame(i), float(2.0));
 
     power /= frame.length();
 }

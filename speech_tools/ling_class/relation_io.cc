@@ -36,9 +36,9 @@
 /*                      Relation class file i/o, label files             */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <fstream>
 #include "EST_unix.h"
 #include "EST_types.h"
 #include "ling_class/EST_Relation.h"

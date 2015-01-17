@@ -59,9 +59,9 @@ CONFIGURATION =
 OPTIMISE=3
 WARN=1
 # VERBOSE=1
-# DEBUG=1
+#DEBUG=1
 # PROFILE=gprof
-# SHARED=1
+#SHARED=2
 
 ## Directory specific selections which override the above
 
@@ -76,17 +76,21 @@ OPTIMISE_sigpr = 3
 ## various audio devices are supported directly but you can always
 ## specify a program to play files in a desired format.
 
-## NCD's network audio system, This is recommended.
+## NCD's network audio system.
 # INCLUDE_MODULES += NAS_AUDIO
 
 ## Elightenment Sound Demon, for KDE etc.
 # INCLUDE_MODULES += ESD_AUDIO
 
-## Native audio for your platform (sun, linux, freebsd, irix, windows)
+## Native audio for your platform (sun, linux, freebsd, irix, macosx, windows)
 INCLUDE_MODULES += NATIVE_AUDIO
 
 ## Special code to run Windows MPLAYER
 # INCLUDE_MODULES += MPLAYER_AUDIO
+
+## Under Linux there may be a choice of audio support
+## This is only used if we are under Linux (or a linux like system)
+LINUXAUDIO = @LINUXAUDIO@
 
 ## USER INTERFACE
 
@@ -144,19 +148,29 @@ INCLUDE_MODULES += RXP
 ## Wrappers for selected EST Classes and functionality for
 ## various high level scripted languages, such as Perl
 
-# Uncomment following to enable building of wrappers
+## Uncomment following to enable building of wrappers
 #INCLUDE_MODULES += WRAPPERS
 
-# Path to swig binary.
-# (download from http://www.swig.org/ (SWIG-1.3.19 used here))
+## Path to Swig.
+##
+## If you can't or don't need to run swig yourself (you probably
+## don't), then leaving this variable commented out will use the
+## default pre-generated code.
+##
+## Only set this if you *DO* want to run swig (for example to modify
+## the wrappers yourself).  If so, the safest bet is to use the same
+## version of swig as speech tools developers (download from
+## http://www.swig.org/ (SWIG-1.3.27 used here))
+##
 #CONFIG_SWIG_COMPILER = /usr/bin/swig
 
+
 # Languages to generate wrappers for. Currently: PYTHON and PERL5
-#CONFIG_WRAPPER_LANGUAGES = PYTHON PERL5
+CONFIG_WRAPPER_LANGUAGES = PYTHON PERL5
 
 # Language specific includes should be set to correct site paths
-#CONFIG_PYTHON_INCLUDES= -I/usr/include/python2.2/
-#CONFIG_PERL_INCLUDES= -I/usr/lib/perl5/5.8.3/i386-linux-thread-multi/CORE/
+CONFIG_PYTHON_INCLUDES= -I/usr/include/python2.2/
+CONFIG_PERL_INCLUDES= -I/usr/lib/perl5/5.8.3/i386-linux-thread-multi/CORE/
 #OR OLD#CONFIG_PERL_INCLUDES= -I/usr/lib/perl5/5.6.1/i386-linux/CORE/
 ##
 ###################################################################
@@ -194,3 +208,4 @@ endif
 ## assumed defaults should go below. See config/ReadMe for a description
 ## of the most common things you might need.
 
+# COMPILERLIBS = 

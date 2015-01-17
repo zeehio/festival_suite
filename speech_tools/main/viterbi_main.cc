@@ -37,9 +37,9 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
 #include "EST.h"
 
 EST_read_status load_TList_of_StrVector(EST_TList<EST_StrVector> &w,

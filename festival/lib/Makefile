@@ -41,7 +41,7 @@ ALL_DIRS=$(BUILD_DIRS)
 
 PHONESETS = mrpa_phones.scm mrpa_allophones.scm radio_phones.scm \
             holmes_phones.scm darpa_phones.scm phoneset.scm \
-            cmusphinx2_phones.scm
+            cmusphinx2_phones.scm unilex_phones.scm
 DURSTATS = mrpa_durs.scm klatt_durs.scm gswdurtreeZ.scm f2bdurtreeZ.scm
 INTSTATS = tobi.scm f2bf0lr.scm tobi_rules.scm \
            tilt.scm apml.scm apml_f2bf0lr.scm apml_kaldurtreeZ.scm
@@ -57,14 +57,15 @@ GENERAL =  init.scm synthesis.scm module_description.scm \
           mbrola.scm display.scm postlex.scm tokenpos.scm \
           festtest.scm cslush.scm cart_aux.scm pauses.scm \
           scfg.scm mettree.scm java.scm clunits.scm clunits_build.scm \
-          hts.scm siteinit.scm
+          siteinit.scm
+HTS = hts.scm
 OTHERS = Sable.v0_2.dtd sable-latin.ent festival.el scfg_wsj_wp20.gram \
 	speech.properties Singing.v0_1.dtd
 
 SIOD =  siod.scm web.scm cstr.scm fringe.scm
 
 FILES=Makefile VCLocalRules $(PHONESETS) $(DURSTATS) $(INTSTATS) $(DBS) \
-      $(BRKMODELS) $(GENERAL) $(LTSRULES) $(OTHERS) $(MODES)
+      $(BRKMODELS) $(GENERAL) $(LTSRULES) $(OTHERS) $(MODES) $(HTS)
 
 LOCAL_CLEAN=$(SIOD)
 

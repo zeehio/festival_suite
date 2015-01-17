@@ -61,6 +61,7 @@ typedef enum EST_TrackFileType {
   tff_htk,
   tff_htk_fbank,
   tff_htk_mfcc,
+  tff_htk_mfcc_e,
   tff_htk_user,
   tff_htk_discrete,
   tff_xmg,

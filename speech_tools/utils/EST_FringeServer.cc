@@ -39,7 +39,7 @@
 
 #include "EST_system.h"
 #include "EST_socket.h"
-#include <signal.h>
+#include <csignal>
 #include "EST_unix.h"
 #include "EST_TKVL.h"
 #include "EST_ServiceTable.h"
@@ -47,8 +47,8 @@
 #include "EST_Pathname.h"
 #include "EST_error.h"
 #include "EST_Token.h"
-#include "iomanip.h"
-#include "iostream.h"
+#include <iomanip>
+#include <iostream>
 
 static EST_Regex ipnum("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+");
 

@@ -39,7 +39,7 @@
 /*  and it searches for the best path through the candidates             */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdio.h>
+#include <cstdio>
 #include "EST_viterbi.h"
 
 static void init_paths_array(EST_VTPoint *n,int num_states);
@@ -165,7 +165,7 @@ const int EST_Viterbi_Decoder::betterthan(const float a,const float b) const
 	return (a < b);
 }
 
-static void init_dynamic_states(EST_VTPoint *p, EST_VTCandidate *cands)
+static int init_dynamic_states(EST_VTPoint *p, EST_VTCandidate *cands)
 {
     // In a special (hmm maybe not so special), the number of "states"
     // is the number of candidates
@@ -175,6 +175,8 @@ static void init_dynamic_states(EST_VTPoint *p, EST_VTCandidate *cands)
     for (i=0, c=cands; c != 0; c=c->next,i++)
 	c->pos = i;
     init_paths_array(p,i);
+    
+    return i;
 }
 
 void EST_Viterbi_Decoder::set_pruning_parameters(float beam, float
@@ -206,8 +208,8 @@ void EST_Viterbi_Decoder::search(void)
     EST_VTCandidate *c;
     int i=0;
 
-    double best_score,score_cutoff;
-    double best_candidate_score,candidate_cutoff=0;
+    double best_score=0.0,score_cutoff=0.0;
+    double best_candidate_score=0.0,candidate_cutoff=0;
     int dcount,pcount;
     int cand_count=0, cands_considered=0;
 
@@ -273,7 +275,7 @@ void EST_Viterbi_Decoder::search(void)
 		if(trace)
 		{
 		    cerr << "Considered " << cands_considered << " of ";
-		    cerr << cand_count*cand_count << " candidate paths" << endl;
+		    cerr << cand_count*p->num_states << " candidate paths" << endl;
 		    cerr << "FRAME: best score " << best_score;
 		    cerr << "  score cutoff " << score_cutoff << endl;
 		    cerr << "       best candidate score " << best_candidate_score;
@@ -380,7 +382,6 @@ void EST_Viterbi_Decoder::vit_add_path(EST_VTPoint *p, EST_VTPath *np)
 
     if ((np->state < 0) || (np->state > p->num_states))
     {
-	printf("awb pos debug\n");
 	cerr << "EST_Viterbi: state too big (" << np->state << ")" << endl;
     }
     else if ((p->st_paths[np->state] == 0) ||

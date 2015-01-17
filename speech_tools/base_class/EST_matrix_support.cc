@@ -38,7 +38,7 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <iostream.h>
+#include <iostream>
 #include "EST_TVector.h"
 #include "EST_matrix_support.h"
 #include "EST_bool.h"

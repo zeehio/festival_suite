@@ -38,11 +38,11 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <fstream.h>
-#include <math.h>
-#include <limits.h>
+#include <cstdlib>
+#include <cstdio>
+#include <fstream>
+#include <cmath>
+#include <climits>
 #include "EST_String.h"
 #include "EST_types.h"
 #include "EST_FileType.h"

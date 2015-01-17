@@ -36,7 +36,7 @@
 /*                  Features i/o                                         */
 /*  This is kept separate from EST_Features to help reduce dependencies  */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_Features.h"
 #include "ling_class/EST_Item.h"
 #include "EST_error.h"

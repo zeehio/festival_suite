@@ -38,8 +38,8 @@
 /* his original rights                                                   */
 /*                                                                       */
 /*************************************************************************/
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 #include "array_smoother.h"
 #include "EST_cutils.h"
 

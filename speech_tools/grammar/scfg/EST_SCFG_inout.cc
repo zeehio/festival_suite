@@ -46,7 +46,7 @@
 /*    log(a+b) = log(1 + e                ) + log(b)                     */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_SCFG_Chart.h"
 #include "EST_simplestats.h"
 #include "EST_math.h"

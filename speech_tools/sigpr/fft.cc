@@ -37,9 +37,9 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <math.h>
-//#include <iostream.h>
-//#include <fstream.h>
+#include <cmath>
+//#include <iostream>
+//#include <fstream>
 #include "sigpr/EST_fft.h"
 #include "EST_math.h"
 #include "EST_error.h"
@@ -86,7 +86,7 @@ static int slowFFTsub(EST_FVector &real, EST_FVector &imag, float f)
     int i,j,k,l;
     
     M = fastlog2(real.n());
-    N = (int)pow(2,(float)M);
+    N = (int)pow(float(2.0),(float)M);
 
     if (N != real.n())
       {
@@ -96,7 +96,7 @@ static int slowFFTsub(EST_FVector &real, EST_FVector &imag, float f)
 
     for(l=1;l<=M;l++){
 
-	int le = (int)pow(2,(float)(M+1-l));
+      int le = (int)pow(float(2.0),(float)(M+1-l));
 	int le1=le/2;
 
 	u_real = 1.0;

@@ -62,7 +62,7 @@ template<class T> EST_TItem<T> *EST_TItem<T>::make(const T &val)
 
 template<class T> void EST_TItem<T>::release(EST_TItem<T> *it)
 {
-  if (s_nfree < s_maxFree)
+    if (0) // (s_nfree < s_maxFree)
     {
       // Destroy the value in case it holds resources.
       it->EST_TItem<T>::~EST_TItem();
@@ -73,7 +73,9 @@ template<class T> void EST_TItem<T>::release(EST_TItem<T> *it)
       s_nfree++;
     }
   else
-    delete it;
+  {
+      delete it;
+  }
 }
 
 template<class T> void EST_TList<T>::copy_items(const EST_TList<T> &l)
@@ -127,13 +129,5 @@ template<class T> EST_TList<T> &EST_TList<T>::operator+=(const EST_TList<T> &a)
     return *this;
 }
 
-template<class T> 
-ostream& operator << (ostream &st, EST_TList< T > const &list) 
-{ 
-  EST_Litem *ptr; 
-  for (ptr = list.head(); ptr != 0; ptr = next(ptr)) 
-    st << list.item(ptr) << " "; 
-  return st;
-}
 
 

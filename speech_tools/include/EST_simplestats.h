@@ -47,6 +47,8 @@
 #include "EST_TKVL.h"
 #include "EST_types.h"
 
+typedef size_t int_iter; 
+
 /** A class for managing mapping string names to integers and back again,
     mainly used for representing alphabets in n-grams and grammars etc.
 
@@ -249,7 +251,8 @@ public:
     /// Add this observation, may specify number of occurrences
     void cumulate(const EST_String &s,double count=1);
     /// Add this observation, i must be with in EST\_Discrete range
-    void cumulate(const int i,double count=1);
+    void cumulate(EST_Litem *i,double count=1);
+    void cumulate(int i,double count=1);
     /// Return the most probable member of the distribution
     const EST_String &most_probable(double *prob = NULL) const;
     /** Return the entropy of the distribution
@@ -265,17 +268,18 @@ public:
     /// 
     double frequency(const int i) const; 
     /// Used for iterating through members of the distribution
-    int item_start() const;
+    EST_Litem *item_start() const;
     /// Used for iterating through members of the distribution
-    int item_next(int idx) const;
+    EST_Litem *item_next(EST_Litem *idx) const;
     /// Used for iterating through members of the distribution
-    int item_end(int idx) const;
+    int item_end(EST_Litem *idx) const;
+
     /// During iteration returns name given index 
-    const EST_String &item_name(int idx) const;
+    const EST_String &item_name(EST_Litem *idx) const;
     /// During iteration returns name and frequency given index  
-    void item_freq(int idx,EST_String &s,double &freq) const;
+    void item_freq(EST_Litem *idx,EST_String &s,double &freq) const;
     /// During iteration returns name and probability given index
-    void item_prob(int idx,EST_String &s,double &prob) const;
+    void item_prob(EST_Litem *idx,EST_String &s,double &prob) const;
 
     /// Returns discrete vocabulary of distribution
     inline const EST_Discrete *const get_discrete() const { return discrete; };
@@ -288,11 +292,13 @@ public:
         accordingly.  This is used when smoothing frequencies.
     */
     void set_frequency(int i,double c); 
+    void set_frequency(EST_Litem *i,double c); 
     
     /// Sets the frequency of named item, without modifying {\tt num\_samples}.
     void override_frequency(const EST_String &s,double c);
     /// Sets the frequency of named item, without modifying {\tt num\_samples}.
     void override_frequency(int i,double c); 
+    void override_frequency(EST_Litem *i,double c); 
     
     /** Sets the number of samples.  Care should be taken on setting this
         as it will affect how probabilities are calculated.

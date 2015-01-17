@@ -39,10 +39,10 @@
 /*  files include signals, lpc and F0 files                              */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include "EST_unix.h"
-#include <string.h>
+#include <cstring>
 #include "EST_cutils.h"
 #include "EST_wave_utils.h"
 #include "esps_utils.h"

@@ -39,8 +39,8 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <fcntl.h>
 #include "EST_unix.h"
 #include "EST_socket.h"

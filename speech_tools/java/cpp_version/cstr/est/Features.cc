@@ -107,7 +107,7 @@ Java_cstr_est_Features_create_1cpp_1features(JNIEnv *env,
 			    : (EST_Features *)handle
 			    );
 
-  // printf("create features %x\n", features);
+  // printf("create features %p\n", features);
 
   env->SetLongField(self, handle_field, (jlong)features);
 
@@ -119,7 +119,7 @@ Java_cstr_est_Features_destroy_1cpp_1features (JNIEnv *env, jobject self)
 {
   EST_Features *features = (EST_Features *) env->GetLongField(self, handle_field);
 
-  // printf("destroy features  %x\n", features);
+  // printf("destroy features  %p\n", features);
 
   delete features;
   return 1;

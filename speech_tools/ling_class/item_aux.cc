@@ -36,10 +36,10 @@
 /*  Various auxiliary item/relation functions for tree manipulation      */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
 #include "ling_class/EST_Item.h"
 #include "ling_class/EST_Item_Content.h"
 #include "ling_class/EST_Relation.h"

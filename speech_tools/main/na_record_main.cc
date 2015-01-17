@@ -39,11 +39,15 @@
 #include "EST.h"
 #include "EST_audio.h"
 #include "EST_cmd_line_options.h"
-#ifdef WIN32
+#if defined(WIN32) || defined(__CYGWIN__)
+#include "windows.h"
 #include "Mmsystem.h"
 #endif
 
 int record_voxware_wave(EST_Wave &inwave, EST_Option &al);
+#if defined(WIN32) || defined(__CYGWIN__)
+int win_record_wave(EST_Wave &wave,  EST_Option &al);
+#endif
 
 /** @name <command>na_record</command> <emphasis>Audio file recording</emphasis>
     @id na-record-manual
@@ -111,41 +115,64 @@ int main (int argc, char *argv[])
 	al.add_item("-time", "10");
     if (al.present("-o"))
 	out_file = al.val("-o");
-
-#ifndef WIN32
+#if defined(WIN32) || defined(__CYGWIN__)
+    if (win_record_wave(wave,al) != 0)
+#else
     if (record_wave(wave,al) != 0)
+#endif
     {
 	return -1;
     }
 
     write_wave(wave, out_file, al);
     return 0;
-#else
-	char command_buffer[100];
-	MCIERROR audio_error;
-	EST_String save_command("save mysound ");
-
-	if (!al.present("-o"))
-	{
-		cerr << "na_record: for Win32 version, must specify an output file with the -o flag" << endl;
-		return -1;
-	}
-	save_command += al.val("-o");
-
-	audio_error = mciSendString("open new type waveaudio alias mysound buffer 6",NULL,0,NULL);
-
-	sprintf(command_buffer,"set mysound time format ms bitspersample 16 samplespersec %d",
-		al.val("-f"));
-	audio_error = mciSendString(command_buffer,NULL, 0 ,NULL);
-
-	sprintf(command_buffer,"record mysound from 0 to %d wait",(int)(1000*al.fval("-time")));
-	audio_error = mciSendString(command_buffer,NULL,0,NULL);
-	audio_error = mciSendString(save_command,NULL,0,NULL);
-	audio_error = mciSendString("close mysound",NULL,0,NULL);
-
-	return 0;
-#endif
-
 }
+
+#if defined(WIN32) || defined(__CYGWIN__)
+int win_record_wave(EST_Wave &wave,  EST_Option &al)
+{
+    char command_buffer[100];  // This could be more robust - ART
+    MCIERROR audio_error;
+    EST_String out_file("-");
+    //	EST_String save_command("save mysound ");
+
+    if (!al.present("-o"))
+    {
+        cerr << "na_record: for Win32 version, must specify an output file with the -o flag" << endl;
+        return -1;
+    }
+    out_file = al.val("-o");
+    //	save_command += al.val("-o");
+    
+    // Should check the audio_error return values in the following - ART
+    // as it only reliable records at 44100 we'll do that and down sample
+    
+    audio_error = mciSendString("open new type waveaudio alias mysound buffer 6",NULL,0,NULL);
+    
+    sprintf(command_buffer,"set mysound time format ms bitspersample 16 samplespersec %d",44100);
+    audio_error = mciSendString(command_buffer,NULL, 0 ,NULL);
+    
+    // In theory, based on the previous command, the integer being
+    // calculated in the next line should be the ending time of the
+    // recording in milliseconds.  However, I have tried this program
+    // on a number of Windows machines and have found that the
+    // durations are off by a factor that seems to be assuming a 11025
+    // Hz sample rate.  My guess for the additional factor of 2 needed
+    // to make the output file the right duration is that the Win32
+    // multimedia library is probably assuming stereo instead of mono
+    // recording.  - ART
+    sprintf(command_buffer,"record mysound from 0 to %d wait",(int)(2*1000*al.fval("-time")*44100)/11025);
+    audio_error = mciSendString(command_buffer,NULL,0,NULL);
+    sprintf(command_buffer,"save mysound %s",(char *)al.val("-o"));
+    audio_error = mciSendString(command_buffer,NULL,0,NULL);
+    //	audio_error = mciSendString(save_command,NULL,0,NULL);
+    audio_error = mciSendString("close mysound",NULL,0,NULL);
+    
+    read_wave(wave, out_file, al);
+    wave.resample(al.ival("-sample_rate"));
+    
+    return 0;
+}
+#endif
 
 

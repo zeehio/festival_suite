@@ -38,7 +38,7 @@
 /* determinization of WFST.                                              */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
+#include <iostream>
 #include "EST_WFST.h"
 #include "wfst_aux.h"
 

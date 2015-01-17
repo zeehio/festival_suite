@@ -37,8 +37,8 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include "EST_system.h"
 //#include "EST_sigpr.h"
 #include "sigpr/EST_Window.h"
@@ -282,7 +282,7 @@ void EST_Window::window_signal(const EST_Wave &sig,
     float dc; 
       
       // create the window shape
-    make_window(size, window_vals);
+    make_window(size, window_vals,-1);
     window.ensure(size, (bool)FALSE);
     dc = find_dc(sig, start, size);
 
@@ -318,7 +318,7 @@ void EST_Window::window_signal(const EST_Wave &sig,
 {
     EST_TBuffer<float> window_vals(size); 
       // create the window shape
-    make_window(size, window_vals);
+    make_window(size, window_vals,-1);
 
     window_signal(sig, 
 		  window_vals, 

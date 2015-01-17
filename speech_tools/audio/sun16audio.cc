@@ -42,10 +42,10 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <cctype>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -165,6 +165,7 @@ static int sun16_check_device(int audio)
     if ((ioctl(audio, AUDIO_GETDEV, &type) != -1) &&
 	((streq("SUNW,CS4231",type.name)) ||   /* Newer Suns (ultras)      */
 	 (streq("SUNW,dbri",type.name)) ||     /* Older Suns (SS10s SS20s) */
+         (streq("SUNW,audiots",type.name)) ||  /* For stations more advanced than ultras */
 	 (streq("SUNW,sb16",type.name))))      /* i386 machines            */
 	return TRUE;
     else

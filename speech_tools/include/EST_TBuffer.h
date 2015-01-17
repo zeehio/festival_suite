@@ -37,7 +37,7 @@
   * 
   * @see EST_TBuffer
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TBuffer.h,v 1.3 2004/05/04 00:00:16 awb Exp $
+  * @version $Id: EST_TBuffer.h,v 1.4 2004/09/29 08:24:17 robert Exp $
   */
 //@{
 #ifndef __EST_TBUFFER_H__
@@ -99,7 +99,7 @@ private:
   /// Expand the buffer.
   void expand_to(unsigned int req_size, bool cpy);
   /// Expand and set some of it to a known value.
-  void expand_to(unsigned int req_size, const TYPE &set_to, int howmany=-1);
+  void expand_to(unsigned int req_size, const TYPE &set_to, int howmany);
   
 public:
 
@@ -130,7 +130,7 @@ public:
 
   /// Make sure there is enough space, copying if requested.
   void ensure(unsigned int req_size, bool copy)	
-    {if (req_size > p_size) expand_to(req_size, copy);}	
+  {if (req_size > p_size) expand_to(req_size, copy,-1);}	
 
   /// Make sure there is enough space, setting to a known value.
   void ensure(unsigned int req_size, const TYPE &set_to, int howmany=-1)	

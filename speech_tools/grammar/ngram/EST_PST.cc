@@ -38,10 +38,10 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST_String.h"
 #include "EST_types.h"
 #include "EST_Token.h"
@@ -71,7 +71,8 @@ EST_PredictionSuffixTree_tree_node::print_freqs(ostream &os)
 	// Base -- print from pd 
 	EST_String s;
 	double freq;
-	for (int i = pd.item_start(); 
+        EST_Litem *i;
+	for (i = pd.item_start(); 
 	     !pd.item_end(i); 
 	     i=pd.item_next(i))
 	{
@@ -98,7 +99,7 @@ EST_PredictionSuffixTree_tree_node::print_probs(ostream &os)
 	EST_String s;
 	double prob;
 	os << get_path() << " :";
-	for (int i = pd.item_start(); !pd.item_end(i) ; i=pd.item_next(i))
+	for (EST_Litem *i = pd.item_start(); !pd.item_end(i) ; i=pd.item_next(i))
 	{
 	    pd.item_prob(i,s,prob);
 	    os << " " << s << " " << prob;

@@ -40,7 +40,8 @@
 #ifndef __EST_TVector_H__
 #define __EST_TVector_H__
 
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 #include "EST_bool.h"
 #include "EST_rw_status.h"
 
@@ -309,7 +310,13 @@ public:
   /// Create a sub vector.
   void sub_vector(EST_TVector<T> &sv, int start_c=0, int len=-1);
   /// print out vector.
-  friend ostream& operator << (ostream &st, const EST_TVector<T> &m);
+    friend ostream& operator << (ostream &st, const EST_TVector<T> &m)
+    {
+        int i; 
+        for (i = 0; i < m.n(); ++i) 
+            st << m(i) << " "; st << endl; 
+        return st;
+    }
 
   /// Matrix must be friend to set up subvectors
   friend class EST_TMatrix<T>;
@@ -322,9 +329,6 @@ public:
 /// assignment operator: fill track with values in list <parameter>s</parameter>.
 template<class T>
 extern EST_TVector<T> &set(EST_TVector<T> &v, const EST_TList<T> &s);
-
-template<class T>
-extern ostream& operator << (ostream &st, const EST_TVector< T > &a);
 
 #undef A_CHECK
 #endif

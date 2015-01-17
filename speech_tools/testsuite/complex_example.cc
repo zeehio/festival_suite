@@ -35,8 +35,8 @@
 /************************************************************************/
 
 #include "EST_Complex.h"
-#include <iostream.h>
-#include <stdio.h>
+#include <iostream>
+#include <cstdio>
 
 int main()
 {

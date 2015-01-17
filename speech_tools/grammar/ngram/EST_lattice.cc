@@ -38,8 +38,8 @@
 /*=======================================================================*/
 
 #include "EST_lattice.h"
-#include <fstream.h>
-#include <stdlib.h>
+#include <fstream>
+#include <cstdlib>
 
 Lattice::Lattice()
 {

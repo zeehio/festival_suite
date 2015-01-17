@@ -37,11 +37,11 @@
 /* Discretes for mapping between alphabets and indexes                   */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
-#include <fstream.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include "EST_String.h"
 #include "EST_simplestats.h"
 

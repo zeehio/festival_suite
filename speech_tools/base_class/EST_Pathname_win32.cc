@@ -43,7 +43,7 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 #include "EST_System.h"
 #include "EST_Pathname.h"
 

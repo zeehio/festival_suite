@@ -23,10 +23,10 @@ Cambridge, MA 02138
 /*                                                             */
 /*    Alan W Black (awb@cstr.ed.ac.uk) 8th April 1996          */
 /***************************************************************/
-#include <stdio.h>
+#include <cstdio>
 #include "EST_unix.h"
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include "EST_String.h"
 #include "EST_THash.h"
 #include "EST_StringTrie.h"

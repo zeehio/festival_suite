@@ -8,7 +8,7 @@
  * File functions
 
 */
-#include <stdio.h>
+#include <cstdio>
 #include "siod.h"
 #include "siodp.h"
 #include "EST_Pathname.h"
@@ -137,7 +137,7 @@ static void siod_string_print(LISP exp, EST_String &sd)
       case tc_flonum:
 	if (FLONMPNAME(exp) == NULL)
 	{
-	    sprintf(tkbuffer,"%g",FLONM(exp));
+	    sprintf(tkbuffer,"%.8g",FLONM(exp));
 	    FLONMPNAME(exp) = (char *)must_malloc(strlen(tkbuffer)+1);
 	    sprintf(FLONMPNAME(exp),"%s",tkbuffer);
 	}
@@ -486,7 +486,7 @@ LISP lprin1f(LISP exp,FILE *f)
     case tc_flonum:
       if (FLONMPNAME(exp) == NULL)
       {
-	  sprintf(tkbuffer,"%g",FLONM(exp));
+	  sprintf(tkbuffer,"%.8g",FLONM(exp));
 	  FLONMPNAME(exp) = (char *)must_malloc(strlen(tkbuffer)+1);
 	  sprintf(FLONMPNAME(exp),"%s",tkbuffer);
       }

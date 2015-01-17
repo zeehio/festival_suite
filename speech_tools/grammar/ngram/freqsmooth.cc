@@ -42,11 +42,11 @@
 /*        F(ngram) = !n-1gram|*(P(n-1gram))                              */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
-#include <string.h>
-#include <math.h>
-#include <limits.h>
-#include <float.h>
+#include <iostream>
+#include <cstring>
+#include <cmath>
+#include <climits>
+#include <cfloat>
 #include "EST_Ngrammar.h"
 
 static double fs_find_backoff_prob(EST_Ngrammar *backoff_ngrams,
@@ -74,7 +74,8 @@ void fs_build_backoff_ngrams(EST_Ngrammar *backoff_ngrams,
 				 EST_Ngrammar &ngram)
 {
     // Build all the backoff grammars back to uni-grams
-    int i,j,k,l;
+    int i,j,l;
+    EST_Litem *k;
 
     for (i=0; i < ngram.order()-1; i++)
 	backoff_ngrams[i].init(i+1,EST_Ngrammar::dense,
@@ -110,7 +111,8 @@ int fs_backoff_smooth(EST_Ngrammar *backoff_ngrams,
 {
     // For all ngrams which are too infrequent, adjust their
     // frequencies based on their backoff probabilities
-    int i,j;
+    int i;
+    EST_Litem *j;
     double occurs;
     double backoff_prob;
 

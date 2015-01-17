@@ -36,7 +36,7 @@
 /*                  Feature value pairs in a EST_TKVL                    */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_Features.h"
 #include "ling_class/EST_Item.h"
 #include "EST_error.h"

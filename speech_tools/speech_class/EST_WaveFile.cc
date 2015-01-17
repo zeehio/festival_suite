@@ -36,7 +36,7 @@
  /* Wave file input and output.                                           */
  /*                                                                       */
  /*************************************************************************/
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_Wave.h"
 #include "EST_WaveFile.h"
 #include "waveP.h"
@@ -364,7 +364,7 @@ EST_read_status read_wave(EST_Wave &sig, const EST_String &in_file,
     int sample_rate;
     EST_read_status rval;
     int num_channels;
-    int offset, length;
+    int offset=0, length=0;
     int bo;
     
     if (in_file == "-")

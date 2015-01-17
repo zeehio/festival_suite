@@ -167,6 +167,11 @@ Returns a the last item in this relation."
 	   (set! i (item.next i)))
     i))
 
+(define (item.feat.present item feat)
+  "(item.feat.present item feat)
+nil if feat doesn't existing in this item, non-nil otherwise."
+  (and item (assoc_string feat (item.features item))))
+
 (define (item.relation.append_daughter parent relname daughter)
 "(item.relation.append_daughter parent relname daughter)
 Make add daughter to parent as a new daughter in relname."
@@ -516,7 +521,7 @@ Doing stuff
 "
                 Centre for Speech Technology Research                  
                      University of Edinburgh, UK                       
-                       Copyright (c) 1996-2004
+                       Copyright (c) 1996-2010
                         All Rights Reserved.                           
                                                                        
   Permission is hereby granted, free of charge, to use and distribute  
@@ -620,5 +625,9 @@ Compile all the scheme files in the library directory."
      "mrpa_durs.scm" "klatt_durs.scm" "gswdurtreeZ.scm"
      "tobi.scm" "f2bf0lr.scm"))
   t)
+
+;;; For mlsa resynthesizer
+(defvar mlsa_alpha_param 0.42)
+(defvar mlsa_beta_param 0.0)
 
 (provide 'festival)

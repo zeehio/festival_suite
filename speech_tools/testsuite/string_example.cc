@@ -34,8 +34,8 @@
 /*                   Date: May 1997                                     */
 /************************************************************************/
 #include "EST_String.h"
-#include <iostream.h>
-#include <stdio.h>
+#include <iostream>
+#include <cstdio>
 
 int main()
 {

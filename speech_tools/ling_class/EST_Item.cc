@@ -47,10 +47,10 @@
 /*  for an item in it is trivial.                                        */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
 #include "ling_class/EST_Item.h"
 #include "ling_class/EST_Relation.h"
 #include "ling_class/EST_Utterance.h"
@@ -482,7 +482,7 @@ EST_Item *EST_Item::prepend_daughter(EST_Item *si)
 	if (down() == 0)
 	    nnode = insert_below(si);
 	else
-	    nnode = down()->last()->insert_after(si);
+	    nnode = down()->insert_before(si);
 	// put daughters back on the new item
 	if (its_downs)
 	{

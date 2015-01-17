@@ -39,9 +39,9 @@
  /*                                                                      */
  /************************************************************************/
 
-#include <stdlib.h>
-#include <iostream.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <iostream>
+#include <cstdio>
 #include "EST_walloc.h"
 #include "EST_TNamedEnum.h"
 

@@ -36,7 +36,10 @@
 #ifndef __EST_THASH_H__
 #define __EST_THASH_H__
 
-#include <iostream.h>
+#include <iostream>
+
+using namespace std;
+
 #include "EST_String.h"
 #include "EST_system.h"
 #include "EST_bool.h"
@@ -48,7 +51,7 @@
 /**@name Hash Tables
   *
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_THash.h,v 1.5 2004/05/04 00:00:16 awb Exp $
+  * @version $Id: EST_THash.h,v 1.6 2004/09/29 08:24:17 robert Exp $
   */
 //@{
 

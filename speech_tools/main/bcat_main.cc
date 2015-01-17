@@ -40,7 +40,7 @@
  /*************************************************************************/
 
 
-#include <stdio.h>
+#include <cstdio>
 #include "EST.h"
 #include "EST_String.h"
 #include "EST_error.h"

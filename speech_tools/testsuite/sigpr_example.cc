@@ -38,7 +38,7 @@
 /*                                                                      */
 /************************************************************************/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_sigpr.h"
 #include "EST_cmd_line.h"
 #include "EST_inline_utils.h"
@@ -422,7 +422,7 @@ int main(void)
     /** The make_window function also creates a window:
      */
     //@{ code
-    EST_Window::make_window(win_vals, 256, "hamming");
+    EST_Window::make_window(win_vals, 256, "hamming",-1);
     //@} code
 
     /** this can then be used to make a frame of speech from the main EST_Wave

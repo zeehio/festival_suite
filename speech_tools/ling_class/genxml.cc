@@ -38,9 +38,9 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cctype>
 #include "EST_TDeque.h"
 #include "EST_THash.h"
 #include "EST_error.h"

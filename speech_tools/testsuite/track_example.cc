@@ -39,8 +39,8 @@
  /*************************************************************************/
 
 
-#include <iostream.h>
-#include <stdlib.h>
+#include <iostream>
+#include <cstdlib>
 #include "EST_Track.h"
 #include "EST_Wave.h"
 #include "EST_sigpr.h"

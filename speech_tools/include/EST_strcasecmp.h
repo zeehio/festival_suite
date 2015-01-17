@@ -42,7 +42,12 @@
 #ifndef __EST_STRCASECMP_H__
 #define __EST_STRCASECMP_H__
 
+#ifdef __cplusplus
+#include <cstdlib>
+using namespace std;
+#else
 #include <stdlib.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

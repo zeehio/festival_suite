@@ -39,7 +39,7 @@
 /* make real WFSTs).                                                     */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
+#include <iostream>
 #include "EST_WFST.h"
 #include "EST_cutils.h"
 

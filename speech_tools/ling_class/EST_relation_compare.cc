@@ -37,9 +37,9 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <iostream.h>
-#include <fstream.h>
-#include <math.h>
+#include <iostream>
+#include <fstream>
+#include <cmath>
 #include "EST_types.h"
 #include "EST_FMatrix.h"
 #include "ling_class/EST_Relation.h"

@@ -38,10 +38,10 @@
  /*************************************************************************/
 
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <cctype>
 #include <sys/stat.h>
 #include "EST_Wave.h"
 #include "EST_Option.h"

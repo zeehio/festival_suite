@@ -37,10 +37,10 @@
  /*                                                                       */
  /*************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
 #include "EST_string_aux.h"
 #include "EST_FileType.h"
 #include "EST_Token.h"

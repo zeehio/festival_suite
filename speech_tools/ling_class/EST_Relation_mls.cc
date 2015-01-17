@@ -43,8 +43,8 @@
 /*                                                                       */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include "ling_class/EST_Item.h"
 
 int linked(EST_Item *from, EST_Item *to)

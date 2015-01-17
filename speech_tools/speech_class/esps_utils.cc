@@ -56,10 +56,10 @@
 /*  octal and hex dumps now.                                             */
 /*=======================================================================*/
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include "EST_unix.h"
-#include <string.h>
+#include <cstring>
 #include <time.h>
 #include "EST_wave_utils.h"
 #include "esps_utils.h"

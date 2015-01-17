@@ -82,7 +82,7 @@ Java_cstr_est_Relation_create_1cpp_1relation(JNIEnv *env,
 			   : (EST_Relation *)handle
 			   );
 
-  // printf("create relation %x\n", relation);
+  // printf("create relation %p\n", relation);
 
   env->SetLongField(self, handle_field, (jlong)relation);
 
@@ -94,7 +94,7 @@ Java_cstr_est_Relation_destroy_1cpp_1relation (JNIEnv *env, jobject self)
 {
   EST_Relation *relation = (EST_Relation *) env->GetLongField(self, handle_field);
 
-  // printf("destroy relation  %x\n", relation);
+  // printf("destroy relation  %p\n", relation);
 
   delete relation;
   return 1;

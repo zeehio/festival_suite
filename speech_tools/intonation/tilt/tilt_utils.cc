@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_math.h"
 #include "tilt.h"
 #include "EST_error.h"
@@ -133,7 +133,7 @@ float rfc_to_t_tilt(EST_Features &e)
 {
     float t_tilt;
     t_tilt = (rfc_to_a_tilt(e) + rfc_to_d_tilt(e)) / 2;
-    if (isnan(t_tilt))
+    if (isnanf(t_tilt))
 	t_tilt = 0.0;
     return t_tilt;
 }
@@ -378,9 +378,9 @@ float unit_curve(float amp, float dur, float t)
 
     x = (t / (dur)) * 2.0;
     if (x < 1.0)
-	val = pow(x, 2.0);
+      val = pow(x, float(2.0));
     else
-	val = 2 - pow((2 - x), 2.0);
+      val = 2 - pow((float(2.0) - x), float(2.0));
 	
     val = (val / 2.0);
 	

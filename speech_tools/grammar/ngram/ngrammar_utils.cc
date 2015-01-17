@@ -37,8 +37,8 @@
 /* A rationalization of some of the general functions                    */
 /*                                                                       */
 /*=======================================================================*/
-#include <iostream.h>
-#include <string.h>
+#include <iostream>
+#include <cstring>
 #include "EST_String.h"
 #include "EST_Token.h"
 #include "EST_error.h"

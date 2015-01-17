@@ -38,7 +38,7 @@
 /*                                                                      */
 /************************************************************************/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_Token.h"
 
 #if defined(DATAC)

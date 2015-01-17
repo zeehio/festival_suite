@@ -29,10 +29,10 @@ Cambridge, MA 02138
 /* read-eval print loop functions separated from main functions */
 /* so LISP functions may be used without requiring full         */
 /* evaluation to be linked (and termcap)                        */
-#include <stdio.h>
+#include <cstdio>
 #include "EST_unix.h"
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include "EST_String.h"
 #include "EST_cutils.h"
 #include "siod.h"

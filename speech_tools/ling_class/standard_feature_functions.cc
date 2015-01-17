@@ -32,9 +32,11 @@
  /*************************************************************************/
  /*                                                                       */
  /*                 Author: Richard Caley (rjc@cstr.ed.ac.uk)             */
- /*            Stolen From: Paul Taylor (pault@cstr,ed,ac,uk)             */
+ /*             Originally: Paul Taylor (pault@cstr,ed,ac,uk)             */
  /* --------------------------------------------------------------------  */
  /* Some generally useful feature functions.                              */
+ /*                                                                       */
+ /* Mostly not very general and way too specific, these shouldn't be here */
  /*                                                                       */
  /*************************************************************************/
 
@@ -45,12 +47,17 @@
 
 EST_Val ff_duration(EST_Item *s)
 {
-  return s->F("end")-s->F("start");
+    if (prev(s))
+        return s->F("end")-prev(s)->F("end");
+    else
+        return s->F("end");
 }
 
 EST_Val ff_start(EST_Item *s)
 {
-    s = s->as_relation("Segment");
+    /* Changed by awb 12/07/05, to make this actually a generic function */
+    /* no longer changes relation view to Segment -- may affect tilt and */
+    /* other pault things                                                */
     return  (prev(s) == 0) ? 0.0 : prev(s)->F("end");
 }
 

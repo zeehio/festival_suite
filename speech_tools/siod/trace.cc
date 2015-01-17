@@ -12,7 +12,7 @@ recursion level will also have to wait for a future version.
 
  */
 
-#include <stdio.h>
+#include <cstdio>
 #include <setjmp.h>
 #include "siod.h"
 #include "siodp.h"

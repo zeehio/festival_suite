@@ -37,10 +37,10 @@
 /* used in emulabel                                                      */
 /*                                                                       */
 /*=======================================================================*/
-#include <fstream.h>
-#include <iostream.h>
-#include <stdlib.h>
-#include <math.h>
+#include <fstream>
+#include <iostream>
+#include <cstdlib>
+#include <cmath>
 #include <time.h>
 #include "EST_unix.h"
 #include "EST_types.h"

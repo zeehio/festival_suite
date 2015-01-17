@@ -37,10 +37,10 @@
 /*  predict values using a tree and data                                 */
 /*                                                                       */
 /*=======================================================================*/
-#include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 #include "EST_Wagon.h"
 #include "EST_cutils.h"
 #include "EST_multistats.h"
@@ -105,6 +105,8 @@ static int wagon_test_main(int argc, char **argv)
 	 "-desc <ifile>     Field description file\n"+
 	 "-data <ifile>     Datafile, one vector per line\n"+
 	 "-tree <ifile>     File containing CART tree\n"+
+	 "-track <ifile>\n"+
+         "                  track for vertex indices\n"+
 	 "-predict          Predict for each vector returning full vector\n"+
 	 "-predict_val      Predict for each vector returning just value\n"+
 	 "-predictee <string>\n"+
@@ -160,6 +162,11 @@ static int wagon_test_main(int argc, char **argv)
 	exit(-1);
     }
 
+    if (al.present("-track"))
+    {
+        wgn_VertexTrack.load(al.val("-track"));
+    }
+
     if (al.present("-o"))
     {
 	if ((wgn_output = fopen(al.val("-o"),"w")) == NULL)
@@ -198,6 +205,10 @@ static int wagon_test_main(int argc, char **argv)
     else if (streq(predict_type,"float") ||
 	     streq(predict_type,"int"))
 	test_tree_float(data,wgn_output,tree,description);
+#if 0
+    else if (streq(predict_type,"vector"))
+	test_tree_vector(data,wgn_output,tree,description);
+#endif
     else
 	test_tree_class(data,wgn_output,tree,description);
 
@@ -296,6 +307,43 @@ static void test_tree_class(EST_TokenStream &data, FILE *output,
 			    LISP tree, LISP description)
 {
     // Test tree against class data to get summary of results
+    EST_StrStr_KVL pairs;
+    EST_StrList lex;
+    EST_String predict_class,real_class;
+    LISP vector,w,predict;
+    double H=0,Q=0,prob;
+    (void)output;
+
+    for (vector=get_data_vector(data,description); 
+	 vector != NIL; vector=get_data_vector(data,description))
+    {
+	predict = wagon_vector_predict(tree,vector,description);
+	predict_class = get_c_string(car(reverse(predict)));
+	real_class = get_c_string(siod_nth(wgn_predictee,vector));
+	prob = get_c_float(car(cdr(siod_assoc_str(real_class,
+						  predict))));
+	if (prob == 0)
+	    H += log(0.000001);
+	else
+	    H += log(prob);
+	Q ++;
+	pairs.add_item(real_class,predict_class,1);
+    }
+    for (w=cdr(siod_nth(wgn_predictee,description)); w != NIL; w = cdr(w))
+	lex.append(get_c_string(car(w)));
+
+    const EST_FMatrix &m = confusion(pairs,lex);
+    print_confusion(m,pairs,lex);
+    fprintf(stdout,";; entropy %g perplexity %g\n",
+	    (-1*(H/Q)),pow(2.0,(-1*(H/Q))));
+}
+
+static void test_tree_vector(EST_TokenStream &data, FILE *output, 
+                             LISP tree, LISP description)
+{
+    // Test tree against class data to get summary of results
+    // Note we are talking about predicting vectors (a *bunch* of
+    // numbers, not just a single class here)
     EST_StrStr_KVL pairs;
     EST_StrList lex;
     EST_String predict_class,real_class;

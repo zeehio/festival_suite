@@ -37,7 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "EST_ling_class.h"
 #include "EST_Track.h"
 #include "EST_cmd_line.h"

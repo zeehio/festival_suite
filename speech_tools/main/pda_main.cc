@@ -36,7 +36,7 @@
 /*             Pitch Detection Algorithm Main routine                    */
 /*                                                                       */
 /*=======================================================================*/
-#include <fstream.h>
+#include <fstream>
 #include "EST.h"
 #include "sigpr/EST_sigpr_utt.h"
 #include "EST_cmd_line_options.h"
@@ -149,7 +149,7 @@ void set_parameters(EST_Features &op, EST_Option &al)
     option_override(op, al, "decimation", "-d");
     option_override(op, al, "noise_floor", "-n");
     option_override(op, al, "min_v2uv_coef_thresh", "-m");
-    option_override(op, al, "v2uv_coef_thresh_ratio", "-r");
+    option_override(op, al, "v2uv_coef_thresh_ratio", "-R");
     option_override(op, al, "v2uv_coef_thresh", "-H");
     option_override(op, al, "anti_doubling_thresh", "-t");
     option_override(op, al, "peak_tracking", "-P");

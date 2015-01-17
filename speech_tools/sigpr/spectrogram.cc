@@ -36,9 +36,9 @@
 /*                    Spectrogram Generation                             */
 /*                                                                       */
 /*=======================================================================*/
-#include <math.h>
-#include <limits.h>
-#include <float.h>  /* needed for FLT_MAX */
+#include <cmath>
+#include <climits>
+#include <cfloat>  /* needed for FLT_MAX */
 #include "EST_error.h"
 #include "EST_Track.h"
 #include "EST_Wave.h"
@@ -150,7 +150,7 @@ void raw_spectrogram(EST_Track &sp, EST_Wave &sig,
 
       // create the window shape
     EST_TBuffer<float> window_vals(frame_length); 
-    make_window(frame_length, window_vals);
+    make_window(frame_length, window_vals,-1);
 
     for (int k = 0 ; k < num_frames ; k++)
     {

@@ -68,6 +68,10 @@
   sub(/__LDPATH__/, ldpath);
 }
 
+/__LDVAR__/ {
+  sub(/__LDVAR__/, ldvar);
+}
+
 /__LIBS__/ {
   sub(/__LIBS__/, libs);
 }

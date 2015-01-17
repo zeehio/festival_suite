@@ -8,14 +8,14 @@
  * math functions
 
 */
-#include <stdio.h>
+#include <cstdio>
 #include "siod.h"
 #include "siodp.h"
 
 LISP numberp(LISP x)
 {if FLONUMP(x) return(truth); else return(NIL);}
 
-static LISP plus(LISP args)
+static LISP lplus(LISP args)
 {
     LISP l;
     double sum;
@@ -157,7 +157,7 @@ void init_subrs_math(void)
  init_subr_1("number?",numberp,
  "(number? DATA)\n\
   Returns t if DATA is a number, nil otherwise.");
- init_lsubr("+",plus,
+ init_lsubr("+",lplus,
  "(+ NUM1 NUM2 ...)\n\
   Returns the sum of NUM1 and NUM2 ...  An error is given is any argument\n\
   is not a number.");

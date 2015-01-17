@@ -75,13 +75,14 @@ Cambridge, MA 02138
 
   */
 
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <signal.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cstdio>
+#include <cstring>
+#include <cctype>
+#include <csignal>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+
 #include "EST_unix.h"
 
 #include "EST_cutils.h"
@@ -187,6 +188,31 @@ long stack_size =
 #else
   500000;
 #endif
+
+void NNEWCELL(LISP *_into,long _type)
+{if NULLP(freelist)               
+        {
+             gc_for_newcell();              
+        }
+    *_into = freelist;                
+    freelist = CDR(freelist);        
+    ++gc_cells_allocated;
+    
+    (*_into)->gc_mark = 0;               
+    (*_into)->type = (short) _type;
+}
+
+void need_n_cells(int n)
+{
+    /* Check there are N cells available, and force gc if not */
+    LISP x = NIL;
+    int i;
+
+    for (i=0; i<n; i++)
+        x = cons(NIL,x);
+
+    return;
+}
 
 static void start_rememberring_dead(void)
 {
@@ -625,7 +651,7 @@ const char *get_c_string(LISP x)
      if (FLONMPNAME(x) == NULL)
      {
 	 char b[TKBUFFERN];
-	 sprintf(b,"%g",FLONM(x));
+	 sprintf(b,"%.8g",FLONM(x));
 	 FLONMPNAME(x) = (char *)must_malloc(strlen(b)+1);
 	 sprintf(FLONMPNAME(x),"%s",b);
      }
@@ -1086,7 +1112,7 @@ static void gc_mark_and_sweep(void)
  gc_ms_stats_start();
  setjmp(save_regs_gc_mark);
  mark_locations((LISP *) save_regs_gc_mark,
-		(LISP *) (((char *) save_regs_gc_mark) + sizeof(save_regs_gc_mark)));
+                (LISP *) (((char *) save_regs_gc_mark) + sizeof(save_regs_gc_mark)));
  mark_protected_registers();
  mark_locations((LISP *) stack_start_ptr,
 		(LISP *) &stack_end);
@@ -1256,11 +1282,17 @@ LISP user_gc(LISP args)
  errjmp_ok = 0;
  old_status_flag = gc_status_flag;
  if NNULLP(args)
-   if NULLP(car(args)) gc_status_flag = 0; else gc_status_flag = 1;
+ {
+   if NULLP(car(args)) 
+       gc_status_flag = 0; 
+   else 
+       gc_status_flag = 1;
+ }
  gc_mark_and_sweep();
  gc_status_flag = old_status_flag;
  errjmp_ok = ej_ok;
  no_interrupt(flag);
+
  return(NIL);}
 
 LISP set_backtrace(LISP n)
@@ -1276,7 +1308,9 @@ LISP gc_status(LISP args)
 {LISP l;
  int n;
  if NNULLP(args) 
+ {
    if NULLP(car(args)) gc_status_flag = 0; else gc_status_flag = 1;
+ }
  if (gc_kind_copying == 1)
    {if (gc_status_flag)
       fput_st(fwarn,"garbage collection is on\n");
@@ -1310,14 +1344,21 @@ LISP leval_args(LISP l,LISP env)
  return(result);}
 
 LISP extend_env(LISP actuals,LISP formals,LISP env)
-{if SYMBOLP(formals)
-   return(cons(cons(cons(formals,NIL),cons(actuals,NIL)),env));
- return(cons(cons(formals,actuals),env));}
+{
+    if SYMBOLP(formals)
+        return(cons(cons(cons(formals,NIL),cons(actuals,NIL)),env));
+    else
+        return(cons(cons(formals,actuals),env));
+}
 
 #define ENVLOOKUP_TRICK 1
+LISP global_var = NIL;
+LISP global_env = NIL;
 
 LISP envlookup(LISP var,LISP env)
 {LISP frame,al,fl,tmp;
+    global_var = var;
+    global_env = env;
  for(frame=env;CONSP(frame);frame=CDR(frame))
    {tmp = CAR(frame);
     if NCONSP(tmp) err("damaged frame",tmp);
@@ -1330,7 +1371,8 @@ LISP envlookup(LISP var,LISP env)
     if (SYMBOLP(fl) && EQ(fl, var)) return(cons(al, NIL));
 #endif
   }
- if NNULLP(frame) err("damaged env",env);
+ if NNULLP(frame) 
+              err("damaged env",env);
  return(NIL);}
 
 void set_eval_hooks(long type,LISP (*fcn)(LISP, LISP *,LISP *))
@@ -1338,9 +1380,11 @@ void set_eval_hooks(long type,LISP (*fcn)(LISP, LISP *,LISP *))
  p = get_user_type_hooks(type);
  p->leval = fcn;}
 
-LISP leval(LISP x,LISP env)
+LISP leval(LISP x,LISP qenv)
 {LISP tmp,arg1,rval;
+    LISP env;
  struct user_type_hooks *p;
+ env = qenv;
  STACK_CHECK(&x);
  backtrace = cons(x,backtrace);
  loop:
@@ -1420,7 +1464,7 @@ LISP leval(LISP x,LISP env)
 	   }
 	   goto loop;
 	 case tc_closure:
-	   env = extend_env(leval_args(CDR(x),env),
+           env = extend_env(leval_args(CDR(x),env),
 			    car((*tmp).storage_as.closure.code),
 			    (*tmp).storage_as.closure.env);
 	   x = cdr((*tmp).storage_as.closure.code);
@@ -1441,8 +1485,8 @@ LISP leval(LISP x,LISP env)
 		 goto loop;}
 	   err("bad function",tmp);}
     default:
-      backtrace = cdr(backtrace);
-      return(x);}}
+        backtrace = cdr(backtrace);
+        return(x);}}
 
 void set_print_hooks(long type,
 		     void (*prin1)(LISP, FILE *),
@@ -1540,7 +1584,7 @@ int flush_ws(struct gen_readio *f,const char *eoferr)
  commentp = 0;
  while(1)
    {c = GETC_FCN(f);
-    if (c == EOF) if (eoferr) err(eoferr,NIL); else return(c);
+    if (c == EOF) { if (eoferr) err(eoferr,NIL); else return(c); }
     if (commentp) {if (c == '\n') commentp = 0;}
     else if (c == ';') commentp = 1;
     else if (!isspace(c)) return(c);}}

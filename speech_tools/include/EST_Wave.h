@@ -41,7 +41,7 @@
 #ifndef __Wave_H__
 #define __Wave_H__
 
-#include <stdio.h>
+#include <cstdio>
 #include "EST_Featured.h"
 #include "EST_rw_status.h"
 #include "EST_types.h"
@@ -110,6 +110,12 @@ public:
         { return p_values.a_no_check_1(i,channel); }
   INLINE short a_no_check_1(int i, int channel = 0) const
         { return p_values.a_no_check_1(i,channel); }
+
+  
+  /** explicit set_a, easier to wrap than assignment
+   */
+  INLINE short set_a(int i, int channel = 0, short val = 0)
+  { return a(i,channel) = val; }
 
   /** return amplitude of sample <tt>i</tt> from channel <tt>
       channel</tt>.  By default the 0th channel is selected.

@@ -135,7 +135,7 @@ RM = /bin/rm
 ###########################################################################
 ## Arguments for DOC++ for creating documentation
 
-DOCXX = doc++_sane
+DOCXX = doc++
 DOCXX_ARGS = -a -f -B banner.inc -M sane -D 'SYSTEM "$(EST_HOME)/doc/sane.dtd"'
 
 

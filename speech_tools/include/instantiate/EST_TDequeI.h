@@ -39,7 +39,7 @@
 /** Instantiate rules for list template.
   * 
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_TDequeI.h,v 1.3 2004/05/04 00:00:17 awb Exp $
+  * @version $Id: EST_TDequeI.h,v 1.4 2006/07/19 21:52:12 awb Exp $
   */
 
 // Instantiation Macros
@@ -47,9 +47,7 @@
 // the typedef is purely to get the type name through the following macro.
 
 #define Instantiate_TDEQ_T(T, TAG) \
-        template class EST_TDeque<T>; \
-	ostream& operator << (ostream &st, const EST_TDeque< T > &deq) { return deq.print(st);}
-
+        template class EST_TDeque<T>;
 
 #define Instantiate_TDEQ(T) Instantiate_TDEQ_T(T, T) 
 

@@ -34,22 +34,15 @@
 #ifndef __EST_STRING_H__
 #define __EST_STRING_H__
 
-#ifdef HAVE_CONFIG_H
-#    include "est_string_config.h"
-#endif
-
 class EST_String;
 class EST_Regex;
 
 #define EST_Regex_max_subexpressions 10
 
-#include <string.h>
-#ifdef NO_EST
-#    include <iostream.h>
-#else
-#    include "EST_iostream.h"
-#endif
-#include <limits.h>
+#include <cstring>
+#include <iostream>
+#include <climits>
+using namespace std;
 #include "EST_Chunk.h"
 #include "EST_strcasecmp.h"
 #include "EST_bool.h"
@@ -71,7 +64,7 @@ extern "C" void abort(void);
   * @see string_example
   * @author Alan W Black <awb@cstr.ed.ac.uk>
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_String.h,v 1.3 2004/05/04 00:00:16 awb Exp $
+  * @version $Id: EST_String.h,v 1.7 2009/07/03 17:13:56 awb Exp $
   */
 
 class EST_String {
@@ -250,7 +243,7 @@ public:
     const char *str(void) const { return size==0?"":(const char *)memory; }
     /// Get a writable pointer to the actual memory.
     char *updatable_str(void) { return size==0?(char *)"":(char *)memory; }
-    void make_updatable(void) { ::make_updatable(memory, size+1);}
+    void make_updatable(void) { cp_make_updatable(memory, size+1);}
 
 
     /// Build string from a single character.
@@ -353,7 +346,7 @@ public:
 
     /// Find a match of the regular expression.
     int search(EST_Regex &re, int &mlen, int pos=0, int *starts=NULL, int *ends=NULL) const
-	{ int start, end;
+	{ int start=0, end=0;
 	if (locate(re, pos, start, end, starts, ends))
 	{ mlen=end-start; return start; }
 	return -1;
@@ -639,7 +632,12 @@ public:
     /// Stream output for EST_String.
     friend ostream &operator << (ostream &s, const EST_String &str);
     friend class EST_Regex;
+
 }; 
+
+EST_ChunkPtr chunk_allocate(int bytes);
+EST_ChunkPtr chunk_allocate(int bytes, const char *initial, int initial_len);
+EST_ChunkPtr chunk_allocate(int bytes, const EST_ChunkPtr &initial, int initial_start, int initial_len);
 
 int operator == (const char *a, const EST_String &b);
 int operator == (const EST_String &a, const EST_String &b);

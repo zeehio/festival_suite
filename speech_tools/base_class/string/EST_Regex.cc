@@ -48,25 +48,21 @@
  /*                                                                      */
  /************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#    include "est_string_config.h"
-#endif
-
 #ifdef NO_EST
 #    include <unistd.h>
 #else
 #    include "EST_unix.h"
 #endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include "EST_String.h"
 #include "EST_Regex.h"
 
 #ifdef sun
 #ifndef __svr4__
 /* SunOS */
-#include <string.h>
+#include <cstring>
 #endif
 #endif
 
