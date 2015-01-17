@@ -35,7 +35,7 @@ SYSTEM_TYPE=$(MACHINETYPE)_$(OSTYPE)$(OSREV)
 ## The definitions are in compilers/$(COMPILER).mak
 ## Examples: gcc suncc egcs gcc28
 
-COMPILER=@COMPILERTYPE@
+COMPILER=@COMPILER@
 
 ###########################################################################
 ## Java system to use if you include the Java interface.
@@ -54,18 +54,25 @@ CONFIGURATION =
 ###########################################################################
 ## Compilation options.
 ##
-## OPTIMISE=4 will turn off DEBUG
+## 
 
-OPTIMISE=3
-WARN=1
-# VERBOSE=1
-#DEBUG=1
-# PROFILE=gprof
-#SHARED=2
+# enable with OPTIMISE=3 (or any other optimization level)
+# OPTIMISE=4 will turn off DEBUG
+OPTIMISE=@OPTIMISE@
+# enable with WARN=1       
+WARN=@WARN@
+# enable with VERBOSE=1 
+VERBOSE=0
+# enable with DEBUG=1
+DEBUG=@DEBUG@
+# enable with PROFILE=gprof
+PROFILE=@PROFILE@
+# enable with SHARED=2
+SHARED=@SHARED@
 
 ## Directory specific selections which override the above
 
-OPTIMISE_sigpr = 3
+#OPTIMISE_sigpr = 3
 
 ###########################################################################
 ## Feature selection.
@@ -76,8 +83,8 @@ OPTIMISE_sigpr = 3
 ## various audio devices are supported directly but you can always
 ## specify a program to play files in a desired format.
 
-## NCD's network audio system.
-# INCLUDE_MODULES += NAS_AUDIO
+## NCD's network audio system. Write NAS_AUDIO to include it.
+INCLUDE_MODULES += @NAS_AUDIO@
 
 ## Elightenment Sound Demon, for KDE etc.
 # INCLUDE_MODULES += ESD_AUDIO
@@ -197,6 +204,8 @@ ALSO_INCLUDE=
 include $(EST)/config/systems/$(SYSTEM_TYPE).mak
 
 include $(EST)/config/compilers/$(COMPILER).mak
+
+include $(EST)/config/user_flags.mak
 
 ifneq ($(JAVA_COMPILER),none)
     include $(EST)/config/compilers/$(JAVA_COMPILER).mak

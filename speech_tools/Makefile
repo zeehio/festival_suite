@@ -48,9 +48,9 @@ BUILD_DIRS = $(LIB_BUILD_DIRS) lib main scripts testsuite bin
 TEMPLATE_DIRS=include audio utils base_class base_class/string \
               ling_class speech_class sigpr stats grammar siod
 EXTRA_DIRS=siod java rxp wrappers
-ALL_DIRS = include $(BUILD_DIRS) $(EXTRA_DIRS) config doc 
+ALL_DIRS = include $(BUILD_DIRS) $(EXTRA_DIRS) doc config
 VERSION=$(PROJECT_VERSION)
-CONFIG=configure configure.in config.sub config.guess \
+CONFIG=configure configure.ac config.sub config.guess \
        missing install-sh mkinstalldirs
 FILES=Makefile README INSTALL $(CONFIG)
 
@@ -108,7 +108,7 @@ rebuild_and_test:
 config/config: config/config.in config.status
 	./config.status
 
-configure: configure.in
+configure: configure.ac
 	autoconf
 
 include $(TOP)/config/rules/top_level.mak
