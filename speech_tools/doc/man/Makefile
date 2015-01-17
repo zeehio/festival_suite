@@ -39,32 +39,29 @@
 ##=======================================================================##
 TOP=../..
 DIRNAME=doc/man
-# Replaced by the docbook system (well almost)
-# MANPAGES = ch_lab.1 ch_track.1 ch_wave.1 na_play.1 wagon.1 wagon_test.1
-FILES = $(MANPAGES:.1=.top) $(MANPAGES:.1=.bot) Makefile 
 
-INSTALL = manpages
+PROGRAMS = align bcat ch_lab ch_track ch_utt ch_wave design_filter \
+           dp fringe_client na_play na_record ngram_build ngram_test \
+           ols ols_test pda pitchmark scfg_make scfg_parse scfg_test \
+           scfg_train sig2fv sigfilter siod spectgen tilt_analysis \
+           tilt_synthesis viterbi wagon wagon_test wfst_build wfst_run \
+           wfst_train xml_parser
 
-all: $(MANPAGES)
-
-%.1 : %.top %.options %.bot 
-	cat $^ >$@
-%.options : $(TOP)/bin/%
-	$< -man_options >$@
-
-include $(TOP)/config/common_make_rules
-
-manpages:
-	$(INSTALL_PROG) $(MANPAGES) $(MANDIR)/man1
+BODYFILES = $(addsuffix _man.dox.body, $(PROGRAMS))
+DOXFILES = $(addsuffix _man.dox, $(PROGRAMS))
 
 
+XSLT_FILES = convert-options.xslt convert-synopsis.xslt
+SCRIPTS = create_dox.sh
 
+FILES = Makefile $(BODYFILES) $(XSLT_FILES) $(SCRIPTS)
 
+LOCAL_CLEAN = $(DOXFILES)
 
+-include $(TOP)/config/common_make_rules
 
+%_man.dox: %_man.dox.body
+	./create_dox.sh $(TOP)/main/$* $@.body || exit 1
 
-
-
-
-
+all_dox: $(DOXFILES)
 

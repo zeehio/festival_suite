@@ -36,7 +36,7 @@
 TOP=../..
 DIRNAME=wrappers/interface
 NODEPEND=1
-BUILD_DIRS=python perl5
+BUILD_DIRS=python
 ALL = .sub_directories
 
 COMMON_INTERFACE_FILES = EST_Utterance.i EST_Relation.i EST_Item.i \

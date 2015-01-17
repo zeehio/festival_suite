@@ -36,7 +36,7 @@
 TOP=..
 DIRNAME=wrappers
 NODEPEND=1
-BUILD_DIRS=interface python perl5
+BUILD_DIRS=interface
 ALL = .sub_directories
 
 FILES = Makefile wrappers.mak $(COMMON_FILES)
