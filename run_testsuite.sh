@@ -3,7 +3,7 @@
 # -v: print each command on screen
 set -ev
 
-if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then
+if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
    BASEDIR=`pwd`
    cd "speech_tools"
    autoconf
