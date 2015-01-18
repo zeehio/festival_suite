@@ -3,12 +3,12 @@ language: cpp
 before_install:
   - sudo pip install cpp-coveralls --use-mirrors
   - sudo apt-get update -qq
-  - sudo apt-get install -y libasound2-dev libncurses5-dev libpulse-dev autoconf autoconf-archive
+  - sudo apt-get install -y libasound2-dev libncurses5-dev libpulse-dev autoconf xsltproc doxygen graphviz doxygen-latex
 
 script: 
   - ./run_testsuite.sh
 
-after_success: # coveralls --exclude speech_tools/rxp --exclude speech_tools/testsuite --exclude speech_tools/java --exclude festival
+after_success: coveralls --exclude speech_tools/rxp --exclude speech_tools/testsuite --exclude speech_tools/java
 
 env:
   global:
@@ -22,8 +22,8 @@ addons:
       name: "zeehio/festival_suite"
       description: "Your project description here"
     notification_email: sergioller@gmail.com
-    build_command_prepend: sudo apt-get update -qq && sudo apt-get install -y libasound2-dev libncurses5-dev libpulse-dev autoconf autoconf-archive && autoconf && ./configure --enable-profile=gcov #--with-pulseaudio
-    build_command: make
+    build_command_prepend: sudo apt-get update -qq && sudo apt-get install -y libasound2-dev libncurses5-dev libpulse-dev autoconf && cd "speech_tools" && autoconf && ./configure --enable-profile=gcov #--with-pulseaudio
+    build_command: make && cd "../festival" && ./configure && make
     branch_pattern: coverity_scan
 
 branches:
