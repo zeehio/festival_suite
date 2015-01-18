@@ -43,25 +43,27 @@
 #include "EST_Option.h"
 #include "EST_Features.h"
 
+using namespace std;
+
 static EST_TValuedEnumDefinition<EST_EstFileType, const char *, NO_INFO> 
 estfile_names[] =
 {
-  { est_file_none,	{ "None" }},
-  { est_file_track,	{ "Track", "track" }},
-  { est_file_wave,	{ "wave" }},
-  { est_file_label,	{ "label" }},
-  { est_file_utterance,	{ "utterance" }},
-  { est_file_fmatrix,	{ "fmatrix" }},
-  { est_file_fvector,	{ "fvector" }},
-  { est_file_dmatrix,	{ "dmatrix" }},
-  { est_file_dvector,	{ "dvector" }},
-  { est_file_feature_data, { "feature_data" }},
-  { est_file_fst,	{ "fst" }},
-  { est_file_ngram,	{ "ngram" }},
-  { est_file_index,	{ "index" }},
-  { est_file_f_catalogue,	{ "f_catalogue" }},
-  { est_file_unknown,	{ "unknown" }},
-  { est_file_none,	{ "None" }},
+  { est_file_none,	{ "None" }, 0},
+  { est_file_track,	{ "Track", "track" }, 0},
+  { est_file_wave,	{ "wave" }, 0},
+  { est_file_label,	{ "label" }, 0},
+  { est_file_utterance,	{ "utterance" }, 0},
+  { est_file_fmatrix,	{ "fmatrix" }, 0},
+  { est_file_fvector,	{ "fvector" }, 0},
+  { est_file_dmatrix,	{ "dmatrix" }, 0},
+  { est_file_dvector,	{ "dvector" }, 0},
+  { est_file_feature_data, { "feature_data" }, 0},
+  { est_file_fst,	{ "fst" }, 0},
+  { est_file_ngram,	{ "ngram" }, 0},
+  { est_file_index,	{ "index" }, 0},
+  { est_file_f_catalogue,	{ "f_catalogue" }, 0},
+  { est_file_unknown,	{ "unknown" }, 0},
+  { est_file_none,	{ "None" }, 0},
 };
 
 EST_TNamedEnum<EST_EstFileType> EstFileEnums(estfile_names);
@@ -93,7 +95,10 @@ EST_read_status read_est_header(EST_TokenStream &ts, EST_Features &hinfo,
     if ((ts.fread(magic_number,sizeof(char),8) != 8) ||
 	(strncmp(magic_number,"EST_File",8) != 0))
     {
-	ts.seek(pos);
+	if (ts.seek(pos) != 0) {
+		cerr << "Data seek error: Could not set TokenStream to the original position" << endl;
+		return wrong_format;
+	}
 	return wrong_format;
     }
 
@@ -149,7 +154,10 @@ EST_read_status read_est_header(EST_TokenStream &ts, EST_Option &hinfo,
     if ((ts.fread(magic_number,sizeof(char),8) != 8) ||
 	(strncmp(magic_number,"EST_File",8) != 0))
     {
-	ts.seek(pos);
+		if (ts.seek(pos) != 0) {
+			cerr << "Data seek error: Could not set the TokenStream to the original position" << endl;
+			return wrong_format;
+		}
 	return wrong_format;
     }
 

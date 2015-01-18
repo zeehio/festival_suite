@@ -12,7 +12,7 @@
 #include "siod.h"
 #include "siodp.h"
 
-#ifdef unix
+#ifdef __unix__
 #include <sys/time.h>
 #include <unistd.h>
 static long siod_time_base;
@@ -34,8 +34,7 @@ static LISP lsetenv(LISP name,LISP value)
 
 static LISP lsystem(LISP name)
 {
-    (void)system(get_c_string(name));
-    return NIL;
+    return flocons((double)system(get_c_string(name)));
 }
 
 static LISP lpwd(void)
@@ -51,17 +50,23 @@ static LISP lchdir(LISP args, LISP env)
 {
     (void)env;
     char *home;
-    
+    int chdir_result;
     if (siod_llength(args) == 0)
     {
 	home = getenv("HOME");
-	chdir(home);
+	chdir_result = chdir(home);
+    if (chdir_result == 0)
 	return rintern(home);
+    else
+        return NIL;
     }
     else
     {
-	chdir(get_c_string(leval(car(args),env)));
+	chdir_result = chdir(get_c_string(leval(car(args),env)));
+    if (chdir_result == 0)
 	return (car(args));
+    else
+        return NIL;
     }
 }
 
@@ -72,7 +77,7 @@ static LISP lgetpid(void)
 
 LISP siod_time()
 {
-#ifdef unix
+#ifdef __unix__
     struct timeval tv;
     struct timezone tz;
 
@@ -88,7 +93,7 @@ LISP siod_time()
 void init_subrs_sys(void)
 {
 
-#ifdef unix
+#ifdef __unix__
     struct timeval tv;
     struct timezone tz;
 

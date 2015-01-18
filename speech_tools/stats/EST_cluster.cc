@@ -45,6 +45,8 @@
 #include "EST_string_aux.h"
 #include <cfloat>
 
+using namespace std;
+
 int fn_cluster(EST_FMatrix &m, EST_CBK &cbk, float d);
 int nn_cluster(EST_FMatrix &m, EST_CBK &cbk, float d);
 int nn_cluster2(EST_FMatrix &m, EST_CBK &cbk, float d);
@@ -126,9 +128,11 @@ void collapse(EST_FMatrix &d, EST_CBK &cbk, int row, int col)
 	if (contains(cbk(pj), col))
 	    break;
 
+    if (pi != 0 && pj != 0) {
     cbk(pi) += cbk(pj);
     remove_distances(d, cbk(pi));
     cbk.remove(pj);
+}
 }
 
 float min(float a, float b)
@@ -340,7 +344,7 @@ EST_FVector sort_matrix(EST_FMatrix &m)
     EST_FVector vsort(n_vals);
     for (i = 0; i < n_vals; ++i)
 	vsort[i] = v[i];
-    
+    delete[] v;
     return vsort;
 }
 

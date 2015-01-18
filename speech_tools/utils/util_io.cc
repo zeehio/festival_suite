@@ -51,6 +51,8 @@
 #include "EST_cutils.h"
 #include "EST_Token.h"
 
+using namespace std;
+
 EST_String make_tmp_filename()
 {
     // returns tmp filename
@@ -108,13 +110,14 @@ EST_String stdin_to_file()
 	if (fwrite(buff,1,n,fd) != n)
 	{
 	    cerr << "Write error on temporary file";
+	    fclose(fd);
 	    return tmpname;
 	}
     fclose(fd);
     return tmpname;
 }
 
-int Stringtoi(EST_String s, int success)
+int Stringtoi(EST_String s, int &success)
 {
     char *a;
     int d;
@@ -147,15 +150,12 @@ EST_String ftoString(float n, int pres, int width, int right_justify)
 {
     (void)right_justify;
     EST_String val;
-    char tmp[1000];
-    char spec[10];
-    strcpy(spec, "%");
+    char tmp[10000];
+    char spec[100];
     if (width != 0)
-	strcat(spec, itoString(width));
-    strcat(spec, ".");
-    strcat(spec, itoString(pres));
-    strcat(spec, "f");
-    
+        sprintf(spec, "%%%d.%df", width, pres);
+    else
+        sprintf(spec, "%%.%df", pres);
     sprintf(tmp, spec, n);
     val = tmp;
     return val;

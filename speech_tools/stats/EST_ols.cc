@@ -40,6 +40,8 @@
 #include "EST_multistats.h"
 #include "EST_simplestats.h"
 
+using namespace std;
+
 static void ols_load_selected_feats(const EST_FMatrix &X, 
 				    const EST_IVector &included,
 				    EST_FMatrix &Xl);
@@ -262,8 +264,10 @@ static int ols_stepwise_find_best(const EST_FMatrix &X,
 	    float cor, rmse;
 	    EST_FMatrix pred;
 	    included.a_no_check(i) = TRUE;
-	    if (!robust_ols(X,Y,included,coeffsl))
+	    if (!robust_ols(X,Y,included,coeffsl)) {
+            included.a_no_check(i) = FALSE; /* restore previous status */
 		return FALSE;  // failed for some reason
+        }
 	    ols_apply(Xtest,coeffsl,pred);
             ols_test(Ytest,pred,cor,rmse);
             printf("tested %d %s %f best %f\n",
@@ -295,7 +299,10 @@ int ols_test(const EST_FMatrix &real,
     double v1,v2,v3;
 
     if (real.num_rows() != predicted.num_rows())
+    {
+        correlation = 0;
 	return FALSE;  // can't do this
+    }
 
     for (i=0; i < real.num_rows(); i++)
     {
