@@ -12,6 +12,7 @@ Declarations which are private to SLIB.C internals.
 #define __SIODP_H__
 
 #include "io.h"
+#include "siod.h"
 
 typedef int (*repl_getc_fn)(FILE *);
 typedef void (*repl_ungetc_fn)(int,FILE *);
@@ -83,13 +84,7 @@ struct gc_protected
 void NNEWCELL (LISP *_into,long _type);
 #endif
 
-#ifdef THINK_C
-extern int ipoll_counter;
-void full_interrupt_poll(int *counter);
-#define INTERRUPT_CHECK() if (--ipoll_counter < 0) full_interrupt_poll(&ipoll_counter)
-#else
 #define INTERRUPT_CHECK()
-#endif
 
 extern char *stack_limit_ptr;
 

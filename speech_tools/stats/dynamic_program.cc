@@ -41,6 +41,8 @@
 #include "EST_math.h"
 #include "ling_class/EST_Utterance.h"
 
+using namespace std;
+
 typedef EST_TVector<EST_Item*> EST_Item_ptr_Vector;
 static EST_Item *const def_val_item_ptr = NULL;
 template <> EST_Item* const *EST_Item_ptr_Vector::def_val = &def_val_item_ptr;
@@ -75,7 +77,7 @@ bool dp_sub(int i, int j,
 	    EST_Item *null_sym,
 	    EST_FMatrix &cost);
 
-void trace_back_and_link(int i, int j,
+int trace_back_and_link(int i, int j,
 			 EST_Item *p1, EST_Item *p2,
 			 const EST_IMatrix &DP_path_i, 
 			 const EST_IMatrix &DP_path_j,
@@ -373,7 +375,7 @@ bool dp_sub(int i, int j,
 }
 
 
-void trace_back_and_link(int i, int j,
+int trace_back_and_link(int i, int j,
 			 EST_Item *p1, EST_Item *p2,
 			 const EST_IMatrix &DP_path_i, 
 			 const EST_IMatrix &DP_path_j,
@@ -387,9 +389,8 @@ void trace_back_and_link(int i, int j,
     //i=utt.relation("Lexical")->index(p1);
     //j=utt.relation("Surface")->index(p2);
 
-    if((p1==0)&&(p2==0))
-	// reached start
-	return;
+    if((p1==0)&&(p2==0)) // reached start
+	   return TRUE;
 
     if(DP_path_i(i,j) == i-1)
     {
@@ -397,22 +398,42 @@ void trace_back_and_link(int i, int j,
 	{
 	    // match, or substitution
 	    //cerr << "sub " << p1->name() << " with " << p2->name() << endl;
+        if ((p1 == 0) || (p2 == 0)) {
+            cerr << "trace back and link: Wrong dynamic programming " <<
+            "path or wrong  items at (i=" << i <<", j=" << j <<")" << 
+            endl;
+            return FALSE;
+        }
 	    p1->append_daughter(p2);
 	    p1=iprev(p1);
 	    p2=iprev(p2);
 	}
 	else
+      {
 	    // deletion
+        if (p1 == 0) {
+            cerr << "trace back and link: Wrong dynamic programming " <<
+            "path or wrong  item p1 at (i=" << i <<", j=" << j <<")" << 
+            endl;
+            return FALSE;
+        }
 	    p1=iprev(p1);
     }    
+    }
     else
     {
 	// insertion
 	// p1->append_daughter(p2); // decorative
+    if (p2 == 0) {
+        cerr << "trace back and link: Wrong dynamic programming " <<
+        "path or wrong  item p2 at (i=" << i <<", j=" << j <<")" << 
+        endl;
+        return FALSE;
+    }
 	p2=iprev(p2);
     }
 
-    trace_back_and_link(DP_path_i(i,j), DP_path_j(i,j),
+    return trace_back_and_link(DP_path_i(i,j), DP_path_j(i,j),
 			p1,p2,
 			DP_path_i,DP_path_j,
 			null_sym);

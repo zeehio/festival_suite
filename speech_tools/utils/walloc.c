@@ -40,62 +40,28 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <sys/types.h>
 #include "EST_unix.h"
 #include <string.h>
 #include "EST_cutils.h"
 
-/* #define CST_DEBUG_MALLOC 1 */
-
-#ifdef CST_DEBUG_MALLOC
-/* use the debug malloc in flite */
-#include "cst_alloc.h"
-
-void *safe_walloc(int size)
+void *safe_walloc(size_t size)
 {
-    return cst_safe_alloc(size);
-}
-void *safe_wrealloc(void *ptr, int size)
-{
-    return cst_safe_realloc(ptr,size);
-}
-void *safe_wcalloc(int size)
-{
-    return cst_safe_calloc(size);
-}
-void wfree(void *p)
-{
-    cst_free(p);
-    return;
-}
-char *wstrdup(const char *s)
-{
-    char *t = cst_alloc(char,strlen(s)+1);
-    strcpy(t,s);
-    return t;
-}
-
-void debug_memory_summary(void)
-{
-    cst_alloc_debug_summary();
-}
-
-#else
-void *safe_walloc(int size)
-{
-    char *p;
+    void *p;
     
     if (size == 0)
 	/* Some mallocs return NULL for size 0, which means you can't tell
 	   if it failed or not. So we'll avoid that problem by never 
 	   asking for 0 bytes */
-	p = calloc(1,1);
+	p = malloc(1);
     else
-	p = calloc(size,1);
+	p = malloc(size);
 
     if (p == NULL)
     {
-	fprintf(stderr,"WALLOC: failed to malloc %d bytes\n",size);
+	fprintf(stderr,"WALLOC: failed to malloc %zu bytes\n",size);
 	exit(-1);  /* I'd rather not do this but this is the only safe */
 	           /* thing to do */
     }
@@ -103,9 +69,9 @@ void *safe_walloc(int size)
     return p;
 }
 
-void *safe_wrealloc(void *ptr, int size)
+void *safe_wrealloc(void *ptr, size_t size)
 {
-    char *p;
+    void *p;
 
     if (ptr == 0)
 	p = safe_walloc(size);
@@ -119,7 +85,7 @@ void *safe_wrealloc(void *ptr, int size)
 
     if ((p == NULL) && (size != 0))
     {
-	fprintf(stderr,"WREALLOC: failed to malloc %d bytes\n",size);
+	fprintf(stderr,"WREALLOC: failed to malloc %zu bytes\n",size);
 	exit(-1);  /* I'd rather not do this but this is the only safe */
 	           /* thing to do */
     }
@@ -127,19 +93,38 @@ void *safe_wrealloc(void *ptr, int size)
     return p;
 }
 
-void *safe_wcalloc(int size)
+void *safe_wcalloc(size_t num, size_t size)
 {
-    char *p = safe_walloc(size);
+    void *p;
+    /* Some mallocs return NULL for size 0, which means you can't tell
+	   if it failed or not. So we'll avoid that problem by never 
+	   asking for 0 bytes */
+    if (num == 0 || size == 0) {
+		p = calloc(1, 1);
+	} else {
+		p = calloc(num, size);
+	}
 
-    memset(p,0,size);
-
+    if (p == NULL)
+    {
+	fprintf(stderr,"WCALLOC: failed to calloc %zu elements of %zu bytes each\n",num, size);
+	exit(-1);  /* I'd rather not do this but this is the only safe */
+	           /* thing to do */
+    }
     return p;
 }
 
 char *wstrdup(const char *s)
 {
-    char *t = walloc(char,strlen(s)+1);
-    strcpy(t,s);
+    size_t strsize=strlen(s);
+    if (strsize < SIZE_MAX) {
+      strsize++; /* We can finish copy with a zero */
+    } else {
+      fprintf(stderr,"String is not null terminated! (too long)\n");
+      exit(-1);
+    }
+    char *t = safe_wcalloc(sizeof(char), strsize);
+    memcpy(t, s, strsize);
     return t;
 }
 
@@ -149,4 +134,3 @@ void wfree(void *p)
 	free(p);
 }
 
-#endif
