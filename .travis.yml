@@ -22,8 +22,8 @@ addons:
       name: "zeehio/festival_suite"
       description: "Your project description here"
     notification_email: sergioller@gmail.com
-    build_command_prepend: sudo apt-get update -qq && sudo apt-get install -y libasound2-dev libncurses5-dev libpulse-dev autoconf && cd "speech_tools" && autoconf && ./configure --enable-profile=gcov #--with-pulseaudio
-    build_command: make && cd "../festival" && ./configure && make
+    build_command_prepend:
+    build_command:   ./run_testsuite.sh --force
     branch_pattern: coverity_scan
 
 branches:
