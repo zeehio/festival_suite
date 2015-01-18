@@ -3,7 +3,25 @@
 # -v: print each command on screen
 set -ev
 
-if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
+run="y"
+
+if [ "${COVERITY_SCAN_BRANCH}" = "1" ]; then
+  run="n"
+fi
+
+while getopts ":f" opt; do
+  case $opt in
+    f)
+      run="y"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
+done
+
+
+if [ "$run" = "y" ]; then
    BASEDIR=`pwd`
    cd "speech_tools"
    autoconf
