@@ -7,9 +7,11 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
    BASEDIR=`pwd`
    cd "speech_tools"
    autoconf
-   ./configure #--enable-profile=gcov --with-pulseaudio
+   ./configure --enable-profile=gcov #--with-pulseaudio
    make
    make test
+   cd "$BASEDIR/speech_tools/doc"
+   make doc
    cd "$BASEDIR"
    cd "festival"
    ./configure
