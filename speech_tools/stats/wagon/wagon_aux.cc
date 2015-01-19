@@ -46,6 +46,7 @@
 #include "EST_Wagon.h"
 #include "EST_math.h"
 
+using namespace std;
 
 EST_Val WNode::predict(const WVector &d)
 {
@@ -92,7 +93,8 @@ void WNode::prune(void)
 
 	// Have to check purity as well as values to ensure left and right
 	// don't further split
-	if ((left->pure() == TRUE) && ((right->pure() == TRUE)) &&
+	if ((left  != 0) && (left->pure()  == TRUE) && 
+        (right != 0)  && (right->pure() == TRUE) &&
 	    (left->get_impurity().value() == right->get_impurity().value()))
 	{
 	     delete left; left = 0;
@@ -258,7 +260,7 @@ void WDataSet::load_description(const EST_String &fname, LISP ignores)
     }
 }
 
-const int WQuestion::ask(const WVector &w) const
+int WQuestion::ask(const WVector &w) const
 {
     // Ask this question of the given vector
     switch (op)

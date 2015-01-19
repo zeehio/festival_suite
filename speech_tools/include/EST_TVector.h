@@ -41,7 +41,7 @@
 #define __EST_TVector_H__
 
 #include <iostream>
-using namespace std;
+
 #include "EST_bool.h"
 #include "EST_rw_status.h"
 
@@ -85,11 +85,14 @@ extern const int EST_ALL;
 #endif
 
 
-/**@name Template vector
+/** @class EST_TVector
+ *  @brief Template vector
+ *  @ingroup containerclasses
+ *  @tparam T Type of vector elements
 
     This serves as a base class for a vector
-     of type <type>T</type>.  This acts as a higher level
-     version of a normal C array as defined as <type>float *x</type> etc.
+     of type `T`.  This acts as a higher level
+     version of a normal C array as defined as `float *x`, etc.
 
      The vector can be resized after declaration, access can be 
      with or without bounds checking.  Round brackets denote read-only
@@ -98,14 +101,14 @@ extern const int EST_ALL;
 
      The standard operators () and [] should be thought of as 
      having no bounds checking, though they may do so optionally
-     as a compile time option.  The methods <method>a_check</method> and 
-     <method>a_nocheck</method> provide explicit boundary checking/nonchecking,
+     as a compile time option.  The methods EST_TVector::a_check and 
+     EST_TVector::a_nocheck provide explicit boundary checking/nonchecking,
      both const and non-const versions are provided.
 
      Access through () and [] are guaranteed to be as fast as standard
      C arrays (assuming a reasonable optimizing compiler).  
 
-     <programlisting>
+     @code{.cpp}
      EST_FVector x(10);
      int i;
 
@@ -117,32 +120,27 @@ extern const int EST_ALL;
      for (i=10; i < x.length(); ++i)
         x[i] = sqrt((float)i);
 
-     </programlisting>
+     @endcode
 
-     To instantiate a template for a a vector of type {FooBar}
+     To instantiate a template for a a vector of type `FooBar`
 
-     <programlisting>
+     @code{.cpp}
      #include "../base_class/EST_TVector.cc"
      // If you want List to vector conversion (and defined a TList)
      #include "../base_class/EST_Tvectlist.cc"
        
      template class EST_TVector<FooBar>;
-     template ostream& operator << 
-          (ostream &st, const EST_TVector<FooBar> &v);
-     </programlisting>
+     template std::ostream& operator << 
+          (std::ostream &st, const EST_TVector<FooBar> &v);
+     @endcode
 
      The EST library already has template vector instantiations for
-     <type>int</type>, <type>float</type>, <type>double</type> and
-     <docppRef linkend='EST_String'>.  Also types are defined for them
-     in <docppRef linkend='EST_types.h'> as <docppRef
-     linkend='EST_IVector'>, <docppRef linkend='EST_FVector'>,
-     <docppRef linkend='EST_DVector'> and <docppRef
-     linkend='EST_StrVector'> for <type>int</type>s,
-     <type>float</type>s, <type>doubles</type>s and <docppRef
-     linkend='EST_String'>s respectively.
+     `int`, `float`, `double` and EST_String.  Also types are defined for them
+     in \ref EST_types.h as EST_IVector, EST_FVector,
+     EST_DVector and EST_StrVector for `int`s,
+     `float`s, `doubles`s and \ref EST_String  respectively.
 
   * @see matrix_example */
-//@{
 template <class T> 
 class EST_TVector 
 {
@@ -229,10 +227,10 @@ public:
     */
   static T *error_return;
 
-  /** resize vector. If <expr>set=1</expr>, then the current values in
-      the vector are preserved up to the new length <parameter>n</parameter>. If the
+  /** resize vector. If `set=1`, then the current values in
+      the vector are preserved up to the new length `n`. If the
       new length exceeds the old length, the rest of the vector is
-      filled with the <variable>def_val</variable>
+      filled with the `def_val`
   */
   void resize(int n, int set=1); 
 
@@ -241,10 +239,10 @@ public:
   const T * memory() const { return p_memory; }
   T * memory(){ return p_memory; }
 
-  /**@name access
+  /**@name Access
     * Basic access methods for vectors.
     */
-  //@{
+  ///@{
 
   /// number of items in vector.
   INLINE int num_columns() const {return p_num_columns;}
@@ -290,7 +288,7 @@ public:
   /// assignment operator
   EST_TVector &operator=(const EST_TVector &s);
 
-  /// Fill entire array will value <parameter>v</parameter>.
+  /// Fill entire array will value `v`.
   void fill(const T &v);
 
   /// Fill vector with default value
@@ -310,12 +308,12 @@ public:
   /// Create a sub vector.
   void sub_vector(EST_TVector<T> &sv, int start_c=0, int len=-1);
   /// print out vector.
-    friend ostream& operator << (ostream &st, const EST_TVector<T> &m)
+    friend std::ostream& operator << (std::ostream &st, const EST_TVector<T> &m)
     {
         int i; 
         for (i = 0; i < m.n(); ++i) 
             st << m(i) << " "; 
-        st << endl; 
+        st << std::endl; 
         return st;
     }
 
@@ -326,10 +324,8 @@ public:
 
 };
 
-//@}
-/// assignment operator: fill track with values in list <parameter>s</parameter>.
-
-// This appears unuset and potentially causes a namespace clashes with std::set
+/// assignment operator: fill track with values in list `s`.
+// This appears unused and potentially causes a namespace clashes with std::set
 // is sparrowhawk is used. 
 //   template<class T>
 //     extern EST_TVector<T> &set(EST_TVector<T> &v, const EST_TList<T> &s);

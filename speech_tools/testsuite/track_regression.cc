@@ -52,7 +52,7 @@ void dump_track(EST_Track &tr, EST_String comment)
   for (int f=0; f<tr.num_frames(); f++)
     if (tr.val(f))
       {
-	printf("  %3d:\t%3.3f", f, tr.t(f));
+	printf("  %3zd:\t%3.3f", f, tr.t(f));
 	for(int c=0; c<tr.num_channels(); c++)
 	  printf("\t%3.3f", tr.a(f,c));
 	printf("\n");

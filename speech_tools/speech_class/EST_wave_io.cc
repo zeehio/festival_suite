@@ -44,11 +44,17 @@
 #include <cstdio>
 #include "EST_unix.h"
 #include <cstring>
+#include <limits>
+
 #include "EST_wave_aux.h"
 #include "EST_wave_utils.h"
 #include "EST_strcasecmp.h"
 #include "waveP.h"
 #include "EST_FileType.h"
+#include "EST_File.h"
+
+
+using namespace std;
 
 static int def_load_sample_rate = 16000;
 
@@ -107,15 +113,17 @@ const char *sample_type_to_nist(enum EST_sample_type_t sample_type)
 {
     const char *c;
     switch (sample_type) {
-    case st_unknown:  
+    case st_unknown:
 	c = ""; break;
-    case st_schar:  
+    case st_schar:
 	c = "PCM-1"; break;
+    case st_alaw:
+	c = "ALAW"; break;
     case st_mulaw:
 	c = "ULAW"; break;
-    case st_short: 
+    case st_short:
 	c = "pcm"; break;
-    case st_int:   
+    case st_int:
 	c = "PCM-4"; break;
     case st_float:
 	c = "REAL"; break;
@@ -141,6 +149,9 @@ enum EST_sample_type_t nist_to_sample_type(char *type)
 	     (EST_strcasecmp(type,"mu-law",NULL) == 0) ||
 	     (EST_strcasecmp(type,"mulaw",NULL) == 0))
 	return st_mulaw;
+    else if ((EST_strcasecmp(type,"ALAW",NULL) == 0) ||
+	     (EST_strcasecmp(type,"A-LAW",NULL) == 0))
+	return st_alaw;
     else if (strcmp(type,"alaw") == 0)
 	return st_alaw;
     else if (strcmp(type,"PCM-1") == 0)
@@ -166,9 +177,10 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
 {
     char header[NIST_HDR_SIZE];
     int samps,sample_width,data_length,actual_bo;
+    int system_return;
     unsigned char *file_data;
     enum EST_sample_type_t actual_sample_type;
-    char *byte_order, *sample_coding;
+    char *byte_order, *sample_coding=0;
     int n;
     int current_pos;
 
@@ -186,11 +198,19 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
 	nist_get_param_int(header,"sample_rate",def_load_sample_rate);
     byte_order = nist_get_param_str(header,"sample_byte_format",
 				    (EST_BIG_ENDIAN ? "10" : "01"));
-    sample_coding = nist_get_param_str(header,"sample_coding","pcm");
     if (streq(byte_order,"mu-law"))
     {
+	wfree(byte_order);
 	byte_order = wstrdup((EST_BIG_ENDIAN ? "10" : "01"));
 	sample_coding = wstrdup("ULAW");
+    }
+    else if (streq(byte_order,"a-law"))
+    {
+	wfree(byte_order);
+	byte_order = wstrdup((EST_BIG_ENDIAN ? "10" : "01"));
+	sample_coding = wstrdup("ALAW");
+    } else {
+	sample_coding = nist_get_param_str(header,"sample_coding","pcm");
     }
 
     /* code for reading in Tony Robinson's shorten files.
@@ -220,9 +240,27 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
 	sprintf(cmdstr,"cstrshorten %s %s",
 		(const char*)ts.filename(),tmpfile);
 	printf("Command: %s\n", cmdstr);
-	system(cmdstr);
+	system_return = system(cmdstr);
+    if (system_return != 0)
+    {
+        fprintf(stderr, "Command failed. Could not read nist file\n");
+        fprintf(stderr, "To read embedded-shorten-v1.1 nist files, \n");
+        fprintf(stderr, "shorten utility from Tony Robinson is required\n");
+        wfree(sample_coding);
+        wfree(byte_order);
+        wfree(tmpfile);
+        wfree(cmdstr);
+        return misc_read_error;
+    }
 	EST_TokenStream tt;
-	tt.open(tmpfile);
+	if (tt.open(tmpfile) < 0) {
+		fprintf(stderr, "Could not open %s\n", tmpfile);
+        wfree(sample_coding);
+        wfree(byte_order);
+        wfree(tmpfile);
+        wfree(cmdstr);
+		return misc_read_error;
+	}
 	
 	rval = load_wave_nist(tt, data, num_samples,
 			      num_channels, word_size, sample_rate,
@@ -231,6 +269,8 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
 	wfree(tmpfile);
 	wfree(cmdstr);
 	tt.close();
+	wfree(byte_order);
+	wfree(sample_coding);
 	return rval;
 #endif
     }
@@ -240,9 +280,13 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
     else
 	data_length = length*(*num_channels);
 
+    if (ts.seek(current_pos+NIST_HDR_SIZE+(sample_width*offset*(*num_channels))) != 0) {
+		fprintf(stderr, "WAVE read: Could not seek in file. Read error");
+		wfree(sample_coding);
+		wfree(byte_order);
+		return misc_read_error;
+	}
     file_data = walloc(unsigned char,sample_width * data_length);
-
-    ts.seek(current_pos+NIST_HDR_SIZE+(sample_width*offset*(*num_channels)));
 
     n = ts.fread(file_data,sample_width,data_length);
 
@@ -284,17 +328,17 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
     return format_ok;
 }
 
-enum EST_write_status save_wave_nist(FILE *fp, const short *data, int offset,
-				     int num_samples, int num_channels, 
+enum EST_write_status save_wave_nist_header(FILE *fp,
+				     int num_samples, int num_channels,
 				     int sample_rate,
-				     enum EST_sample_type_t sample_type, int bo)   
+				     enum EST_sample_type_t sample_type, int bo)
 {
     char h[1024], p[1024];
     const char *t;
     
     memset(h,0,1024);
     
-    strcat(h, NIST_SIG);
+    strncat(h, NIST_SIG, 512);
     sprintf(p, "channel_count -i %d\n", num_channels);
     strcat(h, p);
     sprintf(p, "sample_count -i %d\n", num_samples);	
@@ -318,16 +362,44 @@ enum EST_write_status save_wave_nist(FILE *fp, const short *data, int offset,
 	strcat(h, p);
     }
     
+    if (strlen(h)+ strlen(NIST_END_SIG) > 1024) {
+        return misc_write_error;
+    }
     strcat(h, NIST_END_SIG);
     /*makes it nice to read */
     strcat(h, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
     
     if (fwrite(&h, 1024, 1, fp) != 1)
-	return misc_write_error;
+	    return misc_write_error;
     
+    return write_ok;
+}
+
+
+enum EST_write_status save_wave_nist_data(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    (void) sample_rate;
+    if (data == NULL)
+       return write_ok;
+
     return save_raw_data(fp,data,offset,num_samples,num_channels,
 			 sample_type,bo);
     
+}
+
+enum EST_write_status save_wave_nist(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    save_wave_nist_header(fp, num_samples, num_channels,
+				      sample_rate, sample_type, bo);
+    return save_wave_nist_data(fp, data, offset,
+				     num_samples, num_channels,
+				     sample_rate, sample_type, bo);
 }
 
 /*=======================================================================*/
@@ -340,6 +412,7 @@ enum EST_read_status load_wave_est(EST_TokenStream &ts, short **data, int
 				   EST_sample_type_t *sample_type, int *bo, 
 				   int offset, int length)
 {
+    (void) offset;
     int data_length, actual_bo;
     short *file_data;
     EST_String byte_order;
@@ -350,7 +423,7 @@ enum EST_read_status load_wave_est(EST_TokenStream &ts, short **data, int
     EST_read_status r;
     EST_sample_type_t actual_sample_type;
     
-    offset = 0;
+    /*offset = 0;*/
     
     if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
 	return r;
@@ -402,10 +475,10 @@ enum EST_read_status load_wave_est(EST_TokenStream &ts, short **data, int
     return format_ok;
 }
 
-enum EST_write_status save_wave_est(FILE *fp, const short *data, int offset,
-				       int num_samples, int num_channels, 
+enum EST_write_status save_wave_est_header(FILE *fp,
+				       int num_samples, int num_channels,
 				       int sample_rate,
-				       enum EST_sample_type_t sample_type, int bo)   
+				       enum EST_sample_type_t sample_type, int bo)
 {
     fprintf(fp, "EST_File wave\n");
     fprintf(fp, "DataType binary\n");
@@ -417,10 +490,33 @@ enum EST_write_status save_wave_est(FILE *fp, const short *data, int offset,
 	fprintf(fp, "ByteOrder %s\n", ((bo == bo_big) ? "10" : "01"));
     
     fprintf(fp, "EST_Header_End\n");
-    
+    return write_ok;
+}
+
+enum EST_write_status save_wave_est_data(FILE *fp, const short *data, int offset,
+				       int num_samples, int num_channels,
+				       int sample_rate,
+				       enum EST_sample_type_t sample_type, int bo)
+{
+    (void) sample_rate;
+    if (data == NULL)
+       return write_ok;
+
     return save_raw_data(fp, data, offset, num_samples, num_channels,
 			 sample_type, bo);
+}
+
+enum EST_write_status save_wave_est(FILE *fp, const short *data, int offset,
+				       int num_samples, int num_channels,
+				       int sample_rate,
+				       enum EST_sample_type_t sample_type, int bo)
+{
+    save_wave_est_header(fp, num_samples, num_channels,
+				         sample_rate, sample_type, bo);
     
+    return save_wave_est_data(fp, data, offset,
+				       num_samples, num_channels,
+				       sample_rate, sample_type, bo);
 }
 
 /*=======================================================================*/
@@ -458,7 +554,8 @@ enum EST_read_status load_wave_riff(EST_TokenStream &ts, short **data, int
 	return wrong_format;
 
     /* We've got a riff file */
-    ts.fread(&dsize,4,1);
+    /* Next 4 bytes are the file size */
+    if(ts.fread(&dsize,4,1) != 1) return misc_read_error;
     /* .wav files are always little endian */
     if (EST_BIG_ENDIAN) dsize = SWAPINT(dsize);
     if ((ts.fread(info,sizeof(char),4) != 4) ||
@@ -471,9 +568,9 @@ enum EST_read_status load_wave_riff(EST_TokenStream &ts, short **data, int
 	(strncmp(info,"fmt ",4) != 0))
 	return misc_read_error;	/* something else wrong */
 
-    ts.fread(&dsize,4,1);
+    if (ts.fread(&dsize,4,1) != 1) return misc_read_error;
     if (EST_BIG_ENDIAN) dsize = SWAPINT(dsize);
-    ts.fread(&shortdata,2,1);
+    if (ts.fread(&shortdata,2,1) != 1) return misc_read_error;
     if (EST_BIG_ENDIAN) shortdata = SWAPSHORT(shortdata);
 
     switch (shortdata)
@@ -484,34 +581,38 @@ enum EST_read_status load_wave_riff(EST_TokenStream &ts, short **data, int
 	/* The follow are registered proprietary WAVE formats  (?) */
     case WAVE_FORMAT_MULAW:
 	actual_sample_type = st_mulaw; break;
+    case WAVE_FORMAT_ALAW:
+	actual_sample_type = st_alaw; break;
     case WAVE_FORMAT_ADPCM:
-	fprintf(stderr, "RIFF file: unsupported proprietary sample format ADPCM\n"); 
+	fprintf(stderr, "RIFF file: unsupported proprietary sample format ADPCM\n");
 	actual_sample_type = st_short;
 	break;
 	/*	  actual_sample_type = st_adpcm; break; */ /* yes but which adpcm ! */
-    case WAVE_FORMAT_ALAW:
     default:
 	fprintf(stderr, "RIFF file: unknown sample format\n");
 	actual_sample_type = st_short;
 	/*	return misc_read_error; */
     }
-    ts.fread(&shortdata,2,1);
+    if (ts.fread(&shortdata,2,1) != 1) return misc_read_error;
     if (EST_BIG_ENDIAN) shortdata = SWAPSHORT(shortdata);
     *num_channels = shortdata;
-    ts.fread(sample_rate,4,1);
+    if (ts.fread(sample_rate,4,1) != 1) return misc_read_error;
     if (EST_BIG_ENDIAN) *sample_rate = SWAPINT(*sample_rate);
-    ts.fread(&intdata,4,1);	/* average bytes per second -- ignored */
+    if (ts.fread(&intdata,4,1) != 1) return misc_read_error; /* average bytes per second -- ignored */
     if (EST_BIG_ENDIAN) intdata = SWAPINT(intdata);
-    ts.fread(&shortdata,2,1);	/* block align ? */
+    if (ts.fread(&shortdata,2,1) != 1) return misc_read_error;	/* block align ? */
     if (EST_BIG_ENDIAN) shortdata = SWAPSHORT(shortdata);
-    ts.fread(&shortdata,2,1);
+    if (ts.fread(&shortdata,2,1) != 1) return misc_read_error;
     if (EST_BIG_ENDIAN) shortdata = SWAPSHORT(shortdata);
 
     sample_width = (shortdata+7)/8;
     if ((sample_width == 1) && (actual_sample_type == st_short))
 	actual_sample_type = st_uchar; /* oops I meant 8 bit */
 
-    ts.seek((dsize-16)+ts.tell());     /* skip rest of header */
+    if (ts.seek((dsize-16)+ts.tell()) != 0) {     /* skip rest of header */
+		fprintf(stderr, "Could not skip header. Read error");
+		return misc_read_error;
+	}
     while (1)
     {
 	if (ts.fread(info,sizeof(char),4) != 4)
@@ -521,16 +622,19 @@ enum EST_read_status load_wave_riff(EST_TokenStream &ts, short **data, int
 	}
 	if (strncmp(info,"data",4) == 0)
 	{
-	    ts.fread(&samps,4,1);
+	    if (ts.fread(&samps,4,1) != 1) return misc_read_error;
 	    if (EST_BIG_ENDIAN) samps = SWAPINT(samps);
 	    samps /= (sample_width*(*num_channels));
 	    break;
 	}
 	else if (strncmp(info,"fact",4) == 0)
 	{			/* some other type of chunk -- skip it */
-	    ts.fread(&samps,4,1);
+	    if (ts.fread(&samps,4,1) != 1) return misc_read_error;
 	    if (EST_BIG_ENDIAN) samps = SWAPINT(samps);
-	    ts.seek(samps+ts.tell());	/* skip rest of header */
+	    if (ts.seek(samps+ts.tell()) != 0) {	/* skip rest of header */
+			fprintf(stderr, "Could not seek in file. Read error");
+			return misc_read_error;
+		}
 	    /* Hope this is the right amount */
 	}
 	else
@@ -538,19 +642,32 @@ enum EST_read_status load_wave_riff(EST_TokenStream &ts, short **data, int
             //	    fprintf(stderr,"Ignoring unsupported chunk type \"%c%c%c%c\" in RIFF file\n",
             //    info[0],info[1],info[2],info[3]);
 	    //return misc_read_error;
-	    ts.fread(&dsize,4,1);
+	    if(ts.fread(&dsize,4,1) != 1) return misc_read_error;
 	    if (EST_BIG_ENDIAN) dsize = SWAPINT(dsize);
-	    ts.seek(dsize+ts.tell());     /* skip this chunk */
+	    if (ts.seek(dsize+ts.tell()) != 0) {     /* skip this chunk */
+			fprintf(stderr, "Wav file: Read error");
+			return misc_read_error;
+		}
 	}
     }
     if (length == 0)
 	data_length = (samps - offset)*(*num_channels);
     else
 	data_length = length*(*num_channels);
-    
+        
+    if (ts.seek((sample_width*offset*(*num_channels))+ts.tell()) != 0) {
+		fprintf(stderr, "Read error\n");
+		return misc_read_error;
+	}
+	if (data_length < 0) {
+		fprintf(stderr, "Read error\n");
+		return misc_read_error;
+    }
+    if ((size_t) data_length > std::numeric_limits<std::size_t>::max()/sample_width) {
+		fprintf(stderr, "Read error: Data length too big\n");
+        return misc_read_error;
+    }
     file_data = walloc(unsigned char,sample_width * data_length);
-    
-    ts.seek((sample_width*offset*(*num_channels))+ts.tell());
     if ((dsize=ts.fread(file_data,sample_width,data_length)) != data_length)
     {
 	/*  It seems so many WAV files have their datasize wrong I'll */
@@ -576,10 +693,9 @@ enum EST_read_status load_wave_riff(EST_TokenStream &ts, short **data, int
     return format_ok;
 }
 
-enum EST_write_status save_wave_riff(FILE *fp, const short *data, int offset,
-				     int num_samples, int num_channels, 
-				     int sample_rate,
-				     enum EST_sample_type_t sample_type, int bo)   
+enum EST_write_status save_wave_riff_header(FILE *fp, int num_samples,
+                     int num_channels, int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
 {
     (void)bo;
     const char *info;
@@ -636,8 +752,35 @@ enum EST_write_status save_wave_riff(FILE *fp, const short *data, int offset,
     if (EST_BIG_ENDIAN) data_size = SWAPINT(data_size);
     fwrite(&data_size,1,4,fp);	/* total number of bytes in data */
     
+    return write_ok;
+}
+
+enum EST_write_status save_wave_riff_data(FILE *fp, const short *data,
+                     int offset, int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    (void)sample_rate;
+    (void)bo;
+    if (data == NULL)
+       return write_ok;
+
     return save_raw_data(fp,data,offset,num_samples,num_channels,
 			 sample_type,bo_little);
+}
+
+
+enum EST_write_status save_wave_riff(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    save_wave_riff_header(fp, num_samples, num_channels, sample_rate,
+				     sample_type, bo);
+
+    return save_wave_riff_data(fp, data, offset, num_samples,
+                        num_channels, sample_rate, sample_type, bo);
+
 }
 
 /*=======================================================================*/
@@ -665,7 +808,7 @@ enum EST_read_status load_wave_aiff(EST_TokenStream &ts, short **data, int
 {
     char info[4];
     struct AIFFchunk chunk;
-    short comm_channels;
+    short comm_channels = -2;
     int comm_samples;
     short comm_bits;
     unsigned char ieee_ext_sample_rate[10];
@@ -680,7 +823,7 @@ enum EST_read_status load_wave_aiff(EST_TokenStream &ts, short **data, int
 	return wrong_format;
 
     /* We've got an aiff file, I hope */
-    ts.fread(&dsize,4,1);
+    if (ts.fread(&dsize,4,1) != 1) return misc_read_error;
     if (EST_LITTLE_ENDIAN)	/* file is in different byte order */
 	dsize = SWAPINT(dsize);
     if ((ts.fread(info,sizeof(char),4) != 4) ||
@@ -690,7 +833,7 @@ enum EST_read_status load_wave_aiff(EST_TokenStream &ts, short **data, int
 	return misc_read_error; 
     }
     
-    for ( ; ts.fread(&chunk,1,sizeof(chunk)) == sizeof(chunk) ; )
+    for ( ; ts.fread(&chunk, sizeof(chunk), 1) == 1 ; )
     {				/* for each chunk in the file */
 	if (EST_LITTLE_ENDIAN)	/* file is in different byte order */
 	    chunk.size = SWAPINT(chunk.size);
@@ -701,10 +844,13 @@ enum EST_read_status load_wave_aiff(EST_TokenStream &ts, short **data, int
 		fprintf(stderr,"AIFF chunk: bad size\n");
 		return misc_read_error;
 	    }
-	    ts.fread(&comm_channels,1,sizeof(short));
-	    ts.fread(&comm_samples,1,sizeof(int));
-	    ts.fread(&comm_bits,1,sizeof(short));
-	    if (ts.fread(ieee_ext_sample_rate,1,10) != 10)
+	    if (ts.fread(&comm_channels, sizeof(short), 1) != 1)
+            return misc_read_error;
+	    if (ts.fread(&comm_samples, sizeof(int), 1) != 1)
+            return misc_read_error;
+	    if (ts.fread(&comm_bits, sizeof(short), 1) != 1)
+            return misc_read_error;
+	    if (ts.fread(ieee_ext_sample_rate, 10, 1) != 1)
 	    {
 		fprintf(stderr,"AIFF chunk: eof within COMM chunk\n");
 		return misc_read_error;
@@ -716,10 +862,15 @@ enum EST_read_status load_wave_aiff(EST_TokenStream &ts, short **data, int
 		comm_bits = SWAPSHORT(comm_bits);
 	    }
 	    *sample_rate = (int)ConvertFromIeeeExtended(ieee_ext_sample_rate);
+        if (comm_channels < 0) 
+        {
+            fprintf(stderr, "AIFF chunk: Wrong comm channels\n");
+            return wrong_format;
+        }
 	}
 	else if (strncmp(chunk.id,"SSND",4) == 0)
 	{
-	    if (ts.fread(&ssndchunk,1,sizeof(ssndchunk)) != sizeof(ssndchunk))
+	    if (ts.fread(&ssndchunk, sizeof(ssndchunk), 1) != 1)
 	    {
 		fprintf(stderr,"AIFF chunk: eof within SSND chunk\n");
 		return misc_read_error;
@@ -729,7 +880,10 @@ enum EST_read_status load_wave_aiff(EST_TokenStream &ts, short **data, int
 		ssndchunk.offset = SWAPINT(ssndchunk.offset);
 		ssndchunk.blocksize = SWAPINT(ssndchunk.blocksize);
 	    }
-	    
+	    if (comm_channels < 0) {
+            fprintf(stderr, "AIFF: COMM chunk missing\n");
+            return wrong_format;
+        }
 	    *num_channels = comm_channels;
 	    switch (comm_bits)
 	    {
@@ -741,14 +895,42 @@ enum EST_read_status load_wave_aiff(EST_TokenStream &ts, short **data, int
 		    return misc_read_error;
 		}
 	    
-	    ts.seek(ssndchunk.offset+(comm_channels*offset)+ts.tell());
+	    if (ts.seek(ssndchunk.offset+(comm_channels*offset)+ts.tell()) != 0) {
+			fprintf(stderr, "AIFF: Read error\n");
+			return misc_read_error;
+		}
 	    if (length == 0)
  		data_length = (comm_samples-offset)*comm_channels;
   	    else
  		data_length = length*comm_channels;
-	    file_data = walloc(unsigned char, 
-			       data_length*comm_channels*
-			       get_word_size(actual_sample_type));
+        
+        if (data_length < 0 || comm_channels < 0 || get_word_size(actual_sample_type) < 0) {
+            fprintf(stderr, "AIFF: Read error\n");
+            return misc_read_error;
+        }
+        
+        size_t bytes_to_read;
+        if ((size_t)data_length < std::numeric_limits<std::size_t>::max()/comm_channels) {
+            bytes_to_read = data_length * comm_channels;
+        } else {
+            fprintf(stderr, "AIFF: Read error\n");
+            return misc_read_error;
+        }
+        if ((size_t)bytes_to_read < std::numeric_limits<std::size_t>::max()/get_word_size(actual_sample_type)) {
+            bytes_to_read *= get_word_size(actual_sample_type);
+        } else {
+            fprintf(stderr, "AIFF: Read error\n");
+            return misc_read_error;
+        }
+        /*
+        if ((size_t)bytes_to_read < std::numeric_limits<std::size_t>::max()/sizeof(unsigned char)) {
+            bytes_to_read *= sizeof(unsigned char);
+        } else {
+            fprintf(stderr, "AIFF: Read error\n");
+            return misc_read_error;
+        }
+        */
+	    file_data = walloc(unsigned char, bytes_to_read);
 	    if ((n=ts.fread(file_data,get_word_size(actual_sample_type),
 			 data_length)) != data_length)
 	    {
@@ -769,17 +951,20 @@ enum EST_read_status load_wave_aiff(EST_TokenStream &ts, short **data, int
 	}
 	else 
 	{			/* skip bytes in chunk */
-	    ts.seek(ts.tell()+chunk.size);
+	    if (ts.seek(ts.tell()+chunk.size) != 0) {
+			fprintf(stderr, "AIFF: Read error\n");
+			return misc_read_error;
 	}
     }
-    
+	}
     return format_ok;
 }
 
-enum EST_write_status save_wave_aiff(FILE *fp, const short *data, int offset,
-				     int num_samples, int num_channels, 
+
+enum EST_write_status save_wave_aiff_header(FILE *fp,
+				     int num_samples, int num_channels,
 				     int sample_rate,
-				     enum EST_sample_type_t sample_type, int bo)   
+				     enum EST_sample_type_t sample_type, int bo)
 {
     (void)bo;
     const char *info;
@@ -830,16 +1015,41 @@ enum EST_write_status save_wave_aiff(FILE *fp, const short *data, int offset,
 	data_int = SWAPINT(data_int);
     fwrite(&data_int,1,4,fp);   /* blocksize */
     
-    if ((sample_type == st_short) ||
-	(sample_type == st_uchar))
-	return save_raw_data(fp,data,offset,num_samples,num_channels,
-			     sample_type,bo_big);
+    return write_ok;
+
+}
+
+enum EST_write_status save_wave_aiff_data(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    (void)bo;
+    (void)sample_rate;
+    if (data == NULL)
+       return write_ok;
+    if ((sample_type == st_short) || (sample_type == st_uchar))
+	    return save_raw_data(fp,data, offset, num_samples, num_channels,
+                             sample_type, bo_big);
     else
     {
 	fprintf(stderr,"AIFF: requested data type not uchar or short\n");
 	return misc_write_error;
     }
-    
+}
+
+
+enum EST_write_status save_wave_aiff(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    save_wave_aiff_header(fp, num_samples, num_channels,
+                          sample_rate, sample_type, bo);
+
+    return save_wave_aiff_data(fp, data, offset,
+				     num_samples, num_channels,
+				     sample_rate, sample_type, bo);
 }
 
 /*=======================================================================*/
@@ -854,49 +1064,166 @@ enum EST_read_status load_wave_ulaw(EST_TokenStream &ts, short **data, int
 {
     unsigned char *ulaw;
     int data_length,samps;
-    
+
     ts.seek_end();
     samps = ts.tell();
-    
+
     if (length == 0)
 	data_length = samps - offset;
     else
 	data_length = length;
-    
+
+    if (ts.seek(offset) != 0) {
+		fprintf(stderr, "ulaw: Read error\n");
+		return misc_read_error;
+	}
     ulaw = walloc(unsigned char, data_length);
-    ts.seek(offset);
     if (ts.fread(ulaw,1,data_length) != data_length)
     {
-	wfree(ulaw); 
+	wfree(ulaw);
 	return misc_read_error;
     }
-    
+
     *data = walloc(short,data_length);
     ulaw_to_short(ulaw,*data,data_length);
     wfree(ulaw);
-    
+
     *num_samples = data_length;
     *sample_rate = 8000;
     *num_channels = 1;
     *sample_type = st_short;
     *word_size = 2;
     *bo = EST_NATIVE_BO;
-    
+
     return format_ok;
 }
 
-enum EST_write_status save_wave_ulaw(FILE *fp, const short *data, int offset,
-				     int num_samples, int num_channels, 
-				     int sample_rate, 
+enum EST_write_status save_wave_ulaw_header(FILE *fp,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    (void) sample_rate;
+    (void) sample_type;
+    (void) fp;
+    (void) num_samples;
+    (void) num_channels;
+    (void) bo;
+    return write_ok;
+}
+
+enum EST_write_status save_wave_ulaw_data(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
 				     enum EST_sample_type_t sample_type, int bo)
 {
     (void)sample_rate;
     (void)sample_type;
+
+    if (data == NULL)
+       return write_ok;
+
     return save_wave_raw(fp,data,offset,num_samples,num_channels,
 			 8000,st_mulaw,bo);
-    
-    
 }
+
+enum EST_write_status save_wave_ulaw(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    save_wave_ulaw_header(fp, num_samples, num_channels,
+                          sample_rate, sample_type, bo);
+
+    return save_wave_ulaw_data(fp, data, offset,
+				     num_samples, num_channels,
+				     sample_rate, sample_type, bo);
+}
+
+
+
+enum EST_read_status load_wave_alaw(EST_TokenStream &ts, short **data, int
+				    *num_samples, int *num_channels, int *word_size, int
+				    *sample_rate, enum EST_sample_type_t *sample_type, int *bo,
+				    int offset, int length)
+
+{
+    unsigned char *alaw;
+    int data_length,samps;
+
+    ts.seek_end();
+    samps = ts.tell();
+
+    if (length == 0)
+	data_length = samps - offset;
+    else
+	data_length = length;
+
+    if (ts.seek(offset) != 0) {
+		fprintf(stderr, "alaw: Read error\n");
+		return misc_read_error;
+	}
+    alaw = walloc(unsigned char, data_length);
+    if (ts.fread(alaw,1,data_length) != data_length)
+    {
+	wfree(alaw);
+	return misc_read_error;
+    }
+
+    *data = walloc(short,data_length);
+    alaw_to_short(alaw,*data,data_length);
+    wfree(alaw);
+
+    *num_samples = data_length;
+    *sample_rate = 8000;
+    *num_channels = 1;
+    *sample_type = st_short;
+    *word_size = 2;
+    *bo = EST_NATIVE_BO;
+
+    return format_ok;
+}
+
+enum EST_write_status save_wave_alaw_header(FILE *fp,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    (void) sample_rate;
+    (void) sample_type;
+    (void) fp;
+    (void) num_samples;
+    (void) num_channels;
+    (void) bo;
+    return write_ok;
+}
+
+enum EST_write_status save_wave_alaw_data(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    (void)sample_rate;
+    (void)sample_type;
+    if (data == NULL)
+       return write_ok;
+    return save_wave_raw(fp,data,offset,num_samples,num_channels,
+			 8000,st_alaw,bo);
+}
+
+enum EST_write_status save_wave_alaw(FILE *fp, const short *data, int offset,
+				     int num_samples, int num_channels,
+				     int sample_rate,
+				     enum EST_sample_type_t sample_type, int bo)
+{
+    save_wave_alaw_header(fp, num_samples, num_channels,
+                          sample_rate, sample_type, bo);
+
+    return save_wave_alaw_data(fp, data, offset,
+				     num_samples, num_channels,
+				     sample_rate, sample_type, bo);
+}
+
 
 /*=======================================================================*/
 /* Sun and Next snd files                                                */
@@ -921,10 +1248,27 @@ enum EST_read_status load_wave_snd(EST_TokenStream &ts, short **data, int
     enum EST_sample_type_t encoding_type;
     int data_length, sample_width, bytes, samps, n;
     unsigned char *file_data;
-    int current_pos;
+    EST_FilePos current_pos;
     
     current_pos = ts.tell();
-    ts.fread(&header, sizeof(Sun_au_header), 1);
+    if (ts.fread(&(header.magic), sizeof(unsigned int), 1) != 1) {
+        return misc_read_error;
+    }
+    if (ts.fread(&(header.hdr_size), sizeof(unsigned int), 1) != 1) {
+        return misc_read_error;
+    }
+    if (ts.fread(&(header.data_size), sizeof(int), 1) != 1) {
+        return misc_read_error;
+    }
+    if (ts.fread(&(header.encoding), sizeof(unsigned int), 1) != 1) {
+        return misc_read_error;
+    }
+    if (ts.fread(&(header.sample_rate), sizeof(unsigned int), 1) != 1) {
+        return misc_read_error;
+    }
+    if (ts.fread(&(header.channels), sizeof(unsigned int), 1) != 1) {
+        return misc_read_error;
+    }
     
     /* test for magic number */
     if ((EST_LITTLE_ENDIAN) && 
@@ -974,8 +1318,15 @@ enum EST_read_status load_wave_snd(EST_TokenStream &ts, short **data, int
     else
 	data_length = length *(*num_channels);
     
+    if (ts.seek(current_pos+header.hdr_size+(sample_width*offset*(*num_channels))) != 0) {
+		fprintf(stderr, "WAVE read: seek error\n");
+		return misc_read_error;
+	}
+    if (data_length < 0 || (size_t) data_length > std::numeric_limits<std::size_t>::max()/(sample_width*sizeof(unsigned char))) {
+		fprintf(stderr, "WAVE read: Too much data\n");
+        return misc_read_error;
+    }
     file_data = walloc(unsigned char, sample_width * data_length);
-    ts.seek(current_pos+header.hdr_size+(sample_width*offset*(*num_channels)));
     if ((n=ts.fread(file_data,sample_width,data_length)) != data_length)
     {
 	fprintf(stderr,"WAVE read: short file %s\n",
@@ -997,8 +1348,8 @@ enum EST_read_status load_wave_snd(EST_TokenStream &ts, short **data, int
     return read_ok;
 }
 
-enum EST_write_status save_wave_snd(FILE *fp, const short *data, int offset,
-				    int num_samples, int num_channels, 
+enum EST_write_status save_wave_snd_header(FILE *fp,
+				    int num_samples, int num_channels,
 				    int sample_rate, 
 				    enum EST_sample_type_t sample_type, int bo)
 {
@@ -1050,10 +1401,37 @@ enum EST_write_status save_wave_snd(FILE *fp, const short *data, int offset,
     if (fwrite(&header, sizeof(header), 1, fp) != 1)
 	return misc_write_error;
 
+    return write_ok;
+}
+
+enum EST_write_status save_wave_snd_data(FILE *fp, const short *data, int offset,
+				    int num_samples, int num_channels,
+				    int sample_rate,
+				    enum EST_sample_type_t sample_type, int bo)
+{
+    (void)sample_rate;
+    (void)bo;
+
+    if (data == NULL)
+       return write_ok;
+
     /* snd files are always in BIG_ENDIAN (sun) byte order */
     return save_raw_data(fp,data,offset,num_samples,num_channels,
 			 sample_type,bo_big);
 }
+
+
+enum EST_write_status save_wave_snd(FILE *fp, const short *data, int offset,
+				    int num_samples, int num_channels,
+				    int sample_rate,
+				    enum EST_sample_type_t sample_type, int bo)
+{
+    save_wave_snd_header(fp, num_samples, num_channels, sample_rate,
+                         sample_type, bo);
+    return save_wave_snd_data(fp, data, offset, num_samples,
+             num_channels, sample_rate, sample_type, bo);
+}
+
 
 /*=======================================================================*/
 /* CSTR Audlab files (from the last century)                             */
@@ -1065,6 +1443,13 @@ struct s1 {
     float  f2;
 };
 
+static void init_struct_s1(struct s1& s) {
+    memset(s.c,0,17);
+    s.f1=0;
+    s.f2=0;
+    return;
+}
+
 struct s2 {
     float f1;
     float f2;   
@@ -1074,6 +1459,18 @@ struct s2 {
     int i1;
     int i2;
 };
+
+static void init_struct_s2(struct s2& s) {
+    s.f1=0;
+    s.f2=0;
+    s.f3=0;
+    s.c1 = 0;
+    s.c2 = 0;
+    s.i1 = 0;
+    s.i2 = 0;
+    return;
+}
+
 
 struct audlabfh {
     struct s1 z; 
@@ -1086,6 +1483,18 @@ struct audlabfh {
     char  c5[64];
 };
 
+static void init_struct_audlabfh(struct audlabfh & s) {
+    init_struct_s1(s.z);
+    memset(s.file_type,0,8);
+    memset(s.c1, 0, 17);
+    memset(s.c2, 0, 17);
+    memset(s.c3, 0, 17);
+    s.start =0;
+    s.data_type = 0;
+    memset(s.c5,0,64);
+    return;
+}
+
 struct audlabsh {
     int   channel_count;
     char  serial;
@@ -1097,6 +1506,19 @@ struct audlabsh {
     char  c4[121];
     
 };
+
+static void init_struct_audlabsh(struct audlabsh & s) {
+    s.channel_count = 0;
+    s.serial = 0;
+    s.sample_rate = 0;
+    memset(s.c1, 0, 20);
+    s.i1 = 0;
+    s.c2 = 0;
+    memset(s.c3, 0, 121);
+    memset(s.c4, 0, 121);
+    return;
+}
+
 struct audlabsd {
     char descr[17];
     int sample_count;
@@ -1104,6 +1526,15 @@ struct audlabsd {
     float f1;
     struct s2 z;
 };
+
+static void init_struct_audlabsd(struct audlabsd & s) {
+    memset(s.descr, 0, 17);
+    s.sample_count = 0;
+    s.nbits = 0;
+    s.f1 = 0;
+    init_struct_s2(s.z);
+    return;
+}
 
 enum EST_read_status load_wave_audlab(EST_TokenStream &ts, short **data, int
 				      *num_samples, int *num_channels, int *word_size, int
@@ -1114,18 +1545,25 @@ enum EST_read_status load_wave_audlab(EST_TokenStream &ts, short **data, int
     struct audlabfh fh;
     struct audlabsh sh;
     struct audlabsd sd;
+    init_struct_audlabfh(fh);
+    init_struct_audlabsh(sh);
+    init_struct_audlabsd(sd);
     int data_length,sample_count;
     int hdr_length;
     int current_pos;
     
     /* Read header structures from char array */
     current_pos = ts.tell();
-    ts.fread(&fh, sizeof(struct audlabfh), 1);
+
+    if (ts.fread(&fh, sizeof(struct audlabfh), 1) != 1)
+        return misc_read_error;
     if (strcmp(fh.file_type, "Sample") != 0) 
 	return wrong_format;
     
-    ts.fread(&sh, sizeof(struct audlabsh), 1);
-    ts.fread(&sd, sizeof(struct audlabsd), 1);
+    if (ts.fread(&sh, sizeof(struct audlabsh), 1) != 1)
+        return misc_read_error;
+    if (ts.fread(&sd, sizeof(struct audlabsd), 1) != 1)
+        return misc_read_error;
     hdr_length = sizeof(struct audlabfh) +
 	sizeof(struct audlabsh) +
 	    sizeof(struct audlabsd);
@@ -1147,8 +1585,11 @@ enum EST_read_status load_wave_audlab(EST_TokenStream &ts, short **data, int
     else
 	data_length = length *(*num_channels);
     
+    if (ts.seek(current_pos+hdr_length+(sizeof(short)*offset*(*num_channels))) != 0) {
+		fprintf(stderr, "audlab: read error\n");
+		return misc_read_error;
+	}
     *data = walloc(short,sizeof(short) * data_length);
-    ts.seek(current_pos+hdr_length+(sizeof(short)*offset*(*num_channels)));
     
     if ((int)ts.fread(*data, sizeof(short), data_length) != data_length)
     {
@@ -1166,8 +1607,8 @@ enum EST_read_status load_wave_audlab(EST_TokenStream &ts, short **data, int
     return format_ok;
 }
 
-enum EST_write_status save_wave_audlab(FILE *fp, const short *data, int offset,
-				       int num_samples, int num_channels, 
+enum EST_write_status save_wave_audlab_header(FILE *fp,
+				       int num_samples, int num_channels,
 				       int sample_rate, 
 				       enum EST_sample_type_t sample_type, int bo)
 {
@@ -1177,7 +1618,10 @@ enum EST_write_status save_wave_audlab(FILE *fp, const short *data, int offset,
     struct audlabfh fh;
     struct audlabsh sh;
     struct audlabsd sd;
-    
+
+    init_struct_audlabfh(fh);
+    init_struct_audlabsh(sh);
+    init_struct_audlabsd(sd);
     fh.start = sizeof (struct audlabfh) +
 	sizeof (struct audlabsh) + sizeof (struct audlabsd);
     fh.data_type = 2;
@@ -1207,10 +1651,35 @@ enum EST_write_status save_wave_audlab(FILE *fp, const short *data, int offset,
     fwrite (&fh, sizeof(fh), 1, fp);
     fwrite (&sh, sizeof(sh), 1, fp);
     fwrite (&sd, sizeof(sd), 1, fp);
-    
+    return write_ok;
+}
+
+enum EST_write_status save_wave_audlab_data(FILE *fp, const short *data, int offset,
+				       int num_samples, int num_channels,
+				       int sample_rate,
+				       enum EST_sample_type_t sample_type, int bo)
+{
+    (void)sample_rate;
+    (void)sample_type;
+    (void)bo;
+    if (data == NULL)
+       return write_ok;
+
     /* write data*/
     return save_raw_data(fp,data,offset,num_samples,num_channels,
 			 st_short,bo_big);
+}
+
+enum EST_write_status save_wave_audlab(FILE *fp, const short *data, int offset,
+				       int num_samples, int num_channels,
+				       int sample_rate,
+				       enum EST_sample_type_t sample_type, int bo)
+{
+    save_wave_audlab_header(fp, num_samples, num_channels,
+                        sample_rate, sample_type, bo);
+    return save_wave_audlab_data(fp, data, offset,
+				       num_samples, num_channels,
+				       sample_rate, sample_type, bo);
 }
 
 /*=======================================================================*/
@@ -1248,13 +1717,16 @@ enum EST_read_status load_wave_sd(EST_TokenStream &ts, short **data, int
 	return misc_read_error;
     }
     
-    if ((rv=read_esps_hdr(&hdr,fd)) != format_ok)
-	return rv;
+    rv=read_esps_hdr(&hdr,fd);
+    if (rv != format_ok) {
+        return rv;
+    }
     
     if (hdr->file_type != ESPS_SD)
     {
 	fprintf(stderr,"ESPS file: not an FEA_SD file\n");
 	delete_esps_hdr(hdr);
+	wfree(hdr);
 	return misc_read_error;
     }
     
@@ -1278,9 +1750,13 @@ enum EST_read_status load_wave_sd(EST_TokenStream &ts, short **data, int
     else
 	data_length = length *(*num_channels);
     
+    if (EST_fseek(fd,
+                  hdr->hdr_size+(sample_width*offset*(*num_channels)),
+	              SEEK_SET) != 0) {
+       fprintf(stderr, "WAVE read: esps: could not set file to read position");
+       return misc_read_error;
+    }
     file_data = walloc(unsigned char, sample_width * data_length);
-    fseek(fd,hdr->hdr_size+(sample_width*offset*(*num_channels)),
-	  SEEK_SET);
     if ((dl=fread(file_data,sample_width,data_length,fd)) != data_length)
     {
 	fprintf(stderr,"WAVE read: esps short file %s\n",
@@ -1299,12 +1775,14 @@ enum EST_read_status load_wave_sd(EST_TokenStream &ts, short **data, int
     *bo = EST_NATIVE_BO;
     *word_size = 2;
     delete_esps_hdr(hdr);
+    wfree(hdr);
     return format_ok;
     
 }
 
-enum EST_write_status save_wave_sd(FILE *fp, const short *data, int offset,
-				   int num_samples, int num_channels, 
+
+enum EST_write_status save_wave_sd_header(FILE *fp,
+				   int num_samples, int num_channels,
 				   int sample_rate, 
 				   enum EST_sample_type_t sample_type, int bo)
 
@@ -1325,10 +1803,13 @@ enum EST_write_status save_wave_sd(FILE *fp, const short *data, int offset,
 		default:
 		    fprintf(stderr,"ESPS file: no support for sample_type %s\n",
 			    sample_type_to_str(sample_type));
+            delete_esps_hdr(hdr);
+            wfree(hdr);
 		    return misc_write_error;
 		}
     /* I believe all of the following are necessary and in this order */
     add_field(hdr,"samples",esps_type,num_channels);
+    /* FIXME: What is doing this path here?? */
     add_fea_special(hdr,ESPS_FEA_DIRECTORY,"margo:/disk/disk10/home/awb/projects/speech_tools/main");
     add_fea_special(hdr,ESPS_FEA_COMMAND,
 		    "EDST waveform written as ESPS FEA_SD.\n\
@@ -1340,13 +1821,43 @@ enum EST_write_status save_wave_sd(FILE *fp, const short *data, int offset,
     if ((rv=write_esps_hdr(hdr,fp)) != write_ok)
     {
 	delete_esps_hdr(hdr);
+	wfree(hdr);
 	return rv;
     }
     /* lets ignore desired bo and sample type for the time being */
     delete_esps_hdr(hdr);
-    
+    wfree(hdr);
+    return write_ok;
+}
+
+
+enum EST_write_status save_wave_sd_data(FILE *fp, const short *data,
+                   int offset,
+				   int num_samples, int num_channels,
+				   int sample_rate,
+				   enum EST_sample_type_t sample_type, int bo)
+
+{
+    (void)bo;
+    (void)sample_rate;
+    if (data == NULL)
+       return write_ok;
+
     return save_raw_data(fp,data,offset,num_samples,num_channels,
 			 sample_type,EST_NATIVE_BO);
+}
+
+enum EST_write_status save_wave_sd(FILE *fp, const short *data, int offset,
+				   int num_samples, int num_channels,
+				   int sample_rate,
+				   enum EST_sample_type_t sample_type, int bo)
+
+{
+    save_wave_sd_header(fp, num_samples, num_channels, sample_rate,
+                        sample_type, bo);
+    return save_wave_sd_data(fp, data, offset, num_samples,
+                num_channels, sample_rate, sample_type, bo);
+
 }
 
 /*=======================================================================*/
@@ -1382,7 +1893,10 @@ enum EST_read_status load_wave_raw(EST_TokenStream &ts, short **data, int
 	
 	ts.seek_end();
 	guess = (int)(1.2*ts.tell()/7)+10; /* rough guess of the num of samps */
-	ts.seek(0);
+	if (ts.seek(0) != 0) {
+		fprintf(stderr, "Load asci wave: seek error\n");
+		return misc_read_error;
+	}
 	*data = walloc(short, guess);
 	i=0;
 	while (!ts.eof())
@@ -1425,10 +1939,15 @@ enum EST_read_status load_wave_raw(EST_TokenStream &ts, short **data, int
 	else
 	    data_length = length;
 	
+	if (ts.seek(offset*sample_width*inc) != 0) {
+		fprintf(stderr, "Error seeking in file\n");
+		return misc_read_error;
+	}
 	file_data = walloc(unsigned char, data_length * sample_width *inc);
-	ts.seek(offset*sample_width*inc);
-	if ((int)ts.fread(file_data,sample_width,data_length) != data_length)
+	if ((int)ts.fread(file_data,sample_width,data_length) != data_length) {
+        wfree(file_data);
 	    return misc_read_error;
+    }
 	
 	*data = convert_raw_data(file_data,data_length,isample_type,ibo);
     }
@@ -1443,16 +1962,44 @@ enum EST_read_status load_wave_raw(EST_TokenStream &ts, short **data, int
     return format_ok;
 }
 
-enum EST_write_status save_wave_raw(FILE *fp, const short *data, 
-				    int offset,
-				    int num_samples, int num_channels, 
+enum EST_write_status save_wave_raw_header(FILE *fp,
+				    int num_samples, int num_channels,
 				    int sample_rate,
-				    enum EST_sample_type_t sample_type, int bo)   
+				    enum EST_sample_type_t sample_type, int bo)
+{
+    (void)fp;
+    (void)num_samples;
+    (void)num_channels;
+    (void)sample_rate;
+    (void)sample_type;
+    (void)bo;
+    return write_ok;
+}
+
+enum EST_write_status save_wave_raw_data(FILE *fp, const short *data,
+				    int offset,
+				    int num_samples, int num_channels,
+				    int sample_rate,
+				    enum EST_sample_type_t sample_type, int bo)
 {
     (void)sample_rate;
+    if (data == NULL)
+       return write_ok;
     
     return save_raw_data(fp,data,offset,num_samples,num_channels,
 			 sample_type,bo);
+}
+
+enum EST_write_status save_wave_raw(FILE *fp, const short *data,
+				    int offset,
+				    int num_samples, int num_channels,
+				    int sample_rate,
+				    enum EST_sample_type_t sample_type, int bo)
+{
+    (void)sample_rate;
+
+    return save_wave_raw_data(fp, data, offset, num_samples,
+                    num_channels, sample_rate, sample_type, bo);
 }
 
 /***********************************************************************/
@@ -1461,3 +2008,112 @@ enum EST_write_status save_wave_raw(FILE *fp, const short *data,
 /*                                                                     */
 /***********************************************************************/
 
+enum EST_write_status wave_io_save_header(FILE *fp,
+                      const int num_samples, const int num_channels,
+                      const int sample_rate,
+                      const EST_String& stype, const int bo,
+                      const EST_String& ftype)
+{
+    EST_WaveFileType t = EST_WaveFile::map.token(ftype);
+    EST_sample_type_t sample_type = EST_sample_type_map.token(stype);
+    switch(t)
+    {
+        case wff_nist:
+            return save_wave_nist_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_esps:
+            return save_wave_sd_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_est:
+            return save_wave_est_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_audlab:
+            return save_wave_audlab_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_snd:
+            return save_wave_snd_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_aiff:
+            return save_wave_aiff_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_riff:
+            return save_wave_riff_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_raw:
+            return save_wave_raw_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_ulaw:
+            return save_wave_ulaw_header(fp, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        default:
+        case wff_none:
+            cerr << "Can't save wave header to files type " << ftype << endl;
+            break;
+    }
+    return write_ok;
+}
+
+
+enum EST_write_status wave_io_save_data(FILE *fp, const short * data,
+                      const int offset,
+                      const int num_samples, const int num_channels,
+                      const int sample_rate,
+                      const EST_String& stype, const int bo,
+                      const EST_String& ftype)
+{
+    EST_WaveFileType t = EST_WaveFile::map.token(ftype);
+    EST_sample_type_t sample_type = EST_sample_type_map.token(stype);
+    switch(t)
+    {
+        case wff_nist:
+            return save_wave_nist_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_esps:
+            return save_wave_sd_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_est:
+            return save_wave_est_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_audlab:
+            return save_wave_audlab_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_snd:
+            return save_wave_snd_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_aiff:
+            return save_wave_aiff_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_riff:
+            return save_wave_riff_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_raw:
+            return save_wave_raw_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        case wff_ulaw:
+            return save_wave_ulaw_data(fp, data, offset, num_samples, num_channels,
+                       sample_rate, sample_type, bo);
+            break;
+        default:
+        case wff_none:
+            cerr << "Can't save wave data to files type " << ftype << endl;
+            break;
+    }
+    return write_ok;
+}

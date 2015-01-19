@@ -48,6 +48,8 @@
 #include "lexicon.h"
 #include "text.h"
 
+using namespace std;
+
 static int rhc = 10;
 static int lhc = 10;
 
@@ -162,5 +164,5 @@ static void append_token(EST_Relation &ps, const EST_Token &t)
     EST_Item *item = ps.append();
 
     item->set_name(t.string());
-    item->set("filepos",t.filepos());
+    item->set("filepos", (int)t.filepos());
 }

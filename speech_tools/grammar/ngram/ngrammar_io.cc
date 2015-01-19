@@ -49,6 +49,10 @@
 #include "EST_Ngrammar.h"
 #include "EST_Token.h"
 #include "EST_cutils.h"
+#include "EST_File.h"
+
+
+using namespace std;
 
 EST_read_status
 load_ngram_htk_ascii(const EST_String filename, EST_Ngrammar &n)
@@ -291,12 +295,18 @@ load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
     
     if ((ifd=fopen(filename,"rb")) == NULL)
 	return misc_read_error;
-    fread(&magic,sizeof(int),1,ifd);
-    
+    if (fread(&magic,sizeof(int),1,ifd) != 1)
+    {
+        cerr << "Could not read integer from " << filename << endl;
+        fclose(ifd);
+        return misc_read_error;
+    }
     if (SWAPINT(magic) == EST_NGRAMBIN_MAGIC)
 	swap = TRUE;
-    else if (magic != EST_NGRAMBIN_MAGIC)
+    else if (magic != EST_NGRAMBIN_MAGIC) {
+		fclose(ifd);
 	return wrong_format;
+    }
     if (ts.open(ifd, FALSE) == -1)
 	return misc_read_error;
     
@@ -329,7 +339,7 @@ load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
     
     // Need to get to the position one after the newline and
     // who knows what TokenStream has already read,
-    fseek(ifd,(long)(ts.peek().filepos()+5),SEEK_SET);
+    EST_fseek(ifd,(long)(ts.peek().filepos()+5),SEEK_SET);
     
     if(!n.init(order,EST_Ngrammar::dense,vocab,pred_vocab))
     {
@@ -340,14 +350,14 @@ load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
     
     EST_StrVector window(order);
     
-    freq_data_start = ftell(ifd);
-    fseek(ifd,0,SEEK_END);
-    freq_data_end = ftell(ifd);
+    freq_data_start = EST_ftell(ifd);
+    EST_fseek(ifd,0,SEEK_END);
+    freq_data_end = EST_ftell(ifd);
     num_entries = (freq_data_end-freq_data_start)/sizeof(double);
     double *dd = new double[num_entries];
     
     // Go back to start of data
-    fseek(ifd,freq_data_start,SEEK_SET);
+    EST_fseek(ifd,freq_data_start,SEEK_SET);
     
     if (fread(dd,sizeof(double),num_entries,ifd) != (unsigned)num_entries)
     {

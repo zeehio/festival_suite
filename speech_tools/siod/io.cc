@@ -153,7 +153,7 @@ static int connect_to_server(const char *host, int port)
 static void server_send(int s, const char *text)
 {
   size_t n=strlen(text);
-  ssize_t sent;
+  int sent;
 
   while (n>0)
     if ((sent = write(s, text, n))<0)
@@ -166,7 +166,7 @@ static const char *server_get_line(int s)
 {
   static char buffer[MAX_LINE_LENGTH+1];
   char *p=buffer;
-  ssize_t n;
+  int n;
 
   *p='\0';
 

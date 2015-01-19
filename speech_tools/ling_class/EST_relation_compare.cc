@@ -49,6 +49,7 @@
 #include "ling_class/EST_relation_compare.h"
 #include "EST_io_aux.h"
 
+using namespace std;
 
 int close_enough(EST_Item &a, EST_Item &b)
 {
@@ -208,7 +209,7 @@ float label_distance2(EST_Item &ref, EST_Item &test)
     return (s + e) / duration(&ref);
 }
 
-int lowest_pos(EST_FMatrix &m, int j)
+int lowest_pos(const EST_FMatrix &m, int j)
 {
     float val = 1000.0;
     int i, pos=0;
@@ -334,7 +335,7 @@ int major_matrix_deletions(EST_FMatrix &m, EST_Relation &ref_lab)
     return (m.num_columns() - n);
 }
 
-int lowest_pos(float *m, int n)
+int lowest_pos(float const * const m, int n)
 {
     float val = 1000.0;
     int i, pos=0;
@@ -569,10 +570,17 @@ void multiple_matrix_compare(EST_RelationList &rlist, EST_RelationList
 	}
     }
     
+    if (tot != 0) {
     rc = float(tot - del)/(float)tot * 100.0;
     ra = float(tot - del -ins)/(float)tot *100.0;
     mrc = float(tot - mdel)/(float)tot * 100.0;
     mra = float(tot - mdel - mins)/(float)tot *100.0;
+	} else {
+    rc = NAN;
+    ra = NAN;
+    mrc = NAN;
+    mra = NAN;
+	}
     
     if (v)
     {
@@ -823,9 +831,9 @@ void test_labels(EST_Utterance &ref, EST_Utterance &test, EST_Option &op)
 
 void print_i_d_scores(EST_FMatrix &m)
 {
-    cout.setf(ios::left,ios::adjustfield);
+	std::ios_base::fmtflags oldsetf = cout.setf(ios::fixed, ios::adjustfield);
     cout << "Total: ";
-    cout.width(10);
+	std::streamsize oldwidth = cout.width(10);
     cout << m.num_columns();
     cout << "Deletions: ";
     cout.width(10);
@@ -833,6 +841,9 @@ void print_i_d_scores(EST_FMatrix &m)
     cout << "Insertions: "; 
     cout.width(10);
     cout<< matrix_insertions(m) << endl;
+	
+	cout.width(oldwidth);
+	cout.setf(oldsetf);
 }
 
 void print_matrix_scores(EST_Relation &ref, EST_Relation &test, EST_FMatrix &a)

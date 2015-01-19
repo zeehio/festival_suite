@@ -48,6 +48,8 @@
 #include "EST_track_aux.h"
 #include "EST_error.h"
 
+using namespace std;
+
 //static inline int irint(float f) { return (int)(f+0.5); }
 //static inline int irint(double f) { return (int)(f+0.5); }
 //static inline int ifloor(float f) { return (int)(f); }
@@ -350,6 +352,8 @@ float mean( const EST_Track &tr, int channel )
       ++n;
     }
 
+  if (n == 0) return NAN;
+  
   return mean/(float)n;
 }
 
@@ -486,6 +490,11 @@ void meansd(EST_TrackList &tl, float &mean, float &sd, int channel)
 		mean += tl(p).a(i, channel);
 		++n;
 	    }
+    }
+    if (n == 0) {
+        mean = NAN;
+        sd = NAN;
+        return;
     }
 
     mean /= n;

@@ -45,6 +45,8 @@
 #include "EST_Token.h"
 #include "EST_THash.h"
 
+using namespace std;
+
 #define LINE_LENGTH 1000
 
 EST_Regex RX_Word("[A-Z]?[a-z]+\\('[a-z]+\\)?");
@@ -61,7 +63,9 @@ main(int argc, const char *argv[])
   if (argc != 2)
     return 1;
 
-  file.open(argv[1]);
+  if (file.open(argv[1]) != 0) {
+    return -1;
+  }
   file.set_WhiteSpaceChars("");
   file.set_SingleCharSymbols("\n");
   file.set_PunctuationSymbols("");

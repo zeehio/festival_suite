@@ -66,6 +66,8 @@ Instantiate_TVector_T(EST_WFST_State *, EST_WFST_StateP)
 
 #endif
 
+using namespace std;
+
 // Used for marking states duration traversing functions
 int EST_WFST::traverse_tag = 0;
 
@@ -127,6 +129,8 @@ EST_WFST::EST_WFST()
 {
     p_num_states = 0;
     init(0);
+    p_start_state = 0;
+    current_tag = 0;
 }
 
 void EST_WFST::copy(const EST_WFST &wfst)
@@ -427,7 +431,11 @@ EST_write_status EST_WFST::save(const EST_String &filename,
 static float get_float(FILE *fd,int swap)
 {
     float f;
-    fread(&f,4,1,fd);
+    if (fread(&f,4,1,fd) != 1)
+    {
+        cerr << "Could not get float from WFST" << endl;
+        return 0;
+    }
     if (swap) swapfloat(&f);
     return f;
 }
@@ -435,7 +443,11 @@ static float get_float(FILE *fd,int swap)
 static int get_int(FILE *fd,int swap)
 {
     int i;
-    fread(&i,4,1,fd);
+    if (fread(&i,4,1,fd) != 1)
+    {
+        cerr << "Could not get int from WFST" << endl;
+        return 0;
+    }
     if (swap) 
 	return SWAPINT(i);
     else
@@ -447,6 +459,7 @@ EST_read_status EST_WFST::load_binary(FILE *fd,
 				      int num_states,
 				      int swap)
 {
+    (void)hinfo;
     EST_read_status r;
     int i,j, s;
     int num_trans, state_type;

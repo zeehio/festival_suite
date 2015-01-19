@@ -44,6 +44,8 @@
 #include "apml.h"
 #include "rxp/XML_Parser.h"
 
+using namespace std;
+
 static EST_Regex simpleIDRegex(".*#id(w\\([0-9]+\\))");
 static EST_Regex rangeIDRegex(".*#id(w\\([0-9]+\\)).*id(w\\([0-9]+\\))");
 static EST_Regex RXpunc("[\\.,\\?\\!\"]+");
@@ -311,6 +313,7 @@ void Apml_Parser_Class::pcdata(XML_Parser_Class &c,
 	    const char *chars)
 {
   (void)c; 
+  (void)p;
   
  Parse_State *state = (Parse_State *)data;
  EST_String strings[255];

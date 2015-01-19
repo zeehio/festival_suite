@@ -50,6 +50,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cctype>
+#include <iostream>
 #include <sys/stat.h>
 #include "EST_cutils.h"
 #include "EST_walloc.h"
@@ -59,6 +60,8 @@
 #include "audioP.h"
 #include "EST_io_aux.h"
 #include "EST_error.h"
+
+using namespace std;
 
 #ifdef SUPPORT_FREEBSD16
 #include <sys/soundcard.h>
@@ -243,6 +246,7 @@ int play_linux_wave(EST_Wave &inwave, EST_Option &al)
 	      THREAD_UNPROTECT();
 	      EST_warning("%s: failed to write to buffer (sr=%d)",aud_sys_name, sample_rate );
 		close(audio);
+        delete[] buf;
 		return -1;
 	    }
 	    // ioctl(audio, SNDCTL_DSP_SYNC, 0);
@@ -256,6 +260,9 @@ int play_linux_wave(EST_Wave &inwave, EST_Option &al)
       cerr << aud_sys_name << ": unable to set sample rate " <<
 	sample_rate << endl;
       close(audio);
+      if (waveform2 != waveform)
+         wfree(waveform2);
+      wfree(waveform);
       return -1;
     }
     
@@ -327,6 +334,7 @@ int record_linux_wave(EST_Wave &inwave, EST_Option &al)
 		cerr << aud_sys_name << ": failed to read from audio device"
 		    << endl;
 		close(audio);
+        wfree(waveform2);
 		return -1;
 	    }
 	}
@@ -621,6 +629,9 @@ static int recover_from_error(snd_pcm_t *pcm_handle, ssize_t res)
 {
   if (res == -EPIPE) /* xrun */
   {
+	EST_warning("xrun has occured. This suggests ALSA buffer is "
+	            "underflowing. Possibly change audio output methods "
+	            "or use a faster or more lightly loaded device");
 	res = snd_pcm_prepare(pcm_handle);
 	if (res < 0) 
 	{
@@ -869,6 +880,9 @@ int record_linux_wave(EST_Wave &inwave, EST_Option &al)
     }
 
     close(audio);
+#else /* if 0 */
+    (void) inwave;
+    (void) al;
 #endif /* 0 */ 
     return 0;
 }

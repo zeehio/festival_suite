@@ -54,6 +54,9 @@
 #include "EST_walloc.h"
 #include "EST_TrackFile.h"
 #include "EST_FileType.h"
+#include "EST_File.h"
+
+using namespace std;
 
 EST_read_status EST_TrackFile::load_ssff(const EST_String filename, 
 					EST_Track &tr, float ishift, float startt)
@@ -75,7 +78,8 @@ EST_read_status EST_TrackFile::load_ssff_ts(EST_TokenStream &ts, EST_Track &tr, 
     (void)startt;
     int num_frames, num_channels;
     int swap = FALSE;
-    int i,j,pos,end;
+    int i,j;
+    EST_FilePos pos,end;
     float Start_Time, Record_Freq;
     EST_Features channels;
     EST_String c, name, type, size, cname;
@@ -167,11 +171,15 @@ EST_read_status EST_TrackFile::load_ssff_ts(EST_TokenStream &ts, EST_Track &tr, 
     // There's no num_records field in the header so have to use file's 
     // length to calculate it
     fp = ts.filedescriptor();
-    pos = ftell(fp);
-    fseek(fp,0,SEEK_END);
-    end = ftell(fp);
-    fseek(fp,pos,SEEK_SET);
+    pos = EST_ftell(fp);
+    EST_fseek(fp,0,SEEK_END);
+    end = EST_ftell(fp);
+    EST_fseek(fp,pos,SEEK_SET);
+    if (num_channels == 0) { /* Dummy unlikely case (wrong format?) */
+        num_frames = 0;
+    } else {
     num_frames = (end - pos)/(num_channels*sizeof(double));
+    }
     
     // Finished reading header
     tr.resize(num_frames,num_channels);
@@ -188,14 +196,24 @@ EST_read_status EST_TrackFile::load_ssff_ts(EST_TokenStream &ts, EST_Track &tr, 
 	    type = channels.S(EST_String("Channel_")+ itoString(j)+".type");
 	    if (type == "DOUBLE")
 	    {
-		ts.fread(dbuff,sizeof(double),1);
+		if (ts.fread(dbuff,sizeof(double),1) != 1)
+        {
+            cerr << "Failed to read frame " << i << ", channel " <<
+                    j << endl;
+            return misc_read_error;
+        }
 		if (swap)
 		    swap_bytes_double(dbuff,1);
 		tr(i,j) = *dbuff;
 	    }
 	    else if (type == "SHORT")
 	    {
-		ts.fread(sbuff,sizeof(short),1);
+		if (ts.fread(sbuff,sizeof(short),1) != 1)
+        {
+            cerr << "Failed to read short from frame" << i <<
+                    ", channel " << j << endl;
+            return misc_read_error;
+        }
 		if (swap)
 		    swap_bytes_short(sbuff,1);
 		tr(i,j) = (float)(*sbuff);
@@ -211,7 +229,7 @@ EST_read_status EST_TrackFile::load_ssff_ts(EST_TokenStream &ts, EST_Track &tr, 
     return format_ok;
 }
 
-EST_write_status EST_TrackFile::save_ssff(const EST_String filename, EST_Track tr)
+EST_write_status EST_TrackFile::save_ssff(const EST_String filename, EST_Track& tr)
 {
     FILE *fd;
     EST_write_status r;
@@ -229,7 +247,7 @@ EST_write_status EST_TrackFile::save_ssff(const EST_String filename, EST_Track t
 
 }
 
-EST_write_status EST_TrackFile::save_ssff_ts(FILE *fp, EST_Track tr)
+EST_write_status EST_TrackFile::save_ssff_ts(FILE *fp, EST_Track& tr)
 {
     int i,j;
     int need_prob_voice = 0;

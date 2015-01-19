@@ -42,8 +42,7 @@
 #define __TMatrix_H__
 
 #include <iostream>
-
-using namespace std;
+#include <cstddef>
 
 #include "EST_rw_status.h"
 #include "EST_TVector.h"
@@ -79,14 +78,13 @@ using namespace std;
 
 
 
-/** Template Matrix class.
-  *
-  * This is an extension of the EST_TVector class to two dimensions.
+/** \class EST_TMatrix
+  * \ingroup containerclasses
+  * \brief Template Matrix class. This is an extension of the EST_TVector class to two dimensions.
   *
   * @see matrix_example
   * @see EST_TVector
   */
-
 template <class T> 
 class EST_TMatrix : public EST_TVector<T>
 {
@@ -232,45 +230,45 @@ public:
     * memory with the original, so altering values them alters
     * the original. 
     */
-  //@{
+  ///@{
 
-  /// Make the vector {\tt rv} a window onto row {\tt r}
+  /// Make the vector `rv` a window onto row `r`
   void row(EST_TVector<T> &rv, int r, int start_c=0, int len=-1);
-  /// Make the vector {\tt cv} a window onto column {\tt c}
+  /// Make the vector `cv` a window onto column `c`
   void column(EST_TVector<T> &cv, int c, int start_r=0, int len=-1);
-  /// Make the matrix {\tt sm} a window into this matrix.
+  /// Make the matrix `sm` a window into this matrix.
   void sub_matrix(EST_TMatrix<T> &sm,
 		  int r=0, int numr=EST_ALL, 
 		  int c=0, int numc=EST_ALL);
-  //@}
+  ///@}
 
   /**@name Copy in and out
     * Copy data between buffers and the matrix.
     */
-  //@{
-    /** Copy row {\tt r} of matrix to {\tt buf}. {\tt buf}
+  ///@{
+    /** Copy row `r` of matrix to `buf`. `buf`
         should be pre-malloced to the correct size.
         */
     void copy_row(int r, T *buf, int offset=0, int num=-1) const;
 
-    /** Copy row <parameter>r</parameter> of matrix to
-        <parameter>buf</parameter>. <parameter>buf</parameter> should be
+    /** Copy row `r` of matrix to
+        `buf`. `buf` should be
         pre-malloced to the correct size.  */
     
     void copy_row(int r, EST_TVector<T> &t, int offset=0, int num=-1) const;
 
-    /** Copy column {\tt c} of matrix to {\tt buf}. {\tt buf}
+    /** Copy column `c` of matrix to `buf`. `buf`
         should be pre-malloced to the correct size.
         */
     void copy_column(int c, T *buf, int offset=0, int num=-1) const;
 
-    /** Copy column <parameter>c</parameter> of matrix to
-        <parameter>buf</parameter>. <parameter>buf</parameter> should
+    /** Copy column `c` of matrix to
+        `buf`. `buf` should
         be pre-malloced to the correct size.  */
 
     void copy_column(int c,  EST_TVector<T> &t, int offset=0, int num=-1)const;
 
-    /** Copy buf into row {\tt n} of matrix. 
+    /** Copy buf into row `n` of matrix. 
         */
     void set_row(int n, const T *buf, int offset=0, int num=-1);
 
@@ -282,7 +280,7 @@ public:
                  int offset=0, int num=-1); // set nth row
 
 
-    /** Copy buf into column {\tt n} of matrix.         
+    /** Copy buf into column `n` of matrix.         
       */
     void set_column(int n, const T *buf, int offset=0, int num=-1);
 
@@ -298,19 +296,18 @@ public:
   void set_memory(T *buffer, int offset, int rows, int columns, 
 		  int free_when_destroyed=0);
 
-  //@}
+  ///@}
 
-  /**@name io
-    * Matrix file io.
+  /**@name Matrix file input / output
     */
-  //@{
+  ///@{
   /// load Matrix from file - Not currently implemented.
   EST_read_status  load(const class EST_String &filename);
-  /// save Matrix to file {\tt filename}
+  /// save Matrix to file `filename`
   EST_write_status save(const class EST_String &filename) const;
 
   /// print matrix.
-  friend ostream& operator << (ostream &st,const EST_TMatrix<T> &a)
+  friend std::ostream& operator << (std::ostream &st,const EST_TMatrix<T> &a)
     {int i, j; 
         for (i = 0; i < a.num_rows(); ++i) {
             for (j = 0; j < a.num_columns(); ++j) 
@@ -319,7 +316,7 @@ public:
         }
         return st;
     }
-  //@}
+  ///@}
   
 };
 

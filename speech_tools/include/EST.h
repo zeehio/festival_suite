@@ -39,11 +39,27 @@
 #ifndef __EST_H__
 #define __EST_H__
 
+/** \defgroup basicclasses Basic Classes
+ */
+
+/** \defgroup containerclasses Container Classes
+ *  \ingroup basicclasses
+ *  \brief Classes useful to contain other objects
+ */
+ 
+/** \defgroup stringclasses String Classes
+ *  \ingroup basicclasses
+ *  \brief Classes useful to work with text and strings
+ */
+
+/** \defgroup supportclasses Support Classes
+ *  \ingroup basicclasses
+ *  \brief Classes used as a support to other classes
+ */
+
 // Standard include files.
 #include "EST_system.h"
 #include <cstdlib>
-
-using namespace std;
 
 #include "EST_String.h"
 #include "EST_string_aux.h"

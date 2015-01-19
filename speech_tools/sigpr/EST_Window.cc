@@ -45,6 +45,8 @@
 #include "EST_TNamedEnum.h"
 #include "EST_math.h"
 
+using namespace std;
+
 //static inline int irint(float f) { return (int)(f+0.5); }
 //static inline int irint(double f) { return (int)(f+0.5); }
 static inline int min(int a, int b) { return (a<b)?a:b; }
@@ -208,7 +210,7 @@ static EST_TValuedEnumDefinition<EST_WindowType, const char *, Info> window_name
 				{Hanning,	"Hanning window"}},
   { wf_hamming,		{"hamming", "ham"},			
 				{Hamming,	"Hamming window"}},
-  { wf_none,		{ NULL }},
+  { wf_none,		{ NULL }, {NULL, NULL}},
 };
 
 static EST_TNamedEnumI<EST_WindowType, Info> map(window_names);
@@ -245,7 +247,9 @@ static float find_dc(const EST_Wave &sig, int start, int size)
 
     start = max(0, start);
     size = min(size, sig.num_samples()-start);
-
+    if (size == 0) {
+      return NAN;
+    }
     for(i=0; i<size; i++)
       sum += sig.a_no_check(start+i);
 
