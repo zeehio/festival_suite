@@ -41,6 +41,8 @@
 #include "EST_cmd_line_options.h"
 #include "sigpr/EST_spectrogram.h"
 
+using namespace std;
+
 #define DEFAULT_FRAME_SIZE 0.001
 #define DEFAULT_FRAME_LENGTH 0.008
 #define DEFAULT_ORDER 256
@@ -48,43 +50,6 @@
 
 void set_options(EST_Features &op, EST_Option &al);
 
-/** @name <command>spectgen</command> <emphasis>Make spectrograms</emphasis>
-  * @id spectgen-manual
-  * @toc
- */
-
-//@{
-
-/**@name Synopsis
-  */
-//@{
-
-//@synopsis
-
-/**
-spectgen is used to create spectrograms, which are 3d plots of
-amplitude against time and frequency. Spectgen takes a waveform and
-produces a track, where each channel represents one frequency bin. 
-
-By default spectgen produces a "wide-band" spectrogram, that is one
-with high time resolution and low frequency resolution. "Narrow-band"
-spectrograms can be produced by using the -shift and -length options.
-
-Typical values for -shift and -length are:
-
-
-
-*/
-
-//@}
-
-/**@name Options
-  */
-//@{
-
-//@options
-
-//@}
 
 
 int main(int argc, char *argv[])
@@ -93,7 +58,6 @@ int main(int argc, char *argv[])
     EST_StrList files;
     EST_Option al;
     EST_Features op;
-    int orig_sr;
 
     EST_Wave sig;
     EST_Track spec;
@@ -124,7 +88,6 @@ int main(int argc, char *argv[])
 
     if (read_wave(sig, files.first(), al) != format_ok)
 	exit(-1);
-    orig_sr = sig.sample_rate();
 
     make_spectrogram(sig, spec, op);
     

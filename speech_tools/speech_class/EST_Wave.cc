@@ -48,10 +48,12 @@
 #include "EST_wave_aux.h"
 #include "EST_TNamedEnum.h"
 #include "EST_WaveFile.h"
-
+#include "EST_File.h"
 #include "EST_Track.h"
 
 #include "waveP.h"
+
+using namespace std;
 
 const EST_String DEF_FILE_TYPE = "riff";
 const EST_String DEF_SAMPLE_TYPE = "short";
@@ -63,7 +65,7 @@ EST_Wave::EST_Wave()
     default_vals();
 }
 
-EST_Wave::EST_Wave(const EST_Wave &w)
+EST_Wave::EST_Wave(const EST_Wave &w) : EST_Featured(w)
 {
     default_vals();
     copy(w);
@@ -217,7 +219,10 @@ EST_read_status EST_Wave::load(EST_TokenStream &ts,
 	if (l_fun == NULL)
 	    continue;
 
-	ts.seek(pos);
+	if (ts.seek(pos) != 0) {
+        stat = read_error;
+        break;
+    }
 	stat = (*l_fun)(ts, *this, 
 			rate, st_short, EST_NATIVE_BO, 1,
 			offset, length);
@@ -392,13 +397,13 @@ EST_write_status EST_Wave::save(FILE *fp, const EST_String type)
 
 EST_write_status EST_Wave::save_file(const EST_String filename,
 				     EST_String ftype,
-				     EST_String stype, int obo)
+				     EST_String stype, int obo, const char *mode)
 {
     FILE *fp;
 
     if (filename == "-")
 	fp = stdout;
-    else if ((fp = fopen(filename,"wb")) == NULL)
+    else if ((fp = fopen(filename, mode)) == NULL)
     {
 	cerr << "Wave save: can't open output file \"" <<
 	    filename << "\"" << endl;
@@ -433,7 +438,55 @@ EST_write_status EST_Wave::save_file(FILE *fp,
     }
     
     return (*s_fun)(fp, *this, sample_type, obo);
+}
     
+EST_write_status EST_Wave::save_file_data(FILE *fp,
+				     EST_String ftype,
+				     EST_String stype, int obo)
+{
+    EST_WaveFileType t = EST_WaveFile::map.token(ftype);
+    EST_sample_type_t sample_type = EST_sample_type_map.token(stype);
+
+    if (t == wff_none)
+      {
+	cerr << "Unknown Wave file type " << ftype << endl;
+	return write_fail;
+      }
+
+    EST_WaveFile::Save_TokenStream * s_fun = EST_WaveFile::map.info(t).save_data;
+    
+    if (s_fun == NULL)
+    {
+	cerr << "Can't save wave data to files type " << ftype << endl;
+	return write_fail;
+    }
+
+    return (*s_fun)(fp, *this, sample_type, obo);
+}
+
+
+EST_write_status EST_Wave::save_file_header(FILE *fp,
+				     EST_String ftype,
+				     EST_String stype, int obo)
+{
+    EST_WaveFileType t = EST_WaveFile::map.token(ftype);
+    EST_sample_type_t sample_type = EST_sample_type_map.token(stype);
+
+    if (t == wff_none)
+      {
+	cerr << "Unknown Wave file type " << ftype << endl;
+	return write_fail;
+      }
+
+    EST_WaveFile::Save_TokenStream * s_fun = EST_WaveFile::map.info(t).save_header;
+
+    if (s_fun == NULL)
+    {
+	cerr << "Can't save wave header to files type " << ftype << endl;
+	return write_fail;
+    }
+
+    return (*s_fun)(fp, *this, sample_type, obo);
 }
 
 void EST_Wave::resample(int new_freq)
@@ -463,10 +516,14 @@ void EST_Wave::rescale(float gain, int normalize)
 	  for (int j = 0; j < num_channels(); ++j)
 	    if (abs(a_no_check(i,j)) > max)
 		max = abs(a_no_check(i,j));
-	if (fabs(max/32766.0-gain) < 0.001)
+	if (fabs(max/32766.0-gain) < 0.001) {
 	    return; /* already normalized */
-	else
+    } else {
+        if (max != 0.0) /* prevent div by zero */
 	    factor *= 32766.0/(float)max;
+        else /* signal is zero everywhere */
+            factor = 1.0;
+    }
     }
     
     for (int i = 0; i < num_samples(); ++i)

@@ -41,6 +41,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <fstream>
+#include <sstream>
 #include <cmath>
 #include <climits>
 #include "EST_String.h"
@@ -51,6 +52,8 @@
 #include "EST_cutils.h"  // for swap functions 
 #include "EST_Token.h"
 #include "rateconv.h"
+
+using namespace std;
 
 EST_String EST_DMatrix::default_file_type = "est_ascii";
 

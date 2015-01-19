@@ -39,13 +39,14 @@
  /*************************************************************************/
 
 
-#if !defined(__EST_UNIX_WIN32_H__)
-#define __EST_UNIX_WIN32_H__ 1
+#ifndef __EST_UNIX_WIN32_H__
+#define __EST_UNIX_WIN32_H__
+
+#if defined(SYSTEM_IS_WIN32) /* Prevent including this if not WIN32 */
 
 /* force this to be loaded first */
 #ifdef __cplusplus
 #include <iostream>
-using namespace std;
 #endif
 
 #include<stdint.h>
@@ -113,4 +114,6 @@ extern "C" {
 #   define memcpy(DST, SRC, N) CopyMemory((DST), (SRC), (N))
 #endif
 
-#endif
+#endif /* defined(SYSTEM_IS_WIN32) */
+
+#endif /* header guard */

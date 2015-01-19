@@ -50,6 +50,8 @@
 #include "EST_cutils.h"
 #include "EST_error.h"
 
+using namespace std;
+
 const EST_String EST_Token_Default_WhiteSpaceChars = " \t\n\r";
 const EST_String EST_Token_Default_SingleCharSymbols = "(){}[]";
 const EST_String EST_Token_Default_PrePunctuationSymbols = "\"'`({[";
@@ -162,6 +164,17 @@ void EST_TokenStream::default_values()
     PunctuationSymbols = EST_String::Empty;
     build_table();
     close_at_end=TRUE;
+    
+    /* Avoid leaving uninitialized members */
+    fp = 0;
+    is = 0;
+    fd = 0;
+    buffer = 0;
+    buffer_length = 0;
+    pos = 0;
+    peeked_char = 0;
+    quote = 0;
+    escape = 0;
 }
 
 EST_TokenStream::~EST_TokenStream()
@@ -235,7 +248,7 @@ int EST_TokenStream::open(FILE *ofp, int close_when_finished)
     return 0;
 }
 
-int EST_TokenStream::open(istream &newis)
+int EST_TokenStream::open(std::istream &newis)
 {
     // absorb already open istream 
     if (type != tst_none)
@@ -279,16 +292,17 @@ int EST_TokenStream::seek_end()
 	return -1;
 	break;
       case tst_file:
-	fseek(fp,0,SEEK_END);
-	p_filepos = ftell(fp);
+	EST_fseek(fp,0,SEEK_END);
+	p_filepos = EST_ftell(fp);
 	return p_filepos;
       case tst_pipe:
 	cerr << "EST_TokenStream seek on pipe not supported" << endl;
 	return -1;
 	break;
       case tst_istream:
-	cerr << "EST_TokenStream seek on istream not yet supported" << endl;
-	return -1;
+    is->seekg(0,is->end);
+    p_filepos = is->tellg();
+	return p_filepos;
 	break;
       case tst_string:
 	pos = buffer_length;
@@ -314,14 +328,15 @@ int EST_TokenStream::seek(int position)
 	break;
       case tst_file:
 	p_filepos = position;
-	return fseek(fp,position,SEEK_SET);
+	return EST_fseek(fp,position,SEEK_SET);
       case tst_pipe:
 	cerr << "EST_TokenStream seek on pipe not supported" << endl;
 	return -1;
 	break;
       case tst_istream:
-	cerr << "EST_TokenStream seek on istream not yet supported" << endl;
-	return -1;
+    p_filepos = position;
+    is->seekg(position, is->beg);
+	return 0;
 	break;
       case tst_string:
 	if (position >= pos)
@@ -381,8 +396,9 @@ int EST_TokenStream::fread(void *buff, int size, int nitems)
 	return 0;
 	break;
       case tst_istream:
-	cerr << "EST_TokenStream fread istream not yet supported" << endl;
-	return 0;
+    is->read((char*)buff, (int) size*nitems);
+	return is->gcount()/size;
+    break;
       case tst_string:
 	if ((buffer_length-pos)/size < nitems)
 	    items_read = (buffer_length-pos)/size;

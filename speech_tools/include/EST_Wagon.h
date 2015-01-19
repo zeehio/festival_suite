@@ -47,7 +47,7 @@
 #include "EST_simplestats.h"  /* For EST_SuffStats class */
 #include "EST_Track.h"
 #include "siod.h"
-#define wagon_error(WMESS) (cerr << WMESS << endl,exit(-1))
+#define wagon_error(WMESS) (std::cerr << WMESS << std::endl,exit(-1))
 
 // I get floating point exceptions of Alphas when I do any comparisons
 // with HUGE_VAL or FLT_MAX so I'll make my own
@@ -82,6 +82,7 @@ class WDataSet : public WVectorList {
     EST_IVector p_ignore;
     EST_StrVector p_name;
   public:
+	WDataSet(): WVectorList() { dlength = 0;};
     void load_description(const EST_String& descfname,LISP ignores);
     void ignore_non_numbers();
 
@@ -105,7 +106,12 @@ class WQuestion {
     EST_IList operandl;
     float score;
   public:
-    WQuestion() {;}
+    WQuestion() {
+        this->yes = 0;
+        this->no = 0;
+        this->score = WGN_HUGE_VAL;
+        this->op = wnop_equal;
+        this->feature_pos = 0;}
     WQuestion(const WQuestion &s) 
        { feature_pos=s.feature_pos;
          op=s.op; yes=s.yes; no=s.no; operand1=s.operand1;
@@ -120,13 +126,13 @@ class WQuestion {
     void set_no(const int &n) {no=n;}
     int get_yes(void) const {return yes;}
     int get_no(void) const {return no;}
-    const int get_fp(void) const {return feature_pos;}
-    const wn_oper get_op(void) const {return op;}
+    int get_fp(void) const {return feature_pos;}
+    wn_oper get_op(void) const {return op;}
     const EST_Val get_operand1(void) const {return operand1;}
     const EST_IList &get_operandl(void) const {return operandl;}
-    const float get_score(void) const {return score;}
+    float get_score(void) const {return score;}
     void set_score(const float &f) {score=f;}
-    const int ask(const WVector &w) const;
+    int ask(const WVector &w) const;
     friend ostream& operator<<(ostream& s, const WQuestion &q);
 };
 
@@ -154,7 +160,7 @@ class WImpurity {
     float score;
     int l,width;
 
-    WImpurity() { t=wnim_unset; a.reset(); trajectory=0; l=0; width=0; data=0;}
+    WImpurity() { t=wnim_unset; a.reset(); trajectory=0; l=0; width=0; data=0; score=WGN_HUGE_VAL;}
     ~WImpurity();
     WImpurity(const WVectorVector &ds);
     void copy(const WImpurity &s) 
@@ -197,7 +203,12 @@ class WDlist {
     int p_samples;
     WDlist *next;
   public:
-    WDlist() { next=0; }
+    WDlist() { 
+		next=0; 
+		p_score = WGN_HUGE_VAL;
+		p_freq = 0;
+		p_samples = 0;
+		}
     ~WDlist() { if (next != 0) delete next; }
     void set_score(float s) { p_score = s; }
     void set_question(const WQuestion &q) { p_question = q; }

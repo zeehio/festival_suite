@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <fstream>
+#include <sstream>
 #include <cmath>
 #include <climits>
 using namespace std;

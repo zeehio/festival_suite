@@ -46,7 +46,7 @@
 #ifndef __Event_H__
 #define __Event_H__
 
-#include <EST_String.h>
+#include "EST_String.h"
 
 #ifndef FALSE
 #       define  FALSE   (0)
@@ -55,14 +55,17 @@
 #       define  TRUE    (1)
 #endif
 
-
-//class RFCelement{
-//    float amp;
-//    float dur;
-//    float start_amp;
-//    float start_pos;
-//    EST_String type;
-//};
+/* Class commented out as everything is private, uninitialized and
+   unused */
+#if 0
+class RFCelement{
+    float amp;
+    float dur;
+    float start_amp;
+    float start_pos;
+    EST_String type;
+};
+#endif
 
 class EventBase{
  private:
@@ -90,7 +93,7 @@ public:
 	s << e.type << " " << e.rise_amp << " " << e.rise_dur
 	    << " " << e.fall_amp << " " << e.fall_dur
 	    << " " << e.start_amp << " " << e.start_pos
-            << endl;
+            << std::endl;
 	    return s;
 	}
 };
@@ -139,7 +142,7 @@ public:
 	    << " sf0:" << e.start_f0() << " spos:" << e.start_pos()
 	    << " pf0:" << e.peak_f0() << " ppos:" << e.peak_pos()
 	    << " ef0:" << e.end_f0() << " epos:" << e.end_pos()
-            << endl;
+            << std::endl;
 	    return s;
 	}
 };
@@ -176,7 +179,7 @@ public:
 	s << e.type << " " << e.amp() << " " << e.dur()
 	    << " " << e.tilt() << " " << e.pos()
 	    << " sf0 " << e.start_f0() << " " << e.start_pos()
-            << endl;
+            << std::endl;
 	    return s;
 	}
 

@@ -37,6 +37,8 @@
 #include <iostream>
 #include <cstdio>
 
+using namespace std;
+
 int main()
 {
     EST_String example("hello world");
@@ -55,7 +57,7 @@ int main()
     int end_br[EST_Regex_max_subexpressions];
     int len;
 
-    if (example.search(exclamation, len, 0, start_br, end_br)>=0)
+    if (example.search(exclamation, len, 0, start_br, end_br)!=-1)
       {
 	// whole match is item 0
 	cout << "match was '" << example.at(start_br[0], end_br[0]- start_br[0]) << "'\n";

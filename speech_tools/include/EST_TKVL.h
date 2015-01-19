@@ -41,8 +41,6 @@
 
 #include <cmath>
 
-using namespace std;
-
 #include "EST_TList.h"
 #include "instantiate/EST_TKVLI.h"
 #include "EST_TIterator.h"
@@ -50,7 +48,9 @@ using namespace std;
 class EST_String;
 
 
-/** Templated Key-Value Item. Serves as the items in the list of the
+/** \class EST_TKVI
+ *  @ingroup containerclasses
+ *  \brief Templated Key-Value Item. Serves as the items in the list of the
 EST_TKVL class.  */
 template<class K, class V> class EST_TKVI {
  public:
@@ -61,26 +61,27 @@ template<class K, class V> class EST_TKVI {
 	return( (i.k == k) && (i.v == v) );
     }
 
-    friend  ostream& operator << (ostream& s, EST_TKVI<K,V> const &i)
+    friend  std::ostream& operator << (std::ostream& s, EST_TKVI<K,V> const &i)
         {  return s << i.k << "\t" << i.v << "\n"; }
 };
 
 
-/** Templated Key-Value list. Objects of type EST_TKVL contain lists which
-are accessed by a key of type {\bf K}, which returns a value of type
-{\bf V}. */
+/** \class EST_TKVL
+ *  @ingroup containerclasses
+ *  \brief Templated Key-Value list. Objects of type EST_TKVL contain lists which
+are accessed by a key of type `K`, which returns a value of type `V`. */
 template<class K, class V> class EST_TKVL {
  private:
     EST_Litem *find_pair_key(const K &key) const;
     EST_Litem *find_pair_val(const V &val) const;
  public:
     /**@name Constructor functions */
-    //@{
+    ///@{
     /// default constructor
     EST_TKVL() {;}
     /// copy constructor
     EST_TKVL(const EST_TKVL<K, V> &kv);
-    //@}
+    ///@}
 
     /// default value, returned when there is no such entry.
     static V *default_val;
@@ -93,7 +94,7 @@ template<class K, class V> class EST_TKVL {
     EST_TList< EST_TKVI<K,V> > list;	
 
     /// number of key value pairs in list
-    int length() const {return list.length();} 
+    int length() const {return list.length();}
 
     /// Return First key value pair in list
     EST_Litem * head() const {return list.head();};
@@ -103,7 +104,7 @@ template<class K, class V> class EST_TKVL {
     
     /**@name Access functions.
      */
-    //@{
+    ///@{
     /// return value according to key (const)
     const V &val(const K &rkey, bool m=0) const;
     /// return value according to key (non-const)
@@ -139,7 +140,7 @@ template<class K, class V> class EST_TKVL {
     /// remove key and val pair from list
     int remove_item(const K &rkey, int quiet = 0);
 
-    //@}
+    ///@}
     
     /// Returns true if key is present.
     int present(const K &rkey) const;
@@ -147,10 +148,10 @@ template<class K, class V> class EST_TKVL {
     /// apply function to each pair
     void map(void (*func)(K&, V&));
     
-    friend ostream& operator << (ostream& s, EST_TKVL<K,V> const &l)
+    friend std::ostream& operator << (std::ostream& s, EST_TKVL<K,V> const &l)
     {EST_Litem *p; 
         for (p = l.list.head(); p ; p = p->next()) 
-            s << l.list(p).k << "\t" << l.list(p).v << endl; 
+            s << l.list(p).k << "\t" << l.list(p).v << std::endl; 
         return s;
     } 
     
@@ -164,7 +165,11 @@ template<class K, class V> class EST_TKVL {
   // Iteration support
 
 protected:
-  struct IPointer {  EST_Litem *p; };
+  class IPointer {
+      public:
+      EST_Litem *p;
+      IPointer() { p=NULL;}
+  };
 
   void point_to_first(IPointer &ip) const { ip.p = list.head(); }
   void move_pointer_forwards(IPointer &ip) const { ip.p = ip.p->next(); }

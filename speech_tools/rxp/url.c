@@ -12,6 +12,7 @@
 /* WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.       */
 /*                                                                       */
 /*************************************************************************/
+#define _POSIX_SOURCE
 #ifdef FOR_LT
 
 #include "lt-defs.h"
@@ -152,6 +153,9 @@ char *default_base_url(void)
 	    *p = 0;
     }
     url = Malloc(6 + strlen(buf) + 2);
+    if (url == NULL) {
+        return NULL;
+    }
     sprintf(url, "file:/%s/", buf);
 
 #else
@@ -159,6 +163,9 @@ char *default_base_url(void)
     /* Unix: translate /a/b to file:/a/b/ */
 
     url = Malloc(5 + strlen(buf) + 2);
+    if (url == NULL) {
+        return NULL;
+    }
     sprintf(url, "file:%s/", buf);
 
 #endif
@@ -531,14 +538,15 @@ static FILE16 *http_open(const char *url,
 	LT_ERROR1(LEFILE,
 		     "Error: can't find address for host in http URL \"%s\"\n",
 		     url);
+    close(s);
 	return 0;
     }
 
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     /* If we were really enthusiastic, we would try all the host's addresses */
-    memcpy(&addr.sin_addr, hostent->h_addr, hostent->h_length);
-    addr.sin_port = htons((u_short)(port == -1 ? 80 : port));
+    memcpy(&addr.sin_addr, hostent->h_addr_list[0], hostent->h_length);
+    addr.sin_port = htons((uint16_t)(port == -1 ? 80 : port));
 
     /* Connect */
 
@@ -546,6 +554,7 @@ static FILE16 *http_open(const char *url,
     {
 	LT_ERROR1(LEFILE, "Error: system call connect failed: %s\n",
 		     Strerror());
+    close(s);
 	return 0;
     }
 
@@ -682,7 +691,7 @@ static FILE16 *file_open(const char *url,
     FILE *f;
     FILE16 *f16;
     char *file;
-
+    (void) port;
     if(host && host[0])
 	WARN1(LEFILE, "Warning: ignoring host part in file URL \"%s\"\n", url);
 
@@ -761,6 +770,9 @@ static void parse_url(const char *url,
     if(p > url && *p == ':')
     {
 	*scheme = Malloc(p - url + 1);
+    if (*scheme == NULL) {
+        return;
+    }
 	strncpy(*scheme, url, p - url);
 	(*scheme)[p - url] = '\0';
 	url = p+1;

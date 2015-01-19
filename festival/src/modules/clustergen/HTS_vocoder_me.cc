@@ -182,7 +182,8 @@ void HTS_Vocoder_synthesize_me(HTS_Vocoder_ME * v_me,
                                double beta, double volume,
                                double *rawdata, HTS_Audio * audio)
 {
-  double x;
+  (void) lpf;
+  double x=0;
   int i, j;
   int k;
   short xs;

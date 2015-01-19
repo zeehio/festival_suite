@@ -375,7 +375,11 @@ EST_read_status EST_TrackFile::load_est(const EST_String filename,
 static float get_float(EST_TokenStream &ts,int swap)
 {
     float f;
-    ts.fread(&f,4,1);
+    if (ts.fread(&f,4,1) != 1)
+    {
+        cerr << "Could not get_float" << endl;
+        return 0.0;
+    }
     if (swap) swapfloat(&f);
     return f;
 }
@@ -410,7 +414,7 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
 
     num_frames = hinfo.I("NumFrames");
     num_channels = hinfo.I("NumChannels");
-    num_aux_channels = hinfo.I("NumAuxChannels", 0);
+    /*num_aux_channels = hinfo.I("NumAuxChannels", 0);*/
     tr.resize(num_frames, num_channels);
 
     hinfo.remove("NumFrames");
@@ -531,7 +535,11 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
 	  }
 	}
 	else{
-	  ts.fread( frame, sizeof(float), num_channels );
+	  if (ts.fread( frame, sizeof(float), num_channels ) != num_channels)
+      {
+          cerr << "Could not read frame " << i << "/" << num_frames << endl;
+          return misc_read_error;
+      }
 	  if( swap )
 	    for( j=0; j<num_channels; ++j ){
 	      swapfloat( &frame[j] );
@@ -549,8 +557,8 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
 	    if (ascii)
 	      {
 		tr.aux(i, j) = ts.get().string();
-		if (!ok)
-		  return misc_read_error;
+		/*if (!ok)
+		  return misc_read_error;*/
 	      }
 	    else
 	    {
@@ -669,7 +677,7 @@ EST_read_status load_snns_res(const EST_String filename, EST_Track &tr,
     return format_ok;
 }
 
-EST_write_status EST_TrackFile::save_esps(const EST_String filename, EST_Track tr)
+EST_write_status EST_TrackFile::save_esps(const EST_String filename, EST_Track& tr)
 {
     EST_write_status rc;
     int i, j;
@@ -735,7 +743,7 @@ EST_write_status EST_TrackFile::save_esps(const EST_String filename, EST_Track t
     return rc;
 }
 
-EST_write_status EST_TrackFile::save_est_ts(FILE *fp, EST_Track tr)
+EST_write_status EST_TrackFile::save_est_ts(FILE *fp, EST_Track& tr)
 {
     int i, j;
 
@@ -776,7 +784,7 @@ EST_write_status EST_TrackFile::save_est_ts(FILE *fp, EST_Track tr)
 }
 
 EST_write_status EST_TrackFile::save_est_ascii(const EST_String filename, 
-					       EST_Track tr)
+					       EST_Track& tr)
 {
     FILE *fd;
     EST_write_status r;
@@ -793,7 +801,7 @@ EST_write_status EST_TrackFile::save_est_ascii(const EST_String filename,
     return r;
 }
 
-EST_write_status EST_TrackFile::save_est_binary(const EST_String filename, EST_Track tr)
+EST_write_status EST_TrackFile::save_est_binary(const EST_String filename, EST_Track& tr)
 {
     FILE *fd;
     EST_write_status r;
@@ -811,7 +819,7 @@ EST_write_status EST_TrackFile::save_est_binary(const EST_String filename, EST_T
 
 }
 
-EST_write_status EST_TrackFile::save_est_binary_ts(FILE *fp, EST_Track tr)
+EST_write_status EST_TrackFile::save_est_binary_ts(FILE *fp, EST_Track& tr)
 {
     int i,j;
 
@@ -853,7 +861,7 @@ EST_write_status EST_TrackFile::save_est_binary_ts(FILE *fp, EST_Track tr)
     return write_ok;
 }
 
-EST_write_status EST_TrackFile::save_ascii(const EST_String filename, EST_Track tr)
+EST_write_status EST_TrackFile::save_ascii(const EST_String filename, EST_Track& tr)
 {
     
     if (tr.equal_space() == TRUE)
@@ -885,7 +893,7 @@ EST_write_status EST_TrackFile::save_ascii(const EST_String filename, EST_Track 
     return write_ok;
 }
 
-EST_write_status EST_TrackFile::save_xgraph(const EST_String filename, EST_Track tr)
+EST_write_status EST_TrackFile::save_xgraph(const EST_String filename, EST_Track& tr)
 {
     
     ostream *outf;
@@ -1030,7 +1038,7 @@ EST_write_status save_snns_pat(const EST_String filename,
    }
    */
 
-EST_write_status EST_TrackFile::save_xmg(const EST_String filename, EST_Track tr)
+EST_write_status EST_TrackFile::save_xmg(const EST_String filename, EST_Track& tr)
 {
     ostream *outf;
     int i, j;
@@ -1240,32 +1248,32 @@ static int htk_swapped_header(htk_header *header)
     
 }
 
-EST_write_status EST_TrackFile::save_htk(const EST_String filename, EST_Track tmp)
+EST_write_status EST_TrackFile::save_htk(const EST_String filename, EST_Track& tmp)
 {
     return save_htk_as(filename, tmp, HTK_FBANK);
 }
 
-EST_write_status EST_TrackFile::save_htk_fbank(const EST_String filename, EST_Track tmp)
+EST_write_status EST_TrackFile::save_htk_fbank(const EST_String filename, EST_Track& tmp)
 {
     return save_htk_as(filename, tmp, HTK_FBANK);
 }
 
-EST_write_status EST_TrackFile::save_htk_mfcc(const EST_String filename, EST_Track tmp)
+EST_write_status EST_TrackFile::save_htk_mfcc(const EST_String filename, EST_Track& tmp)
 {
     return save_htk_as(filename, tmp, HTK_MFCC);
 }
 
-EST_write_status EST_TrackFile::save_htk_mfcc_e(const EST_String filename, EST_Track tmp)
+EST_write_status EST_TrackFile::save_htk_mfcc_e(const EST_String filename, EST_Track& tmp)
 {
     return save_htk_as(filename, tmp, HTK_MFCC | HTK_ENERGY);
 }
 
-EST_write_status EST_TrackFile::save_htk_user(const EST_String filename, EST_Track tmp)
+EST_write_status EST_TrackFile::save_htk_user(const EST_String filename, EST_Track& tmp)
 {
     return save_htk_as(filename, tmp, HTK_USER);
 }
 
-EST_write_status EST_TrackFile::save_htk_discrete(const EST_String filename, EST_Track tmp)
+EST_write_status EST_TrackFile::save_htk_discrete(const EST_String filename, EST_Track& tmp)
 {
     return save_htk_as(filename, tmp, HTK_DISCRETE);
 }
@@ -1288,9 +1296,9 @@ static EST_read_status load_ema_internal(const EST_String filename, EST_Track &t
 	return misc_read_error;
     }
     
-    fseek(fp, 0, SEEK_END);
+    EST_fseek(fp, 0, SEEK_END);
     sample_width = 2;
-    data_length = ftell(fp)/sample_width;
+    data_length = EST_ftell(fp)/sample_width;
     new_order = 10;
     nframes = data_length /new_order;
     shift = 0.002;
@@ -1303,7 +1311,7 @@ static EST_read_status load_ema_internal(const EST_String filename, EST_Track &t
 
     file_data.resize(data_length);
     
-    fseek(fp, 0, SEEK_SET);
+    EST_fseek(fp, 0, SEEK_SET);
     
     if ((int)fread(file_data.memory(), sample_width, data_length, fp) != data_length)
     {
@@ -1563,6 +1571,7 @@ EST_read_status EST_TrackFile::load_htk(const EST_String filename, EST_Track &tm
     switch(base_samp_type){
     case HTK_WAVE:
       cerr << "Can't read HTK WAVEFORM format file into track" << endl;
+      fclose(fp);
       return misc_read_error;
       break;
       
@@ -1599,6 +1608,7 @@ EST_read_status EST_TrackFile::load_htk(const EST_String filename, EST_Track &tm
       
     case HTK_DISCRETE:
       cerr << "Can't read HTK DISCRETE format file into track" << endl;
+      fclose(fp);
       return misc_read_error;
       break;
       
@@ -1632,11 +1642,15 @@ EST_read_status EST_TrackFile::load_htk(const EST_String filename, EST_Track &tm
       }
 
       if( (fread( compressA, sizeof(float), num_values, fp )) != static_cast<size_t>(num_values) ){
+          if (compressA != compressA_Buffer) delete[] compressA;
+          if (compressB != compressB_Buffer) delete[] compressB;
 	fclose( fp );
 	return read_format_error;
       }
       
       if( (fread( compressB, sizeof(float), num_values, fp )) != static_cast<size_t>(num_values) ){
+          if (compressA != compressA_Buffer) delete[] compressA;
+          if (compressB != compressB_Buffer) delete[] compressB;
 	fclose( fp );
 	return read_format_error;
       }
@@ -1656,6 +1670,8 @@ EST_read_status EST_TrackFile::load_htk(const EST_String filename, EST_Track &tm
     }
     
     if (num_values > UNREASONABLE_FRAME_SIZE){
+          if (compressA != compressA_Buffer) delete[] compressA;
+          if (compressB != compressB_Buffer) delete[] compressB;
       fclose(fp);
       return read_format_error;
     }
@@ -1675,19 +1691,25 @@ EST_read_status EST_TrackFile::load_htk(const EST_String filename, EST_Track &tm
     tmp.set_equal_space(!time_included);
     
     // check length of file is as expected from header info
-    long dataBeginPosition = ftell(fp);
+    long dataBeginPosition = EST_ftell(fp);
     if( dataBeginPosition == -1 ){
+          if (compressA != compressA_Buffer) delete[] compressA;
+          if (compressB != compressB_Buffer) delete[] compressB;
       fclose(fp);
       return wrong_format;
     }
     
-    if (fseek(fp,0,SEEK_END)){
+    if (EST_fseek(fp,0,SEEK_END)){
+          if (compressA != compressA_Buffer) delete[] compressA;
+          if (compressB != compressB_Buffer) delete[] compressB;
       fclose(fp);
       return wrong_format;
     }
     
     long file_length;
     if ((file_length = ftell(fp)) == -1){
+          if (compressA != compressA_Buffer) delete[] compressA;
+          if (compressB != compressB_Buffer) delete[] compressB;
       fclose(fp);
       return wrong_format;
     }
@@ -1709,6 +1731,8 @@ EST_read_status EST_TrackFile::load_htk(const EST_String filename, EST_Track &tm
     
     if( expected_vals != (num_values * new_frames) ){
       // it probably isn't HTK format after all
+          if (compressA != compressA_Buffer) delete[] compressA;
+          if (compressB != compressB_Buffer) delete[] compressB;
       fclose(fp);
       return wrong_format;
     }
@@ -1728,8 +1752,10 @@ EST_read_status EST_TrackFile::load_htk(const EST_String filename, EST_Track &tm
       order--;
     
     // go to start of data
-    if( fseek(fp, dataBeginPosition, SEEK_SET) == -1 ){
+    if( EST_fseek(fp, dataBeginPosition, SEEK_SET) == -1 ){
       cerr << "Couldn't position htk file at start of data" << endl;
+          if (compressA != compressA_Buffer) delete[] compressA;
+          if (compressB != compressB_Buffer) delete[] compressB;
       fclose(fp);
       return misc_read_error;
     }

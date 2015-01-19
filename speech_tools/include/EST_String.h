@@ -42,14 +42,21 @@ class EST_Regex;
 #include <cstring>
 #include <iostream>
 #include <climits>
-using namespace std;
+#include <limits>
+
 #include "EST_Chunk.h"
 #include "EST_strcasecmp.h"
 #include "EST_bool.h"
 
 extern "C" void abort(void);
 
-/** A non-copyleft implementation of a string class to use with
+class EST_String;
+int fcompare(const EST_String &a, const EST_String &b, const unsigned char *table=NULL);
+int fcompare(const EST_String &a, const char *b, const unsigned char *table=NULL);
+
+/** @class EST_String
+  * @ingroup stringclasses
+  * A non-copyleft implementation of a string class to use with
   * compilers that aren't GNU C++.
   *
   * Strings are reference-counted and reasonably efficient (eg you
@@ -66,15 +73,7 @@ extern "C" void abort(void);
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
   * @version $Id: EST_String.h,v 1.10 2014/10/13 13:26:19 robert Exp $
   */
-
 class EST_String {
-
-    /** For better libg++ compatibility. 
-      * 
-      * Includes String from char constructor which
-      * tends to mask errors in use. Also reverses the () and [] operators.
-      */
-#   define __FSF_COMPATIBILITY__ (0)
 
     /** Allow gsub() to be used in multi-threaded applications
       * This will cause gsub to use a local table of substitution points
@@ -90,9 +89,9 @@ class EST_String {
 #define __GRIPE_FATAL__ (1)
 
 #if __GRIPE_FATAL__
-#    define gripe(WHAT) (cerr<< ("oops! " WHAT "\n"),abort())
+#    define gripe(WHAT) (std::cerr<< ("oops! " WHAT "\n"),abort())
 #else
-#    define gripe(WHAT) (cerr<< ("oops! " WHAT "\n"))
+#    define gripe(WHAT) (std::cerr<< ("oops! " WHAT "\n"))
 #endif
 
 #if __STRING_ARG_GRIPE__
@@ -138,7 +137,7 @@ private:
 
     /// Simple utility which removes const-ness from memory
     static inline EST_ChunkPtr &NON_CONST_CHUNKPTR(const EST_ChunkPtr &ecp) 
-	{ return *((EST_ChunkPtr *)&ecp);}
+	{ return const_cast<EST_ChunkPtr&> (ecp);}
 
     /// private constructor which uses the buffer given.
     EST_String(int len, EST_ChunkPtr cp) {
@@ -150,7 +149,7 @@ private:
     int shareing (void) { return memory.shareing();}
 
     /**@name Finding substrings */
-    //@{
+    ///@{
     /// Find substring 
     int locate(const char *it, int len, int from, int &start, int &end) const;
     /// Find substring
@@ -158,11 +157,11 @@ private:
 	{ return locate((const char *)s.memory, s.size, from, start, end); }
     /// Find match for regexp.
     int locate(EST_Regex &ex, int from, int &start, int &end, int *starts=NULL, int *ends=NULL) const;
-    //@}
+    ///@}
 
 
     /**@name Extract Substrings */
-    //@{
+    ///@{
     int extract(const char *it, int len, int from, int &start, int &end) const;
     int extract(const EST_String &s, int from, int &start, int &end) const
 	{ return extract((const char *)s.memory, s.size, from, start, end); }
@@ -170,7 +169,7 @@ private:
     //@}
 
     /**@name Chop out part of string */
-    //@{
+    ///@{
     /// Locate subsring and chop.
     EST_String chop_internal(const char *s, int length, int pos, EST_chop_direction directionult) const;
     /// Chop at given position.
@@ -178,15 +177,15 @@ private:
   
     /// Locate match for expression and chop.
     EST_String chop_internal(EST_Regex &ex, int pos, EST_chop_direction directionult) const;
-    //@}
+    ///@}
 
     /**@name Global search and replace */
-    //@{
+    ///@{
     /// Substitute for string
     int gsub_internal(const char *os, int olength, const char *s, int length);
     /// Substitute for matches of regexp.
     int gsub_internal(EST_Regex &ex, const char *s, int length);
-    //@}
+    ///@}
 
     /// Split the string down into parts. 
     int split_internal(EST_String result[], int max, const char* s_seperator, int slen, EST_Regex *re_separator, char quote) const;
@@ -220,14 +219,6 @@ public:
       memory = NON_CONST_CHUNKPTR(s.memory);
       size = s.size;
     }
-
-#if __FSF_COMPATIBILITY__
-    /** Construct from single char.
-      * This constructor is not usually included as it can mask errors.
-      * @see  __FSF_COMPATIBILITY__
-      */
-    EST_String(const char c);
-#endif
 
     /// Destructor.
     ~EST_String() {
@@ -279,7 +270,7 @@ public:
     double Double(void) const { return Double((bool *)NULL); }
 
     /**@name Before */
-    //@{
+    ///@{
     /// Part before position
     EST_String before(int pos, int len=0) const
 	{ return chop_internal(pos, len, Chop_Before); }
@@ -292,10 +283,10 @@ public:
     /// Part before first match of regexp after pos.
     EST_String before(EST_Regex &e, int pos=0) const
 	{ return chop_internal(e,  pos, Chop_Before); }
-    //@}
+    ///@}
 
     /**@name At */
-    //@{
+    ///@{
     /// Return part at position
     EST_String at(int from, int len=0) const
 	{ return EST_String(str(),size,from<0?(size+from):from,len); }
@@ -308,10 +299,10 @@ public:
     /// Return part matching regexp.
     EST_String at(EST_Regex &e, int pos=0) const
 	{ return chop_internal(e,  pos, Chop_At); }
-    //@}
+    ///@}
 
     /**@name After */
-    //@{
+    ///@{
     /// Part after pos+len
     EST_String after(int pos, int len=1) const
 	{ return chop_internal(pos, len, Chop_After); }
@@ -324,10 +315,10 @@ public:
     /// Part after match of regular expression.
     EST_String after(EST_Regex &e, int pos=0) const
 	{ return chop_internal(e,  pos, Chop_After); }
-    //@}
+    ///@}
   
     /**@name Search for something */
-    //@{
+    ///@{
     /// Find a substring.
     int search(const char *s, int len, int &mlen, int pos=0) const
 	{ int start, end;
@@ -351,11 +342,11 @@ public:
 	{ mlen=end-start; return start; }
 	return -1;
 	}
-    //@}
+    ///@}
 
 
     /**@name Get position of something */
-    //@{
+    ///@{
     /// Position of substring (starting at pos)
     int index(const char *s, int pos=0) const
 	{ int start, end; return locate(s, safe_strlen(s), pos, start, end)?start:-1; }
@@ -365,10 +356,10 @@ public:
     /// Position of match of regexp (starting at pos)
     int index(EST_Regex &ex, int pos=0) const
 	{ int start, end; return locate(ex, pos, start, end)?start:-1; }
-    //@}
+    ///@}
   
     /**@name Does string contain something? */
-    //@{
+    ///@{
     /// Does it contain this substring?
     int contains(const char *s, int pos=-1) const
 	{ int start, end; return extract(s, safe_strlen(s), pos, start, end); }
@@ -381,10 +372,10 @@ public:
     /// Does it contain a match for  this regular expression?
     int contains(EST_Regex &ex, int pos=-1) const
 	{ int start, end; return extract(ex, pos, start, end); }
-    //@}
+    ///@}
 
     /**@name Does string exactly match? */
-    //@{
+    ///@{
     /// Exactly match this string?
     int matches(const char *e, int pos=0) const;
     /// Exactly match this string?
@@ -394,7 +385,7 @@ public:
     //@}
 
     /**@name Global replacement */
-    //@{
+    ///@{
     /// Substitute one string for another.
     int gsub(const char *os, const EST_String &s)
 	{ return gsub_internal(os, safe_strlen(os), s, s.size); }
@@ -421,10 +412,10 @@ public:
     int subst(EST_String source, 
 	      int (&starts)[EST_Regex_max_subexpressions], 
 	      int (&ends)[EST_Regex_max_subexpressions]);
-    //@}
+    ///@}
 
     /**@name Frequency counts */
-    //@{
+    ///@{
     /// Number of occurrences of substring
     int freq(const char *s) const;
     /// Number of occurrences of substring
@@ -434,7 +425,7 @@ public:
     //@}
 
     /**@name Quoting */
-    //@{
+    ///@{
     /// Return the string in quotes with internal quotes protected.
     EST_String quote(const char quotec) const;
     /// Return in quotes if there is something to protect (e.g. spaces)
@@ -443,19 +434,15 @@ public:
     EST_String unquote(const char quotec) const;
     /// Remove quotes if any.
     EST_String unquote_if_needed(const char quotec) const;
-    //@}
+    ///@}
 
-#if __FSF_COMPATIBILITY__
-    const char operator [] (int i) const { return memory[i]; }
-    char &operator () (int i) { return memory(i); }
-#else
     /**@name Operators */
-    //@{
+    ///@{
+
     /// Function style access to constant strings.
     char operator () (int i) const { return memory[i]; }
     /// Array style access to writable strings.
     char &operator [] (int i) { return memory(i); }
-#endif
 
     /// Cast to const char * by simply giving access to pointer.
     operator const char*() const {return str(); }
@@ -463,39 +450,41 @@ public:
     /// Cast to char *, may involve copying.
     operator char*() { return updatable_str(); }
 
+    ///@}
+
     /**@name Add to end of string. */
-    //@{
+    ///@{
     /// Add C string to end of EST_String
     EST_String &operator += (const char *b);
     /// Add EST_String to end of EST_String
     EST_String &operator += (const EST_String b);
-    //@}
+    ///@}
 
     /**@name Assignment */
-    //@{
+    ///@{
     /// Assign C string to EST_String
     EST_String &operator = (const char *str);
     /// Assign single character to EST_String
     EST_String &operator = (const char c);
     /// Assign EST_String to EST_String.
     EST_String &operator = (const EST_String &s);
-    //@}
+    ///@}
 
     /**@name Concatenation */
-    //@{
+    ///@{
     /// Concatenate  two EST_Strings
     friend EST_String operator + (const EST_String &a, const EST_String &b);
     /// Concatenate C String with EST_String
     friend EST_String operator + (const char *a, const EST_String &b);
     /// Concatenate EST_String with C String
     friend EST_String operator + (const EST_String &a, const char *b);
-    //@}
+    ///@}
 
     /// Repeat string N times
     friend EST_String operator * (const EST_String &s, int n);
 
     /**@name relational operators */
-    //@{
+    ///@{
     ///
     friend int operator == (const char *a, const EST_String &b);
     ///
@@ -550,15 +539,15 @@ public:
     ///
     friend inline int operator >= (const EST_String &a, const EST_String &b) 
 	{ return compare(a,b) >= 0; }
-    //@}
+    ///@}
 
-    //@}
+    ///@}
 
     /**@name String comparison.
      * All these operators return -1, 0 or 1 to indicate the sort
      * order of the strings.
      */
-    //@{
+    ///@{
     /// 
     friend int compare(const EST_String &a, const EST_String &b);
     /// 
@@ -572,7 +561,7 @@ public:
       * case characters correspond. The default works for
       * ASCII.
       */
-    //@{
+    ///@{
     friend int fcompare(const EST_String &a, const EST_String &b, 
 			const unsigned char *table);
 
@@ -586,9 +575,9 @@ public:
     friend inline int fcompare(const EST_String &a, const EST_String &b, 
 			       const EST_String &table) 
 	{ return fcompare(a, b, (const unsigned char *)(const char *)table); }
-    //@}
-    //@}
-    //@}
+    ///@}
+    ///@}
+    ///@}
 
 
     /**@name Split a string into parts.
@@ -596,7 +585,7 @@ public:
       * These functions divide up a string producing an array of
       * substrings.
       */
-    //@{
+    ///@{
     /// Split at a given separator.
     friend int split(const EST_String & s, EST_String result[], 
 		     int max, const EST_String& seperator, char quote=0)
@@ -609,7 +598,7 @@ public:
     friend int split(const EST_String & s, EST_String result[], int max, 
 		     EST_Regex& seperator, char quote=0)
 	{ return s.split_internal(result, max, NULL, 0, &seperator, quote); }
-    //@}
+    ///@}
 
     /// Convert to upper case.
     friend EST_String upcase(const EST_String &s);
@@ -638,10 +627,6 @@ public:
     friend class EST_Regex;
 
 }; 
-
-EST_ChunkPtr chunk_allocate(int bytes);
-EST_ChunkPtr chunk_allocate(int bytes, const char *initial, int initial_len);
-EST_ChunkPtr chunk_allocate(int bytes, const EST_ChunkPtr &initial, int initial_start, int initial_len);
 
 int operator == (const char *a, const EST_String &b);
 int operator == (const EST_String &a, const EST_String &b);

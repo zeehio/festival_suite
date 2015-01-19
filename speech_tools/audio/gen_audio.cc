@@ -51,6 +51,8 @@
 #include "EST_audio.h"
 #include "EST_wave_aux.h"
 
+using namespace std;
+
 static int play_sunau_wave(EST_Wave &inwave, EST_Option &al);
 static int play_socket_wave(EST_Wave &inwave, EST_Option &al);
 static int play_aucomm_wave(EST_Wave &inwave, EST_Option &al);
@@ -164,7 +166,10 @@ static int play_socket_wave(EST_Wave &inwave, EST_Option &al)
     
     // Because the client may receive many different types of file
     // I send WV\n to it before the file itself
-    send(fd,"WV\n",3,0);
+    if (send(fd,"WV\n",3,0) != 3) {
+		cerr << "Socket: Error sending 'WV\\n' to the client" << endl;
+		return -1;
+	}
     socket_send_file(fd,tmpfile);
     unlink(tmpfile);
 
@@ -174,9 +179,10 @@ static int play_socket_wave(EST_Wave &inwave, EST_Option &al)
 static int play_aucomm_wave(EST_Wave &inwave, EST_Option &al)
 {
     // Play wave by specified command 
-    EST_String usrcommand, otype;
+    EST_String usrcommand, otype, finalcommand;
     char tmpfile[2048];
     char pref[2048];
+    int system_result;
 
     if (al.present("-command"))
 	usrcommand = al.val("-command");
@@ -206,11 +212,16 @@ static int play_aucomm_wave(EST_Wave &inwave, EST_Option &al)
 
     sprintf(pref,"FILE=%s;SR=%d;",tmpfile,inwave.sample_rate());
 
-    system((EST_String)pref+usrcommand.unquote('"'));
-
+    finalcommand = (EST_String)pref+usrcommand.unquote('"');
+    system_result = system(finalcommand);
+    if (system_result != 0)
+    {
+        cerr << "Command \"" << finalcommand << "\" returned error " <<
+                system_result << endl;
+    }
     unlink(tmpfile);  // so we don't fill up /tmp
 
-    return 0;
+    return system_result;
 }
 
 static int play_sunau_wave(EST_Wave &inwave, EST_Option &al)

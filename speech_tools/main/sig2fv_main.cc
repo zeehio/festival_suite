@@ -45,6 +45,8 @@
 #include "sigpr/EST_sigpr_utt.h"
 #include "sigpr/EST_filter.h"
 
+using namespace std;
+
 #define EPSILON (0.0001)
 
 #define DEFAULT_FRAME_SIZE 0.01
@@ -86,57 +88,8 @@ EST_String sigpr_options_supported(void)
 	"    power\n"
 	"    f0\n"
 	"    energy: root mean square energy\n";
-};
+}
 
-
-
-/** @name <command>sig2fv</command> <emphasis>Generate signal processing coefficients from waveforms</emphasis>
-  * @id sigfv-manual
-  * @toc
- */
-
-//@{
-
-/**@name Synopsis
-  */
-//@{
-
-//@synopsis
-
-/**
-sig2fv is used to create signal processing feature vector analysis on speech
-waveforms.
-The following types of analysis are provided:
-
-<itemizedlist>
-<listitem><para>Linear prediction (LPC)</para></listitem>
-<listitem><para>Cepstrum coding from lpc coefficients</para></listitem>
-<listitem><para>Mel scale cepstrum coding via fbank</para></listitem>
-<listitem><para>Mel scale log filterbank analysis</para></listitem>
-<listitem><para>Line spectral frequencies</para></listitem>
-<listitem><para>Linear prediction reflection coefficients</para></listitem>
-<listitem><para>Root mean square energy</para></listitem>
-<listitem><para>Power</para></listitem>
-<listitem><para>fundamental frequency (pitch)</para></listitem>
-<listitem><para>calculation of delta and acceleration coefficients of all of the 
-above</para></listitem>
-</itemizedlist>
-
-The -coefs option is used to specify a list of the names of what sort
-of basic processing is required, and -delta and -acc are used for
-delta and acceleration coefficients respectively.
-
-*/
-
-//@}
-
-/**@name Options
-  */
-//@{
-
-//@options
-
-//@}
 
 
 int main(int argc, char *argv[])
@@ -187,7 +140,7 @@ int main(int argc, char *argv[])
 	 "-window_type <string> Type of window used on waveform. \n"
 	 "    Permissable types are: \n" +
 	 EST_Window::options_supported() + 
-	 "    default: "DEFAULT_WINDOW"\n\n"
+	 "    default: " DEFAULT_WINDOW "\n\n"
 	 "-lpc_order <int>      Order of lpc analysis. \n\n"
 	 "-ref_order <int>      Order of lpc reflection coefficient analysis. \n\n"
 	 "-cep_order <int>      Order of lpc cepstral analysis.\n\n"
@@ -339,75 +292,4 @@ void set_options(EST_Features &op, EST_Option &al)
 
 }
 
-/**@name Examples
 
-
-Fixed frame basic linear prediction:
-
-To produce a set of linear prediction coefficients at every 10ms, using
-pre-emphasis  and saving in EST format:
-
-<para>
-<screen>
-$ sig2fv kdt_010.wav -o kdt_010.lpc -coefs "lpc" -otype est -shift 0.01 -preemph 0.5
-</screen>
-</para>
-<formalpara><title>
-Pitch Synchronous linear prediction</title><para>. The following used the set of pitchmarks
-in kdt_010.pm as the centres of the analysis windows.
-</para>
-</formalpara>
-
-<para>
-<screen>
-$ sig2fv kdt_010.wav -pm kdt_010.pm -o kdt_010.lpc -coefs "lpc" -otype est -shift 0.01 -preemph 0.5
-</screen>
-</para>
-
-<para>
-F0, Linear prediction and cepstral coefficients:
-
-<screen>
-$ sig2fv kdt_010.wav -o kdt_010.lpc -coefs "f0 lpc cep" -otype est -shift 0.01
-</screen>
-
-Note that pitchtracking can also be done with the
-<command>pda</command> program. Both use the same underlying
-technique, but the pda program offers much finer control over the
-pitch track specific processing parameters.
-
-</para>
-
-<para>Energy, Linear Prediction and Cepstral coefficients, with a 10ms frame shift
-during analysis but a 5ms frame shift in the output file:
-
-<para>
-<screen>
-$ sig2fv kdt_010.wav -o kdt_010.lpc -coefs "f0 lpc cep" -otype est -S 0.005
-      -shift 0.01
-</screen>
-</para>
-
-<para>Delta  and acc coefficients can be calculated even if their base form is not 
-required. This produces normal energy coefficients and cepstral delta coefficients:
-
-<para>
-<screen>
-$ sig2fv ../kdt_010.wav -o kdt_010.lpc -coefs "energy" -delta "cep" -otype est
-</screen>
-</para>
-
-<para>Mel-scaled cepstra, Delta and acc coefficients, as is common in speech 
-recognition:
-<para>
-<screen>
-$ sig2fv ../kdt_010.wav -o kdt_010.lpc -coefs "melcep" -delta "melcep" -acc "melcep" -otype est -preemph 0.96
-</screen>
-
-*/
-//@{
-//@}
-
-
-
-//@}

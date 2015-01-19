@@ -55,14 +55,16 @@
 /*  I should add, this wasn't easy to write, though I'm much better at   */
 /*  octal and hex dumps now.                                             */
 /*=======================================================================*/
-
 #include <cstdio>
 #include <cstdlib>
 #include "EST_unix.h"
 #include <cstring>
-#include <time.h>
+#include <ctime>
 #include "EST_wave_utils.h"
 #include "esps_utils.h"
+#include "EST_File.h"
+
+using namespace std;
 
 /* First you must realise there is in fact a number of very similar but */
 /* subtly different header formats that appear on ESPS files.           */

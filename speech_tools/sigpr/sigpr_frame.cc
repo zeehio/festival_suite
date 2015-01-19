@@ -44,6 +44,8 @@
 #include "EST_error.h"
 #include "EST_TBuffer.h"
 
+using namespace std;
+
 #define ALMOST1 0.99999
 #define MAX_ABS_CEPS 4.0
 
@@ -331,60 +333,32 @@ void lpc2cep(const EST_FVector &lpc, EST_FVector &cep)
     }
 }
 
-// REORG - test this!!
+/* Sergio Oller <sergioller@gmail.com>
+ * This function returns the same ref coefficients as given by:
+ * sig2lpc(sig, acf, ref, lpc). (at least on my tests).
+ */
 void lpc2ref(const EST_FVector &lpc, EST_FVector &ref)
 {
-
-  // seem to get weird output from this - best not to use it !
-  EST_error("lpc2ref Code unfinished\n");
-
-  // LPC to reflection coefficients 
-  // from code from Borja Etxebarria
-  // This code does clever things with pointer and so has been
-  // left using float * arrays.
-
-  // simonk (May 99) : fixed because lpc coeffs always have energy at
-  // coeff 0 - the code here would need changing is lpc coeff 0 was
-  // ever made optional.
-  int lpc_offset=1;
-
-    int order = lpc.length() - 1;
-    int i,j;
-    float f,ai;
-    float *vo,*vx;
-    float *vn = new float[order];
-    
-    i = order - 1;
-    ref[i] = lpc(i+lpc_offset);
-    ai = lpc(i+lpc_offset);
-    f = 1-ai*ai;
-    i--;
-    
-    for (j=0; j<=i; j++)
-	ref[j] = (lpc(j+lpc_offset)+((ai*lpc(i-j+lpc_offset))))/f;
-    
-    /* vn=vtmp in previous #define */
-    // Check whether this should really be a pointer
-    vo = new float[order];
-    for (i = 0; i < order; ++i)
-	vo[i] = ref(i);
-
-    for ( ;i>0; ) 
-    {
-	ai=vo[i];
-	f = 1-ai*ai;
-	i--;
-	for (j=0; j<=i; j++)
-	    vn[j] = (vo[j]+((ai*vo[i-j])))/f;
-	
-	ref[i]=vn[i];
-	
-	vx = vn;
-	vn = vo;
-	vo = vx;
+  int order = lpc.length() - 1;
+  int p,m, i;
+  float f;
+  float *x, *xp;
+  x = new float[order+1];
+  xp = new float[order+1];
+  for (i=0;i<lpc.length();i++)
+     x[i] = lpc(i);
+  for (p=order-1;p>0;p--) {
+      memcpy(xp,x,(order+1)*sizeof(float));
+      ref[p] = xp[p+1];
+      f = 1-ref[p]*ref[p];
+      for (m=0;m<p;m++) {
+          x[m+1] = (xp[m+1]+ref[p]*xp[p-m])/f;
     }
-    
-    delete [] vn;
+  }
+  ref[0] = x[1];
+  delete[] x;
+  delete[] xp;
+  return;
 }
 
 void ref2lpc(const EST_FVector &ref, EST_FVector &lpc)
@@ -621,7 +595,7 @@ void sig2fft(const EST_FVector &sig,
     int i,half_fft_order;
     float real,imag;
     float window_size = sig.length();
-    int fft_order = fft_vec.length();
+    int fft_order; /* = fft_vec.length();*/
 
     // work out FFT order required
     fft_order = 2;   
@@ -716,7 +690,8 @@ void fbank2melcep(const EST_FVector &fbank_vec,
     // remember to pass LOG fbank params (energy or power)
 
     int i,j,actual_mfcc_index;
-    float pi_i_over_N,cos_xform_order,const_factor;
+    float pi_i_over_N,const_factor;
+    /*float cos_xform_order;*/
     float PI_over_liftering_parameter;
 
     if(liftering_parameter != 0.0)
@@ -726,7 +701,7 @@ void fbank2melcep(const EST_FVector &fbank_vec,
 
     // if we are not including cepstral coeff 0 (c0) then we need
     // to do a cosine transform 1 longer than otherwise
-    cos_xform_order = include_c0 ? mfcc_vec.length() : mfcc_vec.length() + 1;
+    /*cos_xform_order = include_c0 ? mfcc_vec.length() : mfcc_vec.length() + 1;*/
 
     const_factor = sqrt(2 / (float)(fbank_vec.length()));
 

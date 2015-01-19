@@ -49,6 +49,8 @@
 
 #include "Phone.h"
 
+using namespace std;
+
 void merge_features(EST_Item *from, EST_Item *to, int keep_id);
 
 void dp_time_align(EST_Utterance &utt, const EST_String &source_name,

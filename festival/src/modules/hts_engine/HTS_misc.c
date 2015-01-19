@@ -480,7 +480,7 @@ HTS_Boolean HTS_get_token_from_string(const char *string, size_t * index, char *
 HTS_Boolean HTS_get_token_from_string_with_separator(const char *str, size_t * index, char *buff, char separator)
 {
    char c;
-   size_t start;
+   /*size_t start;*/
    size_t len = 0;
 
    if (str == NULL)
@@ -495,7 +495,7 @@ HTS_Boolean HTS_get_token_from_string_with_separator(const char *str, size_t * i
       (*index)++;
       c = str[(*index)];
    }
-   start = (*index);
+   /*start = (*index);*/
    while (c != separator && c != '\0') {
       buff[len++] = c;
       (*index)++;
@@ -517,7 +517,7 @@ void *HTS_calloc(const size_t num, const size_t size)
 {
    size_t n = num * size;
 #ifdef FESTIVAL
-   void *mem = (void *) safe_wcalloc(num, size);
+   void *mem = (void *) safe_wcalloc(num,size);
 #else
    void *mem = (void *) malloc(n);
 #endif                          /* FESTIVAL */

@@ -48,6 +48,8 @@
 #include "EST_Option.h"
 #include "EST_Token.h"
 
+using namespace std;
+
 static int is_in_class(const EST_String &name, EST_StrList &s);
 
 bool dp_match(const EST_Relation &lexical,
@@ -85,10 +87,11 @@ void quantize(EST_Relation &a, float q)
 int edit_labels(EST_Relation &a, EST_String sedfile)
 {
     EST_Item *a_ptr;
-    char command[100], name[100], newname[100], sf[100];
+    EST_String command;
+    char newname[100];
     FILE *fp;
-    strcpy(sf, sedfile);
     EST_String file1, file2;
+    int system_result;
     file1 = make_tmp_filename();
     file2 = make_tmp_filename();
 
@@ -101,19 +104,20 @@ int edit_labels(EST_Relation &a, EST_String sedfile)
     }
     for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
     {
-	strcpy(name,  a_ptr->name());
-	fprintf(fp, "%s\n", name);
+	fprintf(fp, "%s\n", (const char*) a_ptr->name());
     }
     fclose(fp);
-    strcpy(command, "cat ");
-    strcat(command, file1);
-    strcat(command, " | sed -f ");
-    strcat(command, sedfile);
-    strcat(command, " > ");
-    strcat(command, file2);
 
-    printf("command: %s\n", command);
-    system(command);
+    command = "cat \"" + file1 + "\" | sed -f \"" + sedfile + "\" > " + file2;
+
+    printf("command: %s\n", (const char*) command);
+    system_result = system((const char*) command);
+    if (system_result != 0)
+    {
+        fprintf(stderr, "Error running command. Command returned %d\n",
+                system_result);
+        return -1;
+    }
 
     fp = fopen(file2, "rb");
     if (fp == NULL)
@@ -124,7 +128,8 @@ int edit_labels(EST_Relation &a, EST_String sedfile)
     }
     for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
     {
-	fscanf(fp, "%s", newname);
+        if (fscanf(fp, "%99s", newname) != 1)
+            cerr << "Error reading newname from file" << endl;
 //	cout << "oldname: " << a_ptr->name() << " newname: " << newname << endl;
 	a_ptr->set_name(newname);
     }
@@ -242,7 +247,7 @@ void label_map(EST_Relation &seg, EST_Option &map)
 {
     EST_Item *p, *n;
     
-    for (p = seg.head(); p != 0; n = p)
+    for (p = seg.head(); p != 0; p = n)
     {
 	n = p->next();
 	if (map.present(p->name()))
@@ -415,8 +420,10 @@ int relation_divide(EST_RelationList &slist, EST_Relation &lab,
     for (k = keylab.head(); k ; k = k->next())
 	if (k->F("end") > lab.head()->F("end"))
 	    break;
-
+    if (k != NULL)
     filename = (EST_String)k->f("file");
+    else
+       filename = "no_name";
     a.f.set("name", (filename + ext));
     kstart = 0.0;
     
@@ -435,7 +442,7 @@ int relation_divide(EST_RelationList &slist, EST_Relation &lab,
 		 (k->F("end") - start(n))) || 
 		is_in_class(n->name(), blank))
 	    {
-		a.append(s);
+		t = a.append(s);
 		t->set("end", (s->F("end") - kstart));
 
 		t = a.append(n);

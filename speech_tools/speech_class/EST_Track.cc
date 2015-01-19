@@ -47,6 +47,8 @@
 #include "EST_TrackFile.h"
 #include "EST_error.h"
 
+using namespace std;
+
 const int EST_Track::default_sample_rate=16000; // occasionally needed for xmg files
 const float EST_Track::default_frame_shift=0.005; // default frame spacing.
 
@@ -57,7 +59,7 @@ EST_Track::EST_Track()
     default_vals();
 }
 
-EST_Track::EST_Track(const EST_Track &a)
+EST_Track::EST_Track(const EST_Track &a) : EST_Featured(a)
 { 
     default_vals();
     copy(a);

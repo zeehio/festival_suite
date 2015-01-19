@@ -41,6 +41,8 @@
 #include <cstdlib>
 #include "EST_Token.h"
 
+using namespace std;
+
 static void binary_read_test();
 
 static void find_tokens(EST_TokenStream &ts)
@@ -175,7 +177,11 @@ static void binary_read_test()
 	cout << "failed to read binary data, missing BINARY token." << endl;
 	exit(-1);
     }
-    ts.fread(b,sizeof(int),2);
+    if(ts.fread(b,sizeof(int),2) != 2)
+    {
+        cerr << "Error reading 2 integers from tokenstream" << endl;
+        exit(-1);
+    }
     cout << b[0] << endl;
     cout << b[1] << endl;
     cout << ts.get() << endl;
@@ -193,7 +199,11 @@ static void binary_read_test()
 	cout << "failed to read binary data, missing BINARY token." << endl;
 	exit(-1);
     }
-    ts.fread(b,sizeof(int),2);
+    if (ts.fread(b,sizeof(int),2) != 2)
+    {
+        cerr << "Error reading 2 int from tokenstream" << endl;
+        exit(-1);
+    }
     cout << b[0] << endl;
     cout << b[1] << endl;
     cout << ts.get() << endl;

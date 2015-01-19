@@ -46,8 +46,11 @@
 #include "EST_TVector.h"
 #include "instantiate/EST_TSimpleVectorI.h"
 
-/** A derived class from <tt>EST_TVector</tt> which is used for
-containing simple types, such as <tt>float</tt> or <tt>int</tt>.
+/** \class EST_TSimpleVector
+ *  @ingroup containerclasses
+
+ *  A derived class from EST_TVector which is used for
+ *  containing simple types, such as `float` or `int`.
 */
 template <class T> class EST_TSimpleVector : public EST_TVector<T> {
 private:
@@ -62,7 +65,9 @@ public:
     EST_TSimpleVector(int n): EST_TVector<T>(n) {}; 
     /// memory constructor
     EST_TSimpleVector(int n, T* memory, int offset=0, 
-		      int free_when_destroyed=0): EST_TVector<T>(n,memory) {}; 
+		      int free_when_destroyed=0): EST_TVector<T>(n,memory) {
+                  (void) offset;
+                  (void) free_when_destroyed;}; 
 
     /// resize vector
     void resize(int n, int set=1); 

@@ -49,6 +49,8 @@
 #include "festival.h"
 #include "diphone.h"
 
+using namespace std;
+
 static void add_lpc_coeff(int nth,float *p_coeffs,EST_Track &lpc_coeff);
 static void add_residual(int insize, int outsize, int position,
 			 short *p_residual,
