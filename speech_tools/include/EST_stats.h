@@ -37,8 +37,8 @@
 /*                                                                       */
 /*=======================================================================*/
 
-#ifndef __EST_STATS_H__
-#define __EST_STATS_H__
+#ifndef EST_STATS_H__
+#define EST_STATS_H__
 
 #include "EST_PST.h"
 #include "EST_cluster.h"

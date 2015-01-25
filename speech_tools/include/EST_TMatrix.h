@@ -115,7 +115,7 @@ protected:
       return c;
     }
 
-  /// quick method for returning {\tt x[m][n]}
+  /// quick method for returning `x[m][n]`
   INLINE const T &fast_a_m(int r, int c) const 
     { return this->p_memory[mcell_pos(r,c)]; }
   INLINE T &fast_a_m(int r, int c) 
@@ -206,10 +206,10 @@ public:
   bool have_rows_before(int n) const;
   bool have_columns_before(int n) const;
 
-  /** resize matrix. If {\tt set=1}, then the current values in
-      the matrix are preserved up to the new size {\tt n}. If the
+  /** resize matrix. If `set=1`, then the current values in
+      the matrix are preserved up to the new size `n`. If the
       new size exceeds the old size, the rest of the matrix is
-      filled with the {\tt def_val}
+      filled with the `def_val`
   */
     void resize(int rows, int cols, int set=1); 
 

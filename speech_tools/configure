@@ -630,6 +630,7 @@ PROFILE
 SHARED
 WARN
 OPTIMISE
+PULSE_AUDIO
 NAS_AUDIO
 LINUXAUDIO
 TERMCAPLIB
@@ -710,6 +711,7 @@ ac_user_opts='
 enable_option_checking
 with_compiler
 with_nas_audio
+with_pulseaudio
 enable_optimise
 enable_warn
 enable_shared
@@ -1358,6 +1360,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-compiler         select a compiler
   --with-nas_audio        enable NCD's network audio system
+  --with-pulseaudio       enable PulseAudio sound server
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -4510,6 +4513,16 @@ if test "${with_nas_audio+set}" = set; then :
   withval=$with_nas_audio; NAS_AUDIO=NAS_AUDIO
 else
   NAS_AUDIO=
+fi
+
+
+
+
+# Check whether --with-pulseaudio was given.
+if test "${with_pulseaudio+set}" = set; then :
+  withval=$with_pulseaudio; PULSE_AUDIO=PULSE_AUDIO
+else
+  PULSE_AUDIO=
 fi
 
 

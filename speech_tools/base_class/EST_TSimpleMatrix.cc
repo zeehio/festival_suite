@@ -44,15 +44,15 @@
 #include "EST_TVector.h"
 #include <fstream>
 #include <iostream>
+#include <cstring>
 #include "EST_cutils.h"
-#include <string.h>
 
 template<class T> 
 void EST_TSimpleMatrix<T>::copy_data(const EST_TSimpleMatrix<T> &a)
 {
     
   if (!a.p_sub_matrix && !this->p_sub_matrix)
-    memcpy((void *)&this->a_no_check(0,0),
+    std::memcpy((void *)&this->a_no_check(0,0),
 	   (const void *)&a.a_no_check(0,0),
 	   this->num_rows()*this->num_columns()*sizeof(T)
 	   );

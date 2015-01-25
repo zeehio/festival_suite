@@ -362,6 +362,7 @@ static void get_dltmat(DMATRIX mat, MLPG_DWin *dw, int dno, DMATRIX dmat)
 
 static double *dcalloc(int x, int xoff)
 {
+    (void)xoff;
     double *ptr;
 
     ptr = mlpg_alloc(x,double);
@@ -371,6 +372,7 @@ static double *dcalloc(int x, int xoff)
 
 static double **ddcalloc(int x, int y, int xoff, int yoff)
 {
+    (void) xoff;
     double **ptr;
     register int i;
 

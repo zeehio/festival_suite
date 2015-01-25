@@ -46,6 +46,8 @@
 #include "siod.h"
 #include "ModuleDescription.h"
 
+using namespace std;
+
 void festival_lisp_funcs(void);
 void festival_lisp_vars(void);
 void festival_banner(void);
@@ -341,8 +343,8 @@ void festival_lisp_vars(void)
     siod_set_lval("*module-descriptions*",NIL);
     if (nas_supported)
 	proclaim_module("nas");
-    if (esd_supported)
-	proclaim_module("esd");
+    if (pulse_supported)
+	proclaim_module("pulseaudio");
     if (sun16_supported)
 	proclaim_module("sun16audio");
     if (freebsd16_supported)

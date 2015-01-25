@@ -84,7 +84,7 @@ class EST_TargetCost {
     { (void)targp; (void)candp; return defScore; }
 
   // Allow flatpacking
-  virtual const bool is_flatpack() const {return false;}
+  virtual bool is_flatpack() const {return false;}
 
  protected: 
   float defScore;

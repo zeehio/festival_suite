@@ -62,7 +62,7 @@ bool polynomial_fit(EST_FVector &x, EST_FVector &y, EST_FVector &co_effs,
 {
 
     if(order <= 0){
-	cerr << "polynomial_fit : order must be >= 1" << endl;
+	std::cerr << "polynomial_fit : order must be >= 1" << std::endl;
 	return false;
     }
 

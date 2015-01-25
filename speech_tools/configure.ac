@@ -85,6 +85,13 @@ AC_ARG_WITH([nas_audio],
             [NAS_AUDIO=])
 AC_SUBST(NAS_AUDIO)
 
+AC_ARG_WITH([pulseaudio],
+            [AS_HELP_STRING([--with-pulseaudio],
+              [enable PulseAudio sound server])],
+            [PULSE_AUDIO=PULSE_AUDIO],
+            [PULSE_AUDIO=])
+AC_SUBST(PULSE_AUDIO)
+
 AC_ARG_ENABLE([optimise],[ AS_HELP_STRING([--enable-optimise=NUM Choose optimization level from 0 to 4. Default 3. Level 4 disables debug. ])],
  [ if   test "x$enableval" = "x0"; then
        OPTIMISE=0

@@ -6,7 +6,13 @@
 ##
 ##  Specific config file for local installation
 ##
-
+###########################################################################
+## Even though these variables are defined, this build system is not     ##
+## able to perform out of tree builds.                                   ##
+## Maybe in a future $(TOP) is replaced by these variables               ##
+TOP_BUILDDIR = @abs_top_builddir@
+TOP_SRCDIR = @abs_top_srcdir@
+##
 ###########################################################################
 ## Where the speech_tools tree will be installed.
 ## 
@@ -33,7 +39,7 @@ SYSTEM_TYPE=$(MACHINETYPE)_$(OSTYPE)$(OSREV)
 ###########################################################################
 ## Compiler.
 ## The definitions are in compilers/$(COMPILER).mak
-## Examples: gcc suncc egcs gcc28
+## Examples: gcc clang suncc
 
 COMPILER=@COMPILER@
 
@@ -86,8 +92,8 @@ SHARED=@SHARED@
 ## NCD's network audio system. Write NAS_AUDIO to include it.
 INCLUDE_MODULES += @NAS_AUDIO@
 
-## Elightenment Sound Demon, for KDE etc.
-# INCLUDE_MODULES += ESD_AUDIO
+## PulseAudio sound server. Write PULSE_AUDIO to include it.
+INCLUDE_MODULES += @PULSE_AUDIO@
 
 ## Native audio for your platform (sun, linux, freebsd, irix, macosx, windows)
 INCLUDE_MODULES += NATIVE_AUDIO
@@ -152,8 +158,17 @@ INCLUDE_MODULES += RXP
 ## Efence protected malloc library to catch memory errors
 # INCLUDE_MODULES += EFENCE
 
-## Dmalloc, another chekcing malloc library
+## Dmalloc, another checking malloc library
 # INCLUDE_MODULES += DMALLOC
+
+###################################################################
+## Documentation required tools
+## xsltproc (used for extracting a description of the parameters
+##           of the speech tools programs
+XSLTPROC = xsltproc
+
+## Doxygen:
+DOXYGEN = doxygen
 
 ###################################################################
 ## Wrappers for selected EST Classes and functionality for

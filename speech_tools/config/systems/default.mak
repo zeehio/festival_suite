@@ -61,10 +61,11 @@ NAS_INCLUDE = /usr/X11R6/include
 NAS_LIB = /usr/X11R6/lib
 
 ###########################################################################
-## Where to find Enlightenment Speech Demon
+## Where to find PulseAudio
 
-ESD_INCLUDE = /usr/local/include
-ESD_LIB = /usr/local/lib
+PULSE_INCLUDE = /usr/include
+PULSE_LIB = /usr/lib
+
 
 ###########################################################################
 ## Where to find X11
@@ -131,12 +132,6 @@ GNUTEST = gnutest
 
 ## Avoid clever RMs people may have on their path
 RM = /bin/rm
-
-###########################################################################
-## Arguments for DOC++ for creating documentation
-
-DOCXX = doc++
-DOCXX_ARGS = -a -f -B banner.inc -M sane -D 'SYSTEM "$(EST_HOME)/doc/sane.dtd"'
 
 
 COMPILER_VERSION_COMMAND=true
