@@ -235,7 +235,7 @@ private:
 
 public:
 
-  typedef EST_TIterator<Container, IPointer, Entry> Iter;
+  typedef EST_TRwIterator<Container, IPointer, Entry> Iter;
 
   /// Create an iterator not associated with any specific container.
   EST_TRwIterator() {this->cont=NULL;}
@@ -285,7 +285,7 @@ class EST_TRwStructIterator
 {
 public:
 
-  typedef EST_TIterator<Container, IPointer, Entry> Iter;
+  typedef EST_TRwStructIterator<Container, IPointer, Entry> Iter;
 
   /// Create an iterator not associated with any specific container.
   EST_TRwStructIterator() {this->cont=NULL;}

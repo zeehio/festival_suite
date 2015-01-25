@@ -31,7 +31,7 @@
  ##                                                                       ##
  ###########################################################################
  ##                                                                       ##
- ##                    Makfile for script directory                       ##
+ ##                    Makefile for script directory                       ##
  ## --------------------------------------------------------------------- ##
  ##                 Author: Richard Caley (rjc@cstr.ed.ac.uk)             ##
  ##                   Date: June 1997                                     ##

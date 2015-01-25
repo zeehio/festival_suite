@@ -124,6 +124,7 @@ void EST_BackoffNgrammarState::clear()
 void EST_BackoffNgrammarState::init()
 {
     backoff_weight=0;
+    p_level = -1; /* It better be sanely initialized somewhere else */
     p_pdf.init();
 }
 
@@ -2512,11 +2513,6 @@ double EST_Ngrammar::backoff_probability(const EST_StrVector &words,
 	return bo_wt * backoff_probability(new_ngram,trace);
     }
     
-    // should never reach here !
-    // but gcc thinks it does
-    cerr << "oops !";
-    return -1;
-    
 }
 
 
@@ -2585,12 +2581,6 @@ EST_Ngrammar::backoff_reverse_probability_sub(const EST_StrVector &words,
 	//cerr << "backed off(" << bo_wt << ") ";
 	return bo_wt * backoff_reverse_probability_sub(new_ngram,root);
     }
-    
-    // should never reach here !
-    // but gcc thinks it does
-    cerr << "oops !";
-    return -1;
-    
 }
 
 double 

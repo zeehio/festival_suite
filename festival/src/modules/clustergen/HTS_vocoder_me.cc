@@ -194,7 +194,6 @@ void HTS_Vocoder_synthesize_me(HTS_Vocoder_ME * v_me,
   double xnoise;
   double fxpulse;
   double fxnoise;
-  double e1, e2;
 
 
   /* Copy in str's and build pulse and noise shaping filter for this frame */
