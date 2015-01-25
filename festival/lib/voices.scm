@@ -31,7 +31,7 @@
 ;;;                                                                       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
-;;; Preapre to access voices. Searches down a path of places.
+;;; Prepare to access voices. Searches down a path of places.
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -76,7 +76,7 @@
 
 
 ;; Declaration of voices. When we declare a voice we record the
-;; directory and set up an autoload for the vocie-selecting function
+;; directory and set up an autoload for the voice-selecting function
 
 (defvar voice-locations ()
   "voice-locations
@@ -229,6 +229,35 @@ list of potential voices found be scanning the voice-path at start up time.
 These names can be used as arguments to voice.description and
 voice.describe."
    (mapcar car voice-locations))
+
+(define (voice.find parameters)
+"(voice.find PARAMETERS)
+List of the (potential) voices in the system that match the PARAMETERS described
+in the proclaim_voice description fields."
+  (let ((voices (eval (list voice.list)))
+        (validvoices nil)
+        (voice nil)
+       )
+    (while parameters
+      (while voices
+        (set! voice (car voices))
+;;I believe the next line should be improved. equal? doesn't work always.
+        (if (equal? (list (cadr (assoc (caar parameters)
+                                       (cadr (assoc voice Voice_descriptions))
+                                ))) (cdar parameters))
+            (begin
+              (set! validvoices (append (list voice) validvoices))
+            )
+        )
+        (set! voices (cdr voices))
+      )
+      (set! voices validvoices)
+      (set! validvoices nil)
+      (set! parameters (cdr parameters))
+    )
+  voices
+  )
+)
 
 ;; Voices are found on the voice-path if they are in directories of the form
 ;;		DIR/LANGUAGE/NAME

@@ -97,7 +97,7 @@ public:
     /// elementwise divide by scalar
     EST_FMatrix &operator/=(const float f); 
 
-    /// Multiply all elements of matrix by {\tt x}.
+    /// Multiply all elements of matrix by `x`.
     friend EST_FMatrix operator*(const EST_FMatrix &a, const float x);
 
     /// Multiply matrix by vector.

@@ -36,9 +36,11 @@
 /*  Generic Viterbi search specifications through scheme                 */
 /*                                                                       */
 /*=======================================================================*/
-#include <cstdio>
+#include <iostream>
 #include "festival.h"
 #include "lexicon.h"
+
+using namespace std;
 
 static EST_VTCandidate *gv_candlist(EST_Item *s,EST_Features &f);
 static EST_VTPath *gv_npath(EST_VTPath *p,EST_VTCandidate *c,EST_Features &f);
@@ -116,7 +118,10 @@ static EST_VTCandidate *gv_candlist(EST_Item *s,EST_Features &f)
 	n = get_ngram(f.S("ngramname"));
     else
 	w = get_wfst(f.S("wfstname"));
-
+    if (n == 0 && w == 0) {
+        cerr << "gv_candlist: Neither ngram nor wfst were provided" << endl;
+        festival_error();
+    }
     for (l=p; l != NIL; l=cdr(l))
     {
 	prob = get_c_float(car(cdr(car(l))));

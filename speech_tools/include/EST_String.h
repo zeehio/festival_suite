@@ -48,7 +48,7 @@ class EST_Regex;
 #include "EST_strcasecmp.h"
 #include "EST_bool.h"
 
-extern "C" void abort(void);
+#include <cstdlib>
 
 class EST_String;
 int fcompare(const EST_String &a, const EST_String &b, const unsigned char *table=NULL);

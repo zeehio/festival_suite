@@ -62,7 +62,10 @@ LOCAL_CLEAN = doxygen
 -include $(TOP)/config/common_make_rules
 
 doc:
-	(cd $(TOP)/doc/man; make all_dox)
-	doxygen $(TOP)/doc/DoxyFile
+	$(MAKE) -C $(TOP_BUILDDIR)/doc/man all_dox
+	$(DOXYGEN) $(TOP)/doc/DoxyFile
 
+
+doc-pdf: doc
+	$(MAKE) -C $(TOP_BUILDDIR)/doc/doxygen/latex all
 

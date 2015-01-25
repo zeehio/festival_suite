@@ -43,7 +43,7 @@
 #include "EST_Option.h"
 
 extern int nas_supported;
-extern int esd_supported;
+extern int pulse_supported;
 extern int sun16_supported;
 extern int freebsd16_supported;
 extern int linux16_supported;

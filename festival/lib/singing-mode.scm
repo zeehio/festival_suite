@@ -54,7 +54,7 @@
      (set! singing_dur_att_list nil)
      (set! singing_global_time 0.0)
      (set! singing_bpm (get-bpm ATTLIST))
-     (set! singing_bps (/ singing_bpm 50.0)) ;; change this back to 60
+     (set! singing_bps (/ singing_bpm 60.0))
      nil)
 
     (")SINGING" (ATTLIST UTT)
