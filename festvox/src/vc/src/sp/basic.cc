@@ -114,9 +114,9 @@ double round(double x)
 double fix(double x)
 {
     double n;
-    double y;
+    /*double y;*/
 
-    y = modf(x, &n);
+    modf(x, &n);
 
     return n;
 }

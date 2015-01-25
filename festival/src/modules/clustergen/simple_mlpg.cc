@@ -213,6 +213,7 @@ static double get_like_pdfseq_vit(int dim, int dim2, int dnum, int clsnum,
                                   EST_Track *model, 
                                   XBOOL dia_flag)
 {
+    (void) clsnum;
     long d, c, k, l, j;
     double sumgauss;
     double like = 0.0;
@@ -954,7 +955,7 @@ LISP mlpg(LISP ltrack)
     MLPGPARA param = NODATA;
     EST_Track *param_track, *out;
     int dim, dim_st;
-    float like;
+    /*float like;*/
     int i,j;
     int nframes;
     PStreamChol pst;
@@ -1011,7 +1012,7 @@ LISP mlpg(LISP ltrack)
     {
         get_dltmat(param->stm, &pst.dw, 1, param->dltm);
 
-        like = get_like_pdfseq_vit(dim, dim_st, nframes, nframes, param,
+        /*like = */get_like_pdfseq_vit(dim, dim_st, nframes, nframes, param,
                                    param_track, XTRUE);
 
         /* vlike = get_like_gv(dim2, dnum, param); */

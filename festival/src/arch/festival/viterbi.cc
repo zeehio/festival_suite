@@ -46,7 +46,7 @@ static EST_VTCandidate *gv_candlist(EST_Item *s,EST_Features &f);
 static EST_VTPath *gv_npath(EST_VTPath *p,EST_VTCandidate *c,EST_Features &f);
 static double gv_find_wfst_prob(EST_VTPath *p,EST_WFST *wfst,
 				int n,int &state);
-static double gv_find_ngram_prob(EST_VTPath *p,EST_Ngrammar *ngram,
+static double gv_find_ngram_prob(EST_VTPath *p,EST_Ngrammar &ngram,
 				 int n,int &state,EST_Features &f);
 
 LISP Gen_Viterbi(LISP utt)
@@ -154,12 +154,15 @@ static EST_VTPath *gv_npath(EST_VTPath *p,EST_VTCandidate *c,EST_Features &f)
 	ngram = get_ngram(f.S("ngramname"));
     else
 	wfst = get_wfst(f.S("wfstname"));
-
+    if (ngram == 0 && wfst == 0) {
+        cerr << "gv_npath: Neither ngramname nor wfstname were provided" << endl;
+        return np;
+    }
     np->c = c;
     np->from = p;
     int n = c->name.Int();
     if (wfst == 0)
-	prob = gv_find_ngram_prob(p,ngram,n,np->state,f);
+	prob = gv_find_ngram_prob(p,*ngram,n,np->state,f);
     else
 	prob = gv_find_wfst_prob(p,wfst,n,np->state);
 
@@ -200,7 +203,7 @@ static double gv_find_wfst_prob(EST_VTPath *p,EST_WFST *wfst,
     return prob;
 }
 
-static double gv_find_ngram_prob(EST_VTPath *p,EST_Ngrammar *ngram,
+static double gv_find_ngram_prob(EST_VTPath *p,EST_Ngrammar &ngram,
 				 int n,int &state,EST_Features &f)
 {
     int oldstate=0;
@@ -209,7 +212,7 @@ static double gv_find_ngram_prob(EST_VTPath *p,EST_Ngrammar *ngram,
     if (p == 0)
     {
         // This could be done once before the search is called
-	int order = ngram->order();
+	int order = ngram.order();
 	int i;
 	EST_IVector window(order);
 	
@@ -217,16 +220,16 @@ static double gv_find_ngram_prob(EST_VTPath *p,EST_Ngrammar *ngram,
 	    window.a_no_check(order-1) = n;
 	if (order > 2)
 	    window.a_no_check(order-2) = 
-		ngram->get_vocab_word(f.S("p_word"));
+		ngram.get_vocab_word(f.S("p_word"));
 	for (i = order-3; i>=0; i--)
 	    window.a_no_check(i) =
-		ngram->get_vocab_word(f.S("pp_word"));
-	oldstate = ngram->find_state_id(window);
+		ngram.get_vocab_word(f.S("pp_word"));
+	oldstate = ngram.find_state_id(window);
     }
     else
 	oldstate = p->state;
-    state = ngram->find_next_state_id(oldstate,n);
-    const EST_DiscreteProbDistribution &pd = ngram->prob_dist(oldstate);
+    state = ngram.find_next_state_id(oldstate,n);
+    const EST_DiscreteProbDistribution &pd = ngram.prob_dist(oldstate);
     if (pd.samples() == 0)
 	prob = 0;
     else

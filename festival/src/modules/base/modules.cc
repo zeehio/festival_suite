@@ -154,7 +154,7 @@ void create_segments(EST_Utterance &u)
 	{
 	    tpos = start + (get_c_float(car(car(t))));
 	    tval = get_c_float(car(cdr(car(t))));
-	    add_target(&u,Seg,tpos,tval);
+	    add_target(u,Seg,tpos,tval);
 	}
     }
 

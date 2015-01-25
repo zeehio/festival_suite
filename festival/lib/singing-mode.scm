@@ -547,10 +547,8 @@
   ;; use our duration function
   (Parameter.set 'Duration_Method singing_duration_method)
   ;; set phoneme corrections for the current language
-  (let ((language 'english
-;         (cadr (assoc 'language
-;                               (cadr (voice.description current-voice))))
-         ))
+  (let ((language (cadr (assoc 'language
+                               (cadr (voice.description current-voice))))))
     (set! phoneme_offsets* (cdr (assoc language phoneme_offsets))))
   ;; avoid splitting to multiple utterances with insertion of unwanted pauses
   (set! singing_previous_eou_tree eou_tree)

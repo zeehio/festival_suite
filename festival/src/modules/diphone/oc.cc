@@ -149,7 +149,7 @@ static float find_best_left(LISP d,LISP ds,LISP weights)
     // in d
     EST_Track a,b;
     LISP l;
-    int i,j,best,bestj;;
+    int i,j,best/*,bestj*/;
     double b_dist,dist;
     float best_pos;
 
@@ -181,7 +181,7 @@ static float find_best_left(LISP d,LISP ds,LISP weights)
 		{
 		    b_dist = dist;
 		    best = i;
-		    bestj = j;
+		    /*bestj = j;*/
 		}
 	    }
 	}
@@ -215,7 +215,7 @@ static float find_best_right(LISP d,LISP ds,LISP weights)
     // in d
     EST_Track a,b;
     LISP l;
-    int i,j,best,bestj;;
+    int i,j,best/*,bestj*/;
     double b_dist,dist;
     float best_pos;
 
@@ -246,7 +246,7 @@ static float find_best_right(LISP d,LISP ds,LISP weights)
 		{
 		    b_dist = dist;
 		    best = i;
-		    bestj = j;
+		   /* bestj = j;*/
 		}
 	    }
 	}
