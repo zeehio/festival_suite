@@ -56,6 +56,8 @@ FILES=Makefile README.md INSTALL $(CONFIG)
 
 LOCAL_CLEAN= Build.trace Test.trace Templates.DB
 
+LOCAL_DISTCLEAN = config.log config.status
+
 ALL = .config_error .sub_directories
 
 # Try and say if config hasn't been created
