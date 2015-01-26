@@ -71,5 +71,8 @@ if [ "$run" = "y" ]; then
    tar xzf festvox_cmu_us_slt_cg.tar.gz
    cd festival
    make test
+   cd "$BASEDIR/festvox"
+   ./configure
+   make
 fi
 
