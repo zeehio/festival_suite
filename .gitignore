@@ -6,3 +6,6 @@ make.depend
 .buildlib_estools
 .buildlib_eststring
 autom4te.cache/
+*.tar.gz
+festival/lib/dicts
+festival/lib/voices
