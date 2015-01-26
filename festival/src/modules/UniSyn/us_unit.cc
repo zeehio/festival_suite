@@ -406,9 +406,9 @@ void us_unit_raw_concat(EST_Utterance &utt)
 	last_pm = (int)(last_pos * (float)unit_sig->sample_rate());
 	last_length = unit_sig->num_samples() - last_pm;
 
-//	cout << "first pm: " << first_pm << endl;
-//	cout << "last pm: " << last_pm << endl;
-//	cout << "last length: " << last_length << endl;
+//	std::cout << "first pm: " << first_pm << endl;
+//	std::cout << "last pm: " << last_pm << endl;
+//	std::cout << "last length: " << last_length << endl;
 
 	j -= first_pm;
 

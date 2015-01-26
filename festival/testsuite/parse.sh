@@ -40,7 +40,7 @@ export HOME
 
 do_parse () {
    echo "Probabilistic grammars are easy to use, but difficult to train." |
-   $TOP/examples/scfg_parse_text -full_parse || exit 1
+   $TOP/examples/scfg_parse_text || exit 1
 }
 
 echo >$OUTPUT
