@@ -36,22 +36,38 @@ if [ "$run" = "y" ]; then
    make
    cd ".."
    # Download CMU POSLEX and OALD needed for tests:
-   wget http://www.festvox.org/packed/festival/2.4/festlex_CMU.tar.gz
+   if [ ! -f festlex_CMU.tar.gz ]; then
+      wget http://www.festvox.org/packed/festival/2.4/festlex_CMU.tar.gz
+   fi
    tar xzf festlex_CMU.tar.gz
-   wget http://www.festvox.org/packed/festival/2.4/festlex_POSLEX.tar.gz
+   if [ ! -f festlex_POSLEX.tar.gz ]; then
+      wget http://www.festvox.org/packed/festival/2.4/festlex_POSLEX.tar.gz
+   fi
    tar xzf festlex_POSLEX.tar.gz
+   if [ ! -f festlex_OALD.tar.gz ]; then
    wget http://www.festvox.org/packed/festival/2.4/festlex_OALD.tar.gz
+   fi
    tar xzf festlex_OALD.tar.gz
    # Voices:
-   wget http://www.festvox.org/packed/festival/2.4/voices/festvox_kallpc16k.tar.gz
+   if [ ! -f festvox_kallpc16k.tar.gz ]; then
+       wget http://www.festvox.org/packed/festival/2.4/voices/festvox_kallpc16k.tar.gz
+   fi
    tar xzf festvox_kallpc16k.tar.gz
-   wget http://www.festvox.org/packed/festival/2.4/voices/festvox_rablpc16k.tar.gz
+   if [ ! -f festvox_rablpc16k.tar.gz ]; then
+      wget http://www.festvox.org/packed/festival/2.4/voices/festvox_rablpc16k.tar.gz
+   fi
    tar xzf festvox_rablpc16k.tar.gz
-   wget http://www.festvox.org/packed/festival/2.4/voices/festvox_cmu_us_rms_cg.tar.gz
+   if [ ! -f festvox_cmu_us_rms_cg.tar.gz ]; then
+      wget http://www.festvox.org/packed/festival/2.4/voices/festvox_cmu_us_rms_cg.tar.gz
+   fi
    tar xzf festvox_cmu_us_rms_cg.tar.gz
-   wget http://www.festvox.org/packed/festival/2.4/voices/festvox_cmu_us_awb_cg.tar.gz
+   if [ ! -f festvox_cmu_us_awb_cg.tar.gz ]; then
+      wget http://www.festvox.org/packed/festival/2.4/voices/festvox_cmu_us_awb_cg.tar.gz
+   fi
    tar xzf festvox_cmu_us_awb_cg.tar.gz
-   wget http://www.festvox.org/packed/festival/2.4/voices/festvox_cmu_us_slt_cg.tar.gz
+   if [ ! -f festvox_cmu_us_slt_cg.tar.gz ]; then
+      wget http://www.festvox.org/packed/festival/2.4/voices/festvox_cmu_us_slt_cg.tar.gz
+   fi
    tar xzf festvox_cmu_us_slt_cg.tar.gz
    cd festival
    make test
