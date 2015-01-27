@@ -726,6 +726,10 @@ static LISP send_sexpr_to_client(LISP l)
     FILE *fd;
 
     fd = fopen(tmpfile,"w");
+    if (fd == 0) {
+        std::cerr << "Error creating tmp file " << tmpfile << std::endl;
+        return NIL;
+    }
 
     lprin1f(l,fd);
     fprintf(fd,"\n");

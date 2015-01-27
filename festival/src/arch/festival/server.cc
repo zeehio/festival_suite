@@ -212,7 +212,13 @@ static int client_access_check(int fd,int client)
     const char *client_hostnum;
     const char *reason = "";
     
-    getpeername(fd,(struct sockaddr *)&peer,&addrlen);
+    if (getpeername(fd,(struct sockaddr *)&peer,&addrlen) < 0) {
+        reason = "rejected: could not get peer name";
+        client_access = FALSE;
+        log_message(-1,reason);
+        return client_access;
+    }
+    
     clienthost = gethostbyaddr((char *)&peer.sin_addr,
 			       sizeof(peer.sin_addr),AF_INET);
     client_hostnum = inet_ntoa(peer.sin_addr);
