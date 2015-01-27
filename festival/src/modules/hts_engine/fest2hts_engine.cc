@@ -207,6 +207,10 @@ static LISP HTS_Synthesize_Utt(LISP utt) {
     } else {
       cerr << "No input label specified" << endl;
       HTS_Engine_refresh(engine);
+      if (rawfp != NULL)
+         fclose(rawfp);
+      if (durfp != NULL)
+         fclose(durfp);
       return utt;
     }
     if (rawfp != NULL)

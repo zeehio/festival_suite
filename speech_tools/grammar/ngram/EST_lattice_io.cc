@@ -491,6 +491,7 @@ load(Lattice &lattice,EST_String filename)
 	if(to_node == NULL){
 	    cerr << "Couldn't find to node, index " 
 		 << temp_arcs[j].end << endl;
+        delete[] used;
 	    return false;
 	}
 

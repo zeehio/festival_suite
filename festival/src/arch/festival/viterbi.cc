@@ -69,6 +69,10 @@ LISP Gen_Viterbi(LISP utt)
     if (f.present("ngramname"))
     {
 	ngram = get_ngram(f.S("ngramname"));
+    if (ngram == 0) {
+        cerr << "Gen_Viterbi: Error. Could not get ngram " << f.S("ngramname") << endl;
+        return utt;
+    }
 	num_states = ngram->num_states();
     }
     else
