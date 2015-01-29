@@ -18,3 +18,34 @@ of the static analysis coverity tool
 [![Coverage Status](https://coveralls.io/repos/zeehio/festival_suite/badge.svg?branch=master)](https://coveralls.io/r/zeehio/festival_suite?branch=master)
 [![Coverity Static Analysis](https://scan.coverity.com/projects/3956/badge.svg)](https://scan.coverity.com/projects/3956)
 
+## Changes with respect to upstream:
+
+ - Improvements to the build system
+   * Update autoconf and configure.ac
+   * Allow passing options to ./configure: ./configure SHARED=2
+   * Respect user custom CFLAGS
+   * Easy usage of code coverage tools
+   * Enable continuous integration using Travis-CI
+   * Add `make distclean` to fully clean the source tree
+   * Use g++ instead of gcc to compile C++ code 
+ - Fix compiler warnings
+   * Check return values of functions (fread, fwrite...)
+   * Unused variables in functions
+   * ... [Ongoing]
+ - Audio
+   * Allow to compile both the ALSA and PulseAudio modules simultaneously
+   * Drop obsolete ESD audio module
+ - Documentation
+   * Improve speech tools documentation
+   * man page for text2wave
+   * Update EST_strcasecmp.c license to BSD-3 as allowed by the copyright owner
+ - Features
+   * Provide compatibility with Festival-1.96 HTS voices
+   * Avoid editing festival/lib/languages.scm to add new language
+   * voice.find function to search for voices
+   * Start support for >2GB files [Ongoing]
+   * Do not import the whole std namespace in headers
+   * Alaw support for asterisk compatibility
+   * Faster text2wave
+   * Rewrite some signal processing functions badly ported from Fortran
+
