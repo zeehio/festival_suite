@@ -281,7 +281,7 @@ EST_read_status EST_TrackFile::load_xmg(const EST_String filename, EST_Track &tr
 
     EST_TokenStream ts;
     EST_StrList sl;
-    int i, n, sr;
+    int i, n;
     EST_String t, k, v;
     EST_Litem *p;
     
@@ -300,14 +300,15 @@ EST_read_status EST_TrackFile::load_xmg(const EST_String filename, EST_Track &tr
 
     while ((!ts.eof()) && (ts.peek().string() != "\014"))
     {
-	k = ts.get().string();
-	v = ts.get().string();
-	if (k == "Freq")
-	    sr = v.Int() * 1000;
-	else if (k == "YMin")
-	  /* tr.amin = atof(v) */;
-	else if (k == "YMax")
-	  /*tr.amax = atof(v) */;
+        k = ts.get().string();
+        v = ts.get().string();
+        if (k == "Freq") {
+            /*sr = v.Int() * 1000;*/
+        } else if (k == "YMin") {
+	        /* tr.amin = atof(v) */;
+	    } else if (k == "YMax") {
+	        /*tr.amax = atof(v) */;
+        }
     }
 
     if (ts.eof())
@@ -392,7 +393,7 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
     (void)ishift;
     (void)startt;
     int i, j;
-    int num_frames, num_channels, num_aux_channels;
+    int num_frames, num_channels;
     EST_Features hinfo;
     EST_EstFileType t;
     EST_String v;

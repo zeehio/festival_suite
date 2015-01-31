@@ -47,6 +47,13 @@
 #include <cstdio>
 #include "ling_class/EST_Item.h"
 
+/**
+ @file EST_Relation_mls.cc
+ Multi-linear list relations
+
+ @todo Allow linear list relations to have relations between one item in one list and a list of items in the other, Alan W Black 1999
+*/
+
 int linked(EST_Item *from, EST_Item *to)
 {
     EST_Item *i;
@@ -69,7 +76,7 @@ void add_link(EST_Item *from, EST_Item *to)
     q = d->append_daughter()->append_daughter(to);
     // Also add it to the simple list of the relation so traversal works
     // append q 
-    
+    (void) q;
 }
 
 #if 0 

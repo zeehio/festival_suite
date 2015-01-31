@@ -46,10 +46,13 @@ MANPAGES = festival.head festival.tail \
 
 FILES=Makefile $(MANPAGES) festival.texi $(SGMLFILES) refcard.tex  $(DOCXXFILES)
 LOCAL_CLEAN = *.aux *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.1
-
+LOCAL_DISTCLEAN = festfeat.texi festfunc.texi festival.cps festival.dvi festival.ps \
+                  festvars.texi html info refcard.dvi refcard.ps refcard.pdf
 ALL = festival.1 festival_client.1 text2wave.1
 
 include $(TOP)/config/common_make_rules
+
+all: $(ALL) doc
 
 %.1 : %.head %.options %.tail 
 	cat $^ >$@
@@ -84,7 +87,8 @@ festival.dvi: festival.texi festfunc.texi festvars.texi
 	tex festival.texi
 	texindex festival.cp
 	tex festival.texi
-doc:	festival.ps festival.html festival.info
+
+doc:	festival.ps festival.html festival.info refcard.ps
 
 festfunc.texi festvars.texi festfeat.texi: $(TOP)/src/main/festival
 	echo "(load_library \"festdoc.scm\") (make-doc)" | $(FESTIVAL)

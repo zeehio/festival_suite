@@ -479,7 +479,7 @@ void FORD1(int m, float *b) {
 }
 
 void FORD2(unsigned int m, float *b) {
-  float t;
+    float t;
     const int n = 0x1<<m; /* 2^m */
     unsigned int k;
     float l[15];
@@ -499,7 +499,7 @@ void FORD2(unsigned int m, float *b) {
     #define l2 l[13]
     #define l1 l[14]
     l[0] = n;
-  
+
     for (k=1;k<m;++k) {
         l[k] = l[k-1]/2;
     }
@@ -525,15 +525,15 @@ void FORD2(unsigned int m, float *b) {
     for (int j13=j12;j13<=l13;j13+=l12) {
     for (int j14=j13;j14<=l14;j14+=l13) {
     for (int ji=j14;ji<=l15;ji+=l14) {
-    if(ij-ji<0) {
+      if (ij-ji < 0) {
         t = b[ij-2];
         b[ij-2] = b[ji-2];
         b[ji-2] = t;
         t  = b[ij-1];
         b[ij-1] = b[ji-1];
         b[ji-1] = t;
-    }
-    ij += 2;
+      }
+      ij += 2;
     }}}}}}}}}}}}}}}
     #undef l15
     #undef l13
@@ -550,7 +550,7 @@ void FORD2(unsigned int m, float *b) {
     #undef l2
     #undef l1
     return;
-} 
+}
 
 int fastlog2(int n) {
     int num_bits, power = 0;
