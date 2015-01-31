@@ -415,7 +415,6 @@ static float test_tree_vector(WNode &tree,WDataSet &dataset,ostream *output)
                     error = predict-actual;
                 else
                     error = (predict-actual)/b.stddev();
-                error = predict-actual; /* awb_debug */
                 se.cumulate((error*error),count);
                 e.cumulate(fabs(error),count);
                 xx.cumulate(predict*predict,count);
@@ -504,7 +503,6 @@ static float test_tree_trajectory(WNode &tree,WDataSet &dataset,ostream *output)
                     error = predict-actual;
                 else
                     error = (predict-actual)/b.stddev();
-                error = predict-actual; /* awb_debug */
                 se.cumulate((error*error),count);
                 e.cumulate(fabs(error),count);
                 xx.cumulate(predict*predict,count);
@@ -571,14 +569,18 @@ static float test_tree_cluster(WNode &tree,WDataSet &dataset,ostream *output)
 
     if (output != NULL)
     {
+        int rightnumber = 0;
+        if (dataset.length() > 0) {
+            rightnumber = (int)(100.0*(float)right_cluster/(float)dataset.length());
+        }
 	// Want number in right class, mean distance in sds, mean ranking
 	if (output != &cout)   // save in output file
 	    *output << ";; Right cluster " << right_cluster << " (" <<
-		(int)(100.0*(float)right_cluster/(float)dataset.length()) << 
+		rightnumber << 
 		    "%) mean ranking " << ranking.mean() << " mean distance "
 			<< meandist.mean() << endl;
 	cout << "Right cluster " << right_cluster << " (" <<
-	    (int)(100.0*(float)right_cluster/(float)dataset.length()) << 
+	    rightnumber << 
 		"%) mean ranking " << ranking.mean() << " mean distance "
 		    << meandist.mean() << endl;
     }
@@ -655,7 +657,7 @@ static float test_tree_ols(WNode &tree,WDataSet &dataset,ostream *output)
 {
     // Test tree against data to get summary of results OLS
     EST_Litem *p;
-    WNode *leaf;
+    /*WNode *leaf;  // unused */
     float predict,real;
     EST_SuffStats x,y,xx,yy,xy,se,e;
     double cor,error;
@@ -663,7 +665,7 @@ static float test_tree_ols(WNode &tree,WDataSet &dataset,ostream *output)
 
     for (p=dataset.head(); p != 0; p=p->next())
     {
-	leaf = tree.predict_node((*dataset(p)));
+	/*leaf = */tree.predict_node((*dataset(p)));
         // do ols to get predict;
         predict = 0.0;  // This is incomplete ! you need to use leaf
 	real = dataset(p)->get_flt_val(wgn_predictee);

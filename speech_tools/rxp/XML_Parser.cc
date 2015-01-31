@@ -79,14 +79,16 @@ XML_Parser *XML_Parser_Class::make_parser(FILE *input,
 					   const EST_String desc, 
 					   void *data)
 {
-  Entity ent = NewExternalEntity(0,0,strdup8(desc),0,0);
-
   FILE16 *input16=MakeFILE16FromFILE(input, "r");
 
-  if (input16==NULL)
+  if (input16==NULL) {
     EST_sys_error("Can't open 16 bit '%s'", (const char *)desc);
+    return 0;
+  }
 
   SetCloseUnderlying(input16, 0);
+
+  Entity ent = NewExternalEntity("",0,strdup8(desc),0,0);
 
   return make_parser(NewInputSource(ent, input16), ent, data);
 }
@@ -107,17 +109,20 @@ XML_Parser *XML_Parser_Class::make_parser(const EST_String filename,
 
   FILE *input = fopen(filename, "r");
 
-  if (input==NULL)
+  if (input==NULL) {
     EST_sys_error("Can't open '%s'", (const char *)filename);
-
-  Entity ent = NewExternalEntity(0,0,strdup8(filename),0,0);
+    return 0;
+  }
 
   FILE16 *input16=MakeFILE16FromFILE(input, "r");
 
-  if (input16==NULL)
+  if (input16==NULL) {
     EST_sys_error("Can't open 16 bit '%s'", (const char *)filename);
-
+    return 0;
+  }
   SetCloseUnderlying(input16, 1);
+
+  Entity ent = NewExternalEntity("",0,strdup8(filename),0,0);
 
   return make_parser(NewInputSource(ent, input16), data);
 }
@@ -248,6 +253,9 @@ XML_Parser::XML_Parser(XML_Parser_Class &pc,
 		       Entity ent,
 		       void *d)
 {
+  p_track_context = 0;
+  p_track_contents = 0;
+  current_bit = 0;
   pclass=&pc;
   source=s;
   initial_entity=ent;

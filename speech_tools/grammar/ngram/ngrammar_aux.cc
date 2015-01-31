@@ -445,11 +445,10 @@ Good_Turing_smooth(EST_Ngrammar &ngrammar, int maxcount, int mincount)
     
   case EST_Ngrammar::backoff:
 {
+    (void)mincount;
     
     cerr << "Smoothing of backed of grammars is not available!" << endl;
     return false;
-    
-    (void)mincount;
     
     /*
        // need to smooth for each order independently

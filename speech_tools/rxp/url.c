@@ -136,6 +136,9 @@ char *default_base_url(void)
 	    *p = '/';
     }
     url = Malloc(6 + strlen(buf) + 2);
+    if (url == NULL) {
+        return NULL;
+    }
     sprintf(url, "file:/%s/", buf);
 
 #else
@@ -374,8 +377,9 @@ bad:
 FILE16 *url_open(const char *url, const char *base, const char *type,
 		 char **merged_url)
 {
-    char *scheme, *host, *path, *m_url;
-    int port, i;
+    char *scheme=NULL, *host, *path, *m_url;
+    int port;
+    unsigned int i;
     FILE16 *f;
 #ifdef HAVE_LIBZ
     int len, gzipped = 0;
@@ -383,8 +387,9 @@ FILE16 *url_open(const char *url, const char *base, const char *type,
 
     /* Determine the merged URL */
 
-    if(!(m_url = url_merge(url, base, &scheme, &host, &port, &path)))
+    if(!(m_url = url_merge(url, base, &scheme, &host, &port, &path))) {
 	return 0;
+    }
 
 #ifdef HAVE_LIBZ
     len = strlen(m_url);
@@ -566,7 +571,15 @@ static FILE16 *http_open(const char *url,
 #else
     fin = fdopen(s, "r");
     setvbuf(fin, 0, _IONBF, 0);
-    fout = fdopen(dup(s), "w");
+    int newfd = dup(s);
+    if (newfd < 0) {
+        LT_ERROR(LEFILE,
+                 "Error: http_open: Can't copy file descriptor\n");
+        close(s);
+        fclose(fin);
+    return 0;
+    }
+    fout = fdopen(newfd, "w");
 #endif
 #endif
 

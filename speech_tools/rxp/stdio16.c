@@ -364,23 +364,32 @@ CharacterEncoding GetFileEncoding(FILE16 *file)
 
 int Fprintf(FILE16 *file, const char *format, ...)
 {
+    int nchars;
     va_list args;
     va_start(args, format);
-    return Vfprintf(file, format, args);
+    nchars = Vfprintf(file, format, args);
+    va_end(args);
+    return nchars;
 }
 
 int Printf(const char *format, ...)
 {
+    int nchars;
     va_list args;
     va_start(args, format);
-    return Vfprintf(Stdout, format, args);
+    nchars = Vfprintf(Stdout, format, args);
+    va_end(args);
+    return nchars;
 }
 
 int Sprintf(void *buf, CharacterEncoding enc, const char *format, ...)
 {
+    int nchars;
     va_list args;
     va_start(args, format);
-    return Vsprintf(buf, enc, format, args);
+    nchars = Vsprintf(buf, enc, format, args);
+    va_end(args);
+    return nchars;
 }
 
 int Vprintf(const char *format, va_list args)
@@ -392,7 +401,7 @@ int Vsprintf(void *buf, CharacterEncoding enc, const char *format,
 	     va_list args)
 {
     int nchars;
-    FILE16 file = {0, 0, -1, StringRead, StringWrite, StringSeek, StringFlush, StringClose, FILE16_write};
+    FILE16 file = {0, 0, -1, StringRead, StringWrite, StringSeek, StringFlush, StringClose, FILE16_write, 0,0};
 
     file.handle = buf;
     file.enc = enc;
@@ -416,9 +425,13 @@ int Vfprintf(FILE16 *file, const char *format, va_list args)
     const char8 *p;
     const char16 *q;
     char16 cbuf[1];
-    int mflag, pflag, sflag, hflag, zflag;
-    int l, h, L;
+    int mflag;//, pflag, sflag, hflag, zflag;
+    int l, h;
+    #ifdef HAVE_LONG_DOUBLE
+    int L;
+    #endif
     int nchars = 0;
+    memset(buf, 0, BufferSize*sizeof(char8));
 
     while((c = *format++))
     {
@@ -431,8 +444,11 @@ int Vfprintf(FILE16 *file, const char *format, va_list args)
 	start = format-1;
 	width = 0;
 	prec = -1;
-	mflag=0, pflag=0, sflag=0, hflag=0, zflag=0;
-	l=0, h=0, L=0;
+	mflag=0;//, pflag=0, sflag=0, hflag=0, zflag=0;
+	l=0, h=0;
+    #ifdef HAVE_LONG_DOUBLE
+    L=0;
+    #endif
 
 	while(1)
 	{
@@ -442,16 +458,16 @@ int Vfprintf(FILE16 *file, const char *format, va_list args)
 		mflag = 1;
 		break;
 	    case '+':
-		pflag = 1;
+		//pflag = 1;
 		break;
 	    case ' ':
-		sflag = 1;
+		//sflag = 1;
 		break;
 	    case '#':
-		hflag = 1;
+		//hflag = 1;
 		break;
 	    case '0':
-		zflag = 1;
+		//zflag = 1;
 		break;
 	    default:
 		goto flags_done;
@@ -507,7 +523,7 @@ int Vfprintf(FILE16 *file, const char *format, va_list args)
 #endif
 	}
 
-	if(format - start + 1 > sizeof(fmt))
+	if(format - start + 1 > (int) sizeof(fmt))
 	{
 	  ERR("Printf: format specifier too long");
 	    errno = 0;
@@ -801,6 +817,7 @@ static int StringClose(FILE16 *file)
 
 static int StringFlush(FILE16 *file)
 {
+    (void) file;
     return 0;
 }
 

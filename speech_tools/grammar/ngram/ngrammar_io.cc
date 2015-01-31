@@ -77,7 +77,8 @@ load_ngram_arpa(const EST_String filename, EST_Ngrammar &n, const EST_StrList &v
     EST_TokenStream ts;
     EST_String s;
     int i,j,k, order=0;
-    double occur,weight;
+    //double weight;
+    /*double occur;*/
     int this_num,this_order;
 
     if (ts.open(filename) == -1)
@@ -305,7 +306,7 @@ load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
 	swap = TRUE;
     else if (magic != EST_NGRAMBIN_MAGIC) {
 		fclose(ifd);
-	return wrong_format;
+        return wrong_format;
     }
     if (ts.open(ifd, FALSE) == -1)
 	return misc_read_error;
@@ -364,6 +365,7 @@ load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
 	cerr << "EST_Ngrammar::load_ngram_cstr_bin format does not have expected number of entries" << endl;
 	ts.close();
 	fclose(ifd);
+	delete[] dd;
 	return misc_read_error;
     }
     if (swap)
@@ -376,6 +378,7 @@ load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
 	    cerr << "EST_Ngrammar::load_ngram_cstr_bin unexpected end of frequency data" << endl;
 	    ts.close();
 	    fclose(ifd);
+        delete[] dd;
 	    return misc_read_error;	
 	}
 	for (k=n.p_states[i].pdf().item_start();
@@ -666,7 +669,7 @@ save_ngram_arpa(const EST_String filename, EST_Ngrammar &n)
     
     ostream *ost;
     int i,o;
-    
+
     if (filename == "-")
 	ost = &cout;
     else

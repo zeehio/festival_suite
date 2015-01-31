@@ -931,6 +931,7 @@ Lattice::minimise()
 
     if(!build_distinguished_state_table(dst)){
 	cerr << "Couldn't build distinguished state table" << endl;
+    delete[] dst;
 	return false;
     }
 
@@ -1425,7 +1426,7 @@ Lattice::expand()
     }
 
     // need to make sure ENTER node has no arcs in - if so add a dummy ENTER node
-
+    /*
     //Node *enter_node = nodes(nodes.head());
     bool flag=false;
     for(n_ptr=nodes.head();n_ptr!=NULL;n_ptr=n_ptr->next()){
@@ -1435,7 +1436,7 @@ Lattice::expand()
 	}
     }
 
-/*
+
     if(flag){
 	cerr << " fixing ENTER node" << endl;
 	new_node = new Node;
@@ -1603,6 +1604,10 @@ Lattice::build_transition_function()
     int num_nodes = nodes.length();
     int num_symbols = alphabet.n();
 
+    if (num_nodes <= 0) {
+        cerr << "No nodes, no transition function" << endl;
+        return true;
+    }
     if(tf != NULL)
 	cerr << "Warning : discarding existing transition function" << endl;
 

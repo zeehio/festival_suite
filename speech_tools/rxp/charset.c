@@ -233,7 +233,7 @@ CharacterEncoding InternalCharacterEncoding;
 void init_charset(void)
 {
     int i, j;
-
+    
     /* Determine internal encoding */
 
 #if CHAR_SIZE == 8
