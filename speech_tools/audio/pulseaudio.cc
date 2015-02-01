@@ -99,16 +99,9 @@ static int transfer_pulse_wave(EST_Wave &inwave, EST_Option &al, int record)
     }
 
     if (record) {
-        pa_ret = 	pa_simple_read (s, waveform, num_samples*sizeof(short), &err) :
+        pa_ret = pa_simple_read (s, waveform, num_samples*sizeof(short), &err);
     } else {
-    for (i=0; i < num_samples; i += AUDIOBUFFSIZE/2)
-    {
-        if (i + AUDIOBUFFSIZE/2 < num_samples)
-            pa_simple_write(s,&waveform[i],(size_t)AUDIOBUFFSIZE,&err);
-        else
-            pa_simple_write(s,&waveform[i],(size_t)(num_samples-i)*2,&err);
-    }
-
+        pa_ret = pa_simple_write(s, waveform, num_samples*sizeof(short), &err);
     }
     if (pa_ret < 0) {
 	cerr << err_prefix << pa_strerror(err) << endl;

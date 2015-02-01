@@ -214,9 +214,9 @@ bool EST_BackoffNgrammarState::accumulate(const EST_IVector &words,
 	s = get_child(words(words.n()-1-p_level));
 	if (s==NULL)
 	    // have to extend the tree
-	    s = add_child(p_pdf.get_discrete(),words);
+	    add_child(p_pdf.get_discrete(),words);
 
-	// get pointer again in case we built more than one level
+	// get pointer
 	s = get_child(words(words.n()-1-p_level));
 	if (s==NULL)
 	{
@@ -658,7 +658,7 @@ bool EST_Ngrammar::init_vocab(const EST_StrList &word_list)
     pred_vocab = vocab;	// same thing in this case
     vocab_pdf.init(pred_vocab);
     
-    return (bool)(vocab != NULL);
+    return true;
 }
 
 bool EST_Ngrammar::init_vocab(const EST_StrList &word_list,
@@ -672,7 +672,7 @@ bool EST_Ngrammar::init_vocab(const EST_StrList &word_list,
 	return false;
     vocab_pdf.init(pred_vocab);
     
-    return (bool)(vocab != NULL);
+    return true;
 }
 
 bool EST_Ngrammar::check_vocab(const EST_StrList &word_list)
@@ -2152,9 +2152,6 @@ EST_Ngrammar::load(const EST_String &filename)
     }
     else
 	return misc_read_error;
-    
-    cerr << "EST_Ngrammar::load can't determine ngrammar file type for input file " << filename << endl;
-    return wrong_format;
 }
 
 EST_read_status

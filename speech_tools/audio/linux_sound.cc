@@ -669,7 +669,8 @@ static int recover_from_error(snd_pcm_t *pcm_handle, ssize_t res)
 int audio_write_alsa(cst_audiodev *ad, void *samples, int num_bytes)
 {
     size_t frame_size;
-    ssize_t num_frames, res;
+    ssize_t num_frames;
+    snd_pcm_sframes_t res;
     snd_pcm_t *pcm_handle;
     char *buf = (char *) samples;
 
