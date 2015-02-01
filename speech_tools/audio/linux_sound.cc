@@ -615,7 +615,7 @@ int audio_close_alsa(cst_audiodev *ad)
 }
 
 /* Returns zero if recovery was successful. */
-static int recover_from_error(snd_pcm_t *pcm_handle, size_t res)
+static int recover_from_error(snd_pcm_t *pcm_handle, long int res)
 {
   if (res == -EPIPE) /* xrun */
   {
@@ -659,7 +659,8 @@ static int recover_from_error(snd_pcm_t *pcm_handle, size_t res)
 int audio_write_alsa(cst_audiodev *ad, void *samples, int num_bytes)
 {
   size_t frame_size;
-  size_t num_frames, res;
+  long int num_frames;
+  snd_pcm_sframes_t res;
   snd_pcm_t *pcm_handle;
   char *buf = (char *) samples;
 
