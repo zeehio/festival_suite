@@ -41,8 +41,3 @@ addons:
     - texlive-binaries
     - texlive-latex-base
 
-branches:
-  only:
-    - master
-    - coverity_scan
-
