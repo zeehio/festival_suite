@@ -164,7 +164,10 @@ EST_Item::EST_Item(EST_Relation *rel, EST_Item *li)
     p_relation = rel;
     p_contents = 0;
     n=p=u=d=0;
-    set_contents(li->contents());
+    if (li)
+        set_contents(li->contents());
+    else
+        set_contents(0);
 
     assign_id(this);
 }
@@ -314,10 +317,8 @@ EST_Item *EST_Item::insert_parent(EST_Item *si)
 {
     // Insert new parent here, by added a new below node and moving
     // the contents down to it.
-    if (this == 0) return 0;
-
     insert_below(0);
-    down()->set_contents(grab_contents());
+    d->set_contents(grab_contents());
     if (si != 0)
 	set_contents(si->grab_contents());
     else
@@ -326,113 +327,138 @@ EST_Item *EST_Item::insert_parent(EST_Item *si)
     return this;
 }
 
-EST_Item *EST_Item::last() const
+EST_Item *inext(const EST_Item *x)
 {
-    // To get round the const access to this
-    EST_Item *node = (EST_Item *)(void *)this;
-
-    if (this == 0) return 0;
-    for (; node->n != 0; node=node->n);
-    return node;
-}
-
-EST_Item *EST_Item::first() const
-{
-    // To get round the const access to this
-    EST_Item *node = (EST_Item *)(void *)this;
-
-    if (this == 0) return 0;
-    for (; node->p != 0; node=node->p);
-    return node;
-}
-
-EST_Item *EST_Item::top() const
-{
-    EST_Item *node = (EST_Item *)(void *)this;
-
-    if (this == 0) return 0;
-    for (; parent(node) != 0; node=parent(node));
-    return node;
-}
-
-EST_Item *EST_Item::next_leaf() const
-{
-    if (this == 0)
-	return 0;
-    else if (next() != 0)
-	return next()->first_leaf();
+    if (x == NULL)
+        return NULL;
     else
-	return parent(this)->next_leaf();
+        return x->n;
 }
 
-EST_Item *EST_Item::next_item() const
+EST_Item *iprev(const EST_Item *x)
+{
+    if (x == NULL)
+        return NULL;
+    else
+        return x->p;
+}
+
+EST_Item *idown(const EST_Item *x)
+{
+    if (x == NULL)
+        return NULL;
+    else
+        return x->d;
+}
+
+EST_Item *iup(const EST_Item *x)
+{
+    if (x == NULL)
+        return NULL;
+    else
+        return x->u;
+}
+
+EST_Item *last(const EST_Item *x)
+{
+    // To get round the const access to this
+    EST_Item *node = (EST_Item *)(void *)x;
+
+    for (; node && inext(node) != 0; node=inext(node));
+    return node;
+}
+
+EST_Item *first(const EST_Item *x)
+{
+    // To get round the const access to this
+    EST_Item *node = (EST_Item *)(void *)x;
+
+    for (; node && iprev(node) != 0; node=iprev(node));
+    return node;
+}
+
+EST_Item *top(const EST_Item *x)
+{
+    EST_Item *node = (EST_Item *)(void *)x;
+
+    for (; node && parent(node) != 0; node=parent(node));
+    return node;
+}
+
+EST_Item *next_leaf(const EST_Item *x)
+{
+    if (x == NULL) return NULL;
+    if (inext(x) != NULL)
+	return first_leaf(inext(x));
+    else 
+	return next_leaf(parent(x));
+}
+
+EST_Item *next_item(const EST_Item *x)
 {
     // For traversal through a relation, in pre-order (root then daughters)
-    if (this == 0)
-	return 0;
-    else if (down() != 0)
-	return down();
-    else if (next() != 0)
-	return next();
+    if (x == NULL)
+        return NULL;
+    else if (idown(x) != NULL)
+	return idown(x);
+    else if (inext(x) != NULL)
+	return inext(x);
     else
     {   // at the right most leaf so go up until you find a parent with a next
-	for (EST_Item *pp = parent(this); pp != 0; pp = parent(pp))
-	    if (pp->next())
-		return pp->next();
-	return 0;
+	for (EST_Item *pp = parent(x); pp != 0; pp = parent(pp))
+	    if (inext(pp)) return inext(pp);
+	return NULL;
     }
 }
 
-EST_Item *EST_Item::first_leaf() const
+EST_Item *first_leaf(const EST_Item *x)
 {
     // Leafs are defined as those nodes with no daughters
-    if (this == 0)
-	return 0;
-    if (down() == 0)
-	return (EST_Item *)(void *)this;
+    if (x == NULL) return NULL;
+    if (idown(x) == NULL)
+	return (EST_Item *)(void *)x;
     else
-	return down()->first_leaf();
+	return first_leaf(idown(x));
 }
 
-EST_Item *EST_Item::last_leaf() const
+EST_Item *last_leaf(const EST_Item *x)
 {
     // Leafs are defined as those nodes with no daughters
-    if (this == 0)
-	return 0;
-    else if (next())
-	return next()->last_leaf();
-    else if (down())
-	return down()->last_leaf();
+    if (x == NULL) return NULL;
+    if (inext(x))
+        return last_leaf(last(x));
+    else if (idown(x))
+	return last_leaf(idown(x));
     else
-	return (EST_Item *)(void *)this;
+	return (EST_Item *)(void *)x;
 }
 
 EST_Item *first_leaf_in_tree(const EST_Item *root)
 {
-    return root->first_leaf();
+    if (root == NULL) return NULL;
+    return first_leaf(root);
 }
 
 EST_Item *last_leaf_in_tree(const EST_Item *root)
 {
-    if (root == 0)
-	return 0;
-    else if (root->down() == 0)
+    if (root == NULL) return NULL;
+    if (idown(root) == NULL)
 	return (EST_Item *)(void *)root;
     else
-	return root->down()->last_leaf();
+	return last_leaf(idown(root));
 }
 
 EST_Item *EST_Item::append_daughter(EST_Item *si)
 {
-    if (this == 0)
-	return 0;
     EST_Item *nnode;
     EST_Item *its_downs;
+    EST_Item *c = NULL;
 
     // Because we don't distinguish forests properly we need
     // to do nasty things if this si is already associated to a 
     // this relation and its "in the top list"
-    EST_Item *c = si->as_relation(relation_name());
+    if (si)
+        c = si->as_relation(relation_name());
     if (in_list(c,p_relation->head()))
     {
 	// need to save its daughters to put on the new node
@@ -440,10 +466,10 @@ EST_Item *EST_Item::append_daughter(EST_Item *si)
 	c->d = 0; // otherwise it could delete its sub tree
 	if (its_downs) its_downs->u = 0;
 
-	if (down() == 0)
+	if (d == 0)
 	    nnode = insert_below(si);
 	else
-	    nnode = down()->last()->insert_after(si);
+	    nnode = last(d)->insert_after(si);
 	// put daughters back on the new item
 	if (its_downs)
 	{
@@ -453,18 +479,16 @@ EST_Item *EST_Item::append_daughter(EST_Item *si)
 
 	delete c;  // delete its old form from the top level
     }
-    else if (down() == 0)
+    else if (d == 0)
 	nnode = insert_below(si);
     else
-	nnode = down()->last()->insert_after(si);
+	nnode = last(d)->insert_after(si);
 
     return nnode;
 }
 
 EST_Item *EST_Item::prepend_daughter(EST_Item *si)
 {
-    if (this == 0)
-	return 0;
     EST_Item *nnode;
     EST_Item *its_downs;
 
@@ -479,10 +503,10 @@ EST_Item *EST_Item::prepend_daughter(EST_Item *si)
 	c->d = 0; // otherwise it could delete its sub tree
 	if (its_downs) its_downs->u = 0;
 
-	if (down() == 0)
+	if (d == 0)
 	    nnode = insert_below(si);
 	else
-	    nnode = down()->insert_before(si);
+	    nnode = d->insert_before(si);
 	// put daughters back on the new item
 	if (its_downs)
 	{
@@ -492,17 +516,17 @@ EST_Item *EST_Item::prepend_daughter(EST_Item *si)
 
 	delete c;  // delete its old form from the top level
     }
-    else if (down() == 0)
+    else if (d == 0)
 	nnode = insert_below(si);
     else
-	nnode = down()->insert_before(si);
+	nnode = d->insert_before(si);
 
     return nnode;
 }
 
 EST_Item *EST_Item::grab_daughters()
 {
-    EST_Item *dd = down();
+    EST_Item *dd = d;
     if (dd)
     {
 	dd->u = 0;
@@ -529,11 +553,11 @@ void copy_node_tree(EST_Item *from, EST_Item *to)
 {
     // Copy this node and all its siblings and daughters
 
-    if (from->next() != 0)
-	copy_node_tree(from->next(),to->insert_after(from->next()));
+    if (inext(from) != 0)
+	copy_node_tree(inext(from),to->insert_after(inext(from)));
 
-    if (from->down() != 0)
-	copy_node_tree(from->down(),to->insert_below(from->down()));
+    if (idown(from) != 0)
+	copy_node_tree(idown(from),to->insert_below(idown(from)));
 
 }
 
@@ -542,16 +566,16 @@ void copy_node_tree_contents(EST_Item *from, EST_Item *to)
     // Copy this node and all its siblings and daughters
     // also copy the item's contents
 
-    if (from->next() != 0)
+    if (inext(from) != 0)
     {
-	EST_Item i = *from->next();  // copies the contents
-	copy_node_tree_contents(from->next(),to->insert_after(&i));
+	EST_Item i = *inext(from);  // copies the contents
+	copy_node_tree_contents(inext(from),to->insert_after(&i));
     }
 
-    if (from->down() != 0)
+    if (idown(from) != 0)
     {
-	EST_Item i = *from->down();
-	copy_node_tree_contents(from->down(),to->insert_below(&i));
+	EST_Item i = *idown(from);
+	copy_node_tree_contents(idown(from),to->insert_below(&i));
     }
 
 }
@@ -561,13 +585,15 @@ int EST_Item::verify() const
     // Return FALSE if this node and its neighbours aren't
     // properly linked
 
-    if (this == 0)
-	return TRUE;
     if (((d == 0) || (d->u == this)) &&
-	((n == 0) || (n->p == this)) &&
-	(d->verify()) &&
-	(n->verify()))
+	((n == 0) || (n->p == this)))
+    {
+        if ((d) && (!d->verify()))
+            return FALSE;
+        if ((n) && (!n->verify()))
+            return FALSE;
 	return TRUE;
+}
     else
 	return FALSE;
 }

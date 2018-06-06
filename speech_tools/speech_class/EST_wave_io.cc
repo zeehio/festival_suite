@@ -197,16 +197,26 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
        This is a temporary fix which calls the unshorten program on the
        speech file and reads in the answer by calling this function.
        It would be nice to have a simple library routine which did the
-       unshortening.
+       unshortening. 
+       removed Jun 14th 2016 by awb , security risk, and only works in CSTR 
        */
     
     if (streq(sample_coding,"pcm,embedded-shorten-v1.1"))
     {
+#if 0
 	char *tmpfile, *cmdstr;
 	enum EST_read_status rval;
+#endif
 
+	fprintf(stderr,"WAVE read: nist type is shorten\n");
+	fprintf(stderr,"WAVE read: no support for shorten -- you need to use some external program to unshorten the data\n");
+	return misc_read_error;
+
+#if 0
 	tmpfile = cmake_tmp_filename();
 	cmdstr = walloc(char,strlen(tmpfile)+200);
+        /* This doesn't work, unless you have cstrshorten, and */
+        /* doesn't work if your file name is interesting */
 	sprintf(cmdstr,"cstrshorten %s %s",
 		(const char*)ts.filename(),tmpfile);
 	printf("Command: %s\n", cmdstr);
@@ -222,6 +232,7 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
 	wfree(cmdstr);
 	tt.close();
 	return rval;
+#endif
     }
 
     if (length == 0)

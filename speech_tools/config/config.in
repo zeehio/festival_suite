@@ -102,6 +102,9 @@ TERMCAPLIB = @TERMCAPLIB@
 # speech recognition
 #INCLUDE_MODULES += ASR
 
+## Support for OpenMP for multithreading, works for most gcc implementations
+OMP_OPTS=@OMP_OPTS@
+OMP_DEFS=@OMP_DEFS@
 
 ## Scheme
 
@@ -175,7 +178,7 @@ INCLUDE_MODULES += RXP
 CONFIG_WRAPPER_LANGUAGES = PYTHON 
 
 # Language specific includes should be set to correct site paths
-CONFIG_PYTHON_INCLUDES= -I/usr/include/python2.2/
+CONFIG_PYTHON_INCLUDES= -I/usr/include/python2.7/
 ##
 ###################################################################
 

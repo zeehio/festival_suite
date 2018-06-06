@@ -228,25 +228,29 @@ protected:
 
     /** TRUE if feature is present, FALSE otherwise */
     int f_present(const EST_String &name) const
-       {return features().present(name); }
+    {
+        if (p_contents)
+            return features().present(name);
+        else
+            return FALSE; }
 
     // Number of items (including this) until no next item.
     int length() const;
     //@}
 
     // get contents from item
-    EST_Item_Content *contents() const { return (this == 0) ? 0 : p_contents;}
+    EST_Item_Content *contents() const { return p_contents;}
     // used by tree manipulation functions
     void set_contents(EST_Item_Content *li);
 
     // These should be deleted.
     // The item's name 
     const EST_String name() const
-    { return (this == 0) ? EST_String::Empty : f("name",0).string(); }
+    { return f("name",0).string(); }
 
     // Set item's name
     void set_name(const EST_String &name) const
-    { if (this != 0) p_contents->set_name(name); }
+    { p_contents->set_name(name); }
 
     // Shouldn't normally be needed, except for iteration
     EST_Features &features() const { return p_contents->f; }
@@ -254,18 +258,11 @@ protected:
     const EST_Val f(const EST_String &name) const
     { 
 	EST_Val v;
-	if (this == 0)
-        {
-	    EST_error("item is null so has no %s feature",(const char *)name);
-        }
-        else
-        {
-	    for (v=p_contents->f.val_path(name);
-		 v.type() == val_type_featfunc && featfunc(v) != NULL;
-		 v=(featfunc(v))((EST_Item *)(void *)this));
-	    if (v.type() == val_type_featfunc)
-		EST_error("NULL %s function",(const char *)name);
-	}
+        for (v=p_contents->f.val_path(name);
+             v.type() == val_type_featfunc && featfunc(v) != NULL;
+             v=(featfunc(v))((EST_Item *)(void *)this));
+        if (v.type() == val_type_featfunc)
+            EST_error("NULL %s function",(const char *)name);
 	return v;
     }
 
@@ -289,18 +286,13 @@ protected:
 
     const EST_Val f(const EST_String &name, const EST_Val &def) const
     { 
-	if (this == 0) 
-	    return def;
-        else
-        {
-	    EST_Val v; 
-	    for (v=p_contents->f.val_path(name, def);
-		 v.type() == val_type_featfunc && featfunc(v) != NULL;
-		 v=(featfunc(v))((EST_Item *)(void *)this));
-	    if (v.type() == val_type_featfunc)
-		v = def;
-	    return v;
-	}
+        EST_Val v; 
+        for (v=p_contents->f.val_path(name, def);
+             v.type() == val_type_featfunc && featfunc(v) != NULL;
+             v=(featfunc(v))((EST_Item *)(void *)this));
+        if (v.type() == val_type_featfunc)
+            v = def;
+        return v;
     }
 
     /**@name Cross relational access */
@@ -308,11 +300,11 @@ protected:
 
     /// View item from another relation (const char *) method
     EST_Item *as_relation(const char *relname) const
-    { return (this == 0) ? 0 : p_contents->Relation(relname); }
+    { return p_contents->Relation(relname); }
 
     /// TRUE if this item is in named relation
     int in_relation(const EST_String &relname) const
-    { return (this == 0) ? 0 : p_contents->in_relation(relname); }
+    { return p_contents->in_relation(relname); }
 
     /// Access to the relation links
     EST_TKVL<EST_String, EST_Val> &relations() {return p_contents->relations;}
@@ -337,32 +329,14 @@ protected:
     static void splice(EST_Item *a, EST_Item *b)
 	{ if(a !=NULL) a->n = b; if (b != NULL) b->p=a; }
 
-    // Internal traversal - nnot recommended - use relation traversal functions
-    //
-    EST_Item *next() const { return this == 0 ? 0 : n; }
-    //
-    EST_Item *prev() const { return this == 0 ? 0 : p; }
-    //
-    EST_Item *down() const { return this == 0 ? 0 : d; }
-    //
-    EST_Item *up() const   { return this == 0 ? 0 : u; }
-    // Last item (most next) at this level
-    EST_Item *last() const;
-    // First item (most prev) at this level
-    EST_Item *first() const;
-    // Highest (most up)
-    EST_Item *top() const;
-    // Lowest (most down)
-    EST_Item *bottom() const;
-    // First item which has no down, within the descendants of this item
-    EST_Item *first_leaf() const;
-    // Next item which has no down, following above this item if necessary
-    EST_Item *next_leaf() const;
-    // Last item which has no down, following above this item if necessary
-    EST_Item *last_leaf() const;
-    // Next item in pre order (root, daughters, siblings)
-    EST_Item *next_item() const;
-
+    // Internal traversal - not recommended - use relation traversal functions
+    // As these functions must be safe to NULL arguments they now (gcc6)
+    // cannot refer to this, so alway require an explicit pointer to the object
+    // These four are the only ones that require access to private fields
+    friend EST_Item *inext(const EST_Item *i);
+    friend EST_Item *iprev(const EST_Item *i);
+    friend EST_Item *idown(const EST_Item *i);
+    friend EST_Item *iup(const EST_Item *i);
 
     // Insert a new item after this, with li's contents
     EST_Item *insert_after(EST_Item *li=0);
@@ -411,15 +385,28 @@ inline int i_same_item(const EST_Item *l1,const EST_Item *l2)
 
 
 inline EST_Item *as(const EST_Item *n,const char *relname)
-     { return n->as_relation(relname); }
+{  if (n != 0) return n->as_relation(relname);
+    return 0;}
+
+EST_Item *inext(const EST_Item *i);
+EST_Item *iprev(const EST_Item *i);
+EST_Item *idown(const EST_Item *i);
+EST_Item *iup(const EST_Item *i);
+
+EST_Item *last(const EST_Item *x);
+EST_Item *first(const EST_Item *x);
+EST_Item *top(const EST_Item *x);
+EST_Item *bottom(const EST_Item *x);
+
+EST_Item *next_item(const EST_Item *node);
+EST_Item *first_leaf(const EST_Item *node);
+EST_Item *next_leaf(const EST_Item *node);
+EST_Item *last_leaf(const EST_Item *node);
 
 // Relation structure functions
 #include "ling_class/EST_Relation_list.h"
 #include "ling_class/EST_Relation_tree.h"
 #include "ling_class/EST_Relation_mls.h"
-
-inline EST_Item *next_item(const EST_Item *node) 
-    { return node->next_item(); }
 
 void remove_item(EST_Item *l, const char *relname);
 
@@ -427,7 +414,6 @@ void copy_node_tree(EST_Item *from, EST_Item *to);
 void copy_node_tree_contents(EST_Item *from, EST_Item *to);
 
 void evaluate(EST_Item *a,EST_Features &f);
-
 
 #include "ling_class/EST_FeatureFunctionPackage.h"
 

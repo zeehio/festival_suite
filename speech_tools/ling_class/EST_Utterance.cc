@@ -118,7 +118,7 @@ static EST_Item *item_id(EST_Item *p, const EST_String &n)
     if ((p == 0) || (p->S("id","0") == n))
 	return p;
 
-    for (s = daughter1(p); s; s = s->next())
+    for (s = daughter1(p); s; s = inext(s))
     {
 	t = item_id(s, n);
 	if (t != 0)
@@ -242,18 +242,18 @@ static void merge_tree(EST_Relation *urel,
     EST_Item *n=0;
     merge_features(uroot->features(), root->features());
     // copy horizontally
-    if (root->next()!= NULL)
+    if (inext(root)!= NULL)
     {
-	EST_Item *old = item(items.f(root->next()->S(feature),est_val(n)));
+	EST_Item *old = item(items.f(inext(root)->S(feature),est_val(n)));
 	EST_Item *new_root = old?uroot->insert_after(old):uroot->insert_after();
-	merge_tree(urel, rel, new_root, root->next(), items, feature);
+	merge_tree(urel, rel, new_root, inext(root), items, feature);
     }
     // vertically
-    if (root->down()!= NULL)
+    if (idown(root)!= NULL)
     {
-	EST_Item *old = item(items.f(root->down()->S(feature),est_val(n)));
+	EST_Item *old = item(items.f(idown(root)->S(feature),est_val(n)));
 	EST_Item *new_root = old?uroot->insert_below(old):uroot->insert_below();
-	merge_tree(urel, rel, new_root, root->down(), items, feature);
+	merge_tree(urel, rel, new_root, idown(root), items, feature);
     }
 }
 
@@ -270,7 +270,7 @@ int utterance_merge(EST_Utterance &utt,
     for(ri.begin(utt.relations); ri; ri++)
     {
 	EST_Relation *rel = relation(ri->v);
-	for(EST_Item *i=rel->head(); i != NULL; i=i->next_item())
+	for(EST_Item *i=rel->head(); i != NULL; i=next_item(i))
 	{
 	    EST_String id = i->S(feature);
 	    items.set_val(id,est_val(i));
@@ -356,13 +356,13 @@ static void copy_relation(EST_Item *to,EST_Item *from,
     // Construct next and down nodes of from, into to, mapping
     // stream_items through slist
 
-    if (from->next())
-	copy_relation(to->insert_after(map_ling_item(from->next(),slist)),
-		      from->next(),
+    if (inext(from))
+	copy_relation(to->insert_after(map_ling_item(inext(from),slist)),
+		      inext(from),
 		      slist);
-    if (from->down())
-	copy_relation(to->insert_below(map_ling_item(from->down(),slist)),
-		      from->down(),
+    if (idown(from))
+	copy_relation(to->insert_below(map_ling_item(idown(from),slist)),
+		      idown(from),
 		      slist);
 }
 
@@ -429,7 +429,7 @@ static void sub_utt_copy(EST_Utterance &sub,EST_Item *i,
 		sub.relation(relname)->append(ni);
 
 	    // Do its daughters
-	    for (d = daughter1(i,relname); d ; d=d->next())
+	    for (d = daughter1(i,relname); d ; d=inext(d))
 		sub_utt_copy(sub,d,s);
 	}
     }
@@ -558,25 +558,25 @@ EST_write_status EST_Utterance::save(ostream &outf,
 void utt_2_flat_repr( const EST_Utterance &utt,
 		      EST_String &flat_repr )
 {
-  EST_Item *phrase = utt.relation("Phrase")->head();
-  for( ; phrase; phrase=phrase->next() ){
-    flat_repr += "<";
+    EST_Item *phrase = utt.relation("Phrase")->head();
+    for( ; phrase; phrase=inext(phrase) ){
+        flat_repr += "<";
  
-    EST_Item *word = daughter1(phrase);
-    for( ; word; word=word->next() ){
-      flat_repr += "{";
+        EST_Item *word = daughter1(phrase);
+        for( ; word; word=inext(word) ){
+            flat_repr += "{";
 
-      EST_Item *syllable = daughter1(word, "SylStructure");
-      for( ; syllable; syllable=syllable->next() ){
-	flat_repr += EST_String::cat( "(", syllable->S("stress") );
+            EST_Item *syllable = daughter1(word, "SylStructure");
+            for( ; syllable; syllable=inext(syllable) ){
+                flat_repr += EST_String::cat( "(", syllable->S("stress") );
 
-	EST_Item *phone = daughter1(syllable);
-	for( ; phone; phone=phone->next() )
-	  flat_repr += EST_String::cat( " ", phone->S("name"), " " );
-	flat_repr += ")";
-      }
-      flat_repr += "}";
+                EST_Item *phone = daughter1(syllable);
+                for( ; phone; phone=inext(phone) )
+                    flat_repr += EST_String::cat( " ", phone->S("name"), " " );
+                flat_repr += ")";
+            }
+            flat_repr += "}";
+        }
+        flat_repr += EST_String::cat( "> _", phrase->S("name"), " " ); 
     }
-    flat_repr += EST_String::cat( "> _", phrase->S("name"), " " ); 
-  }
 }

@@ -824,6 +824,13 @@ int EST_TokenStream::eoln(void)
 
 }
 
+EST_Token &EST_TokenStream::peek(void)
+{
+    if (!peeked_tokp) get();
+    peeked_tokp = TRUE;
+    return current_tok;
+}
+
 EST_String quote_string(const EST_String &s,
 			const EST_String &quote, 
 			const EST_String &escape, 

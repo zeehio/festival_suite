@@ -374,6 +374,6 @@ void python_tidy_up(void) {
 #else   // No python support
 
 /* So there is a symbol in here even if there is no python support */
-static int est_no_python_support = 1;
+int est_no_python_support = 1;
 
 #endif  // EST_SIOD_ENABLE_PYTHON

@@ -118,7 +118,7 @@ class EST_Token {
     //@{
     const EST_String &string() const { return String(); }
     /// Access token as a string
-    const EST_String &S() const { return S(); }
+    const EST_String &S() const { return String(); }
     /// Access token as a string
     const EST_String &String() const { return pname; }
     /// For automatic coercion to \Ref{EST_String}
@@ -325,9 +325,7 @@ class EST_TokenStream{
     /// get up to {\tt s} in end of line as a single token.
     EST_Token get_upto_eoln(void);
     /// peek at next token
-    EST_Token &peek(void)
-    {	if (!peeked_tokp) get();
-	peeked_tokp = TRUE; return current_tok; }
+    EST_Token &peek(void);
     /// Reading binary data, (don't use peek() immediately beforehand)
     int fread(void *buff,int size,int nitems);
     //@}

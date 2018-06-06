@@ -243,79 +243,79 @@ void Sole_Parser_Class::element_open(XML_Parser_Class &c,
 		  const char *name,
 		  XML_Attribute_List &attributes)
 {
-  (void)c; (void)p; (void)attributes;
-  Parse_State *state = (Parse_State *)data;
+    (void)c; (void)p; (void)attributes;
+    Parse_State *state = (Parse_State *)data;
 
-  state->depth++;
+    state->depth++;
 
-  if (strcmp(name, "solexml")==0)
+    if (strcmp(name, "solexml")==0)
     {
-      state->relName=attributes.val("relation");
-      printf("start solexml relation=%s\n", (const char *)state->relName);
-      return;
+        state->relName=attributes.val("relation");
+        printf("start solexml relation=%s\n", (const char *)state->relName);
+        return;
     }
-  else if (strcmp(name, "text-elem")==0)
+    else if (strcmp(name, "text-elem")==0)
     {
-      // ignore these
-      return;
+        // ignore these
+        return;
     }
 
-  ensure_relation(state);
+    ensure_relation(state);
 
-  if (strcmp(name, "anaphora-elem")==0 
-      || strcmp(name, "wordlist")==0
-      || strcmp(name, "w")==0)
+    if (strcmp(name, "anaphora-elem")==0 
+        || strcmp(name, "wordlist")==0
+        || strcmp(name, "w")==0)
     {
-      EST_TList<EST_String> ids;
-      extract_ids(attributes, ids);
+        EST_TList<EST_String> ids;
+        extract_ids(attributes, ids);
 
-      EST_Litem *idp = ids.head();
-      bool first=TRUE;
-      for(; idp!= NULL; idp = idp->next())
+        EST_Litem *idp = ids.head();
+        bool first=TRUE;
+        for(; idp!= NULL; idp = idp->next())
 	{
-	  EST_String id = ids(idp);
-	  if (id==EST_String::Empty)
-	    XML_Parser_Class::error(c, p, data, EST_String("Element With No Id"));
+            EST_String id = ids(idp);
+            if (id==EST_String::Empty)
+                XML_Parser_Class::error(c, p, data, EST_String("Element With No Id"));
 
-	  if (first)
-	    first=FALSE;
-	  else
+            if (first)
+                first=FALSE;
+            else
 	    {
-	      state->current = state->parent;
-	      state->parent=state->parent->up();
+                state->current = state->parent;
+                state->parent=iup(state->parent);
 	    }
 	    
 
-	  EST_Item_Content *cont = get_contents(state, id);
+            EST_Item_Content *cont = get_contents(state, id);
 
-	  cont->set_name(id);
+            cont->set_name(id);
 	  
 	    XML_Attribute_List::Entries them;
 	    for(them.begin(attributes); them ; them++)
-	      {
+            {
 		EST_String k = them->k;
 		EST_String v = them->v;
 		cont->f.set(k,v);
-	      }
+            }
 
-	  EST_Item *item;
+            EST_Item *item;
 
-	  if (state->current == NULL)
-	    if (state->parent == NULL)
-	      item = state->rel->append();
-	    else
-	      item = state->parent->insert_below();
-	  else 
-	    item = state->current->insert_after();
+            if (state->current == NULL)
+                if (state->parent == NULL)
+                    item = state->rel->append();
+                else
+                    item = state->parent->insert_below();
+            else 
+                item = state->current->insert_after();
 
-	  item->set_contents(cont);
+            item->set_contents(cont);
 
-	  state->current=NULL;
-	  state->parent=item;
+            state->current=NULL;
+            state->parent=item;
 	}
     }
-  else
-    EST_warning("SOLE XML Parser: unknown element %s", name);
+    else
+        EST_warning("SOLE XML Parser: unknown element %s", name);
 }
 
 
@@ -325,17 +325,17 @@ void Sole_Parser_Class::element(XML_Parser_Class &c,
 				const char *name,
 				XML_Attribute_List &attributes)
 {
-  (void)c; (void)p; (void)attributes;
-  Parse_State *state = (Parse_State *)data;
+    (void)c; (void)p; (void)attributes;
+    Parse_State *state = (Parse_State *)data;
 
-  if (strcmp(name, "language")==0)
+    if (strcmp(name, "language")==0)
     {
-      state->utt->f.set("language", attributes.val("name"));
-      return;
+        state->utt->f.set("language", attributes.val("name"));
+        return;
     }
 
-  element_open(c, p, data, name, attributes);
-  element_close(c, p, data, name);
+    element_open(c, p, data, name, attributes);
+    element_close(c, p, data, name);
 }
 
 
@@ -344,16 +344,16 @@ void Sole_Parser_Class::element_close(XML_Parser_Class &c,
 		   void *data,
 		   const char *name)
 {
-  (void)c; (void)p; (void)name;
-  Parse_State *state = (Parse_State *)data;
+    (void)c; (void)p; (void)name;
+    Parse_State *state = (Parse_State *)data;
 
-  if (strcmp(name, "anaphora-elem")==0 
-      || strcmp(name, "wordlist")==0
-      || strcmp(name, "w")==0)
+    if (strcmp(name, "anaphora-elem")==0 
+        || strcmp(name, "wordlist")==0
+        || strcmp(name, "w")==0)
     {
-      state->depth--;
-      state->current = state->parent;
-      state->parent=state->parent->up();;
+        state->depth--;
+        state->current = state->parent;
+        state->parent=iup(state->parent);
     }
 }
 

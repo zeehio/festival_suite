@@ -917,6 +917,7 @@ EST_String &EST_String::operator = (const char *str)
       return *this;
 }
 
+#if 0
 EST_String &EST_String::operator = (const char c)
 {
       memory = chunk_allocate(2, &c, 1);
@@ -926,15 +927,28 @@ EST_String &EST_String::operator = (const char c)
 
 EST_String &EST_String::operator = (const EST_String &s) 
 {
-#if 1
-/*  static EST_ChunkPtr hack = s.memory;  */
-  memory = NON_CONST_CHUNKPTR(s.memory);
-  size = s.size;
-#else
-      *(struct EST_dumb_string *)this = *(struct EST_dumb_string *)(&s);
-#endif
-      return *this;
+    const char *str = (const char *)s;
+    CHECK_STRING_ARG(str);
+    int len = safe_strlen(str);
+    if (!len)
+	memory = NULL;
+    else if (!shareing() && len < size)
+	memcpy((char *)memory, str, len+1);
+    else if (len)
+	memory = chunk_allocate(len+1, str, len);
+    size=len;
+    return *this;
+    //      
+    //#if 1
+    ///*  static EST_ChunkPtr hack = s.memory;  */
+    //  memory = NON_CONST_CHUNKPTR(s.memory);
+    //  size = s.size;
+    //#else
+    //      *(struct EST_dumb_string *)this = *(struct EST_dumb_string *)(&s);
+    //#endif
+    //      return *this;
 }
+#endif
     
 EST_String downcase(const EST_String &s)
 {

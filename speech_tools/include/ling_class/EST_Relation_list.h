@@ -37,53 +37,6 @@
 #ifndef __EST_RELATION_LIST_H__
 #define __EST_RELATION_LIST_H__
 
-
-#if 0
-/**@name Functions for building and traversing list relations
- */
-
-//@{
-/**@name List traversal functions */
-//@{
-
-/** return next item of <parameter>n</parameter>
- */
-inline EST_Item *next(const EST_Item *n) { return n->next(); }
-
-/** return previous item of <parameter>n</parameter>
- */
-inline EST_Item *prev(const EST_Item *n) { return n->prev(); }
-
-/** return last item in <parameter>n</parameter>'s relation
- */
-inline EST_Item *last(const EST_Item *n) { return n->last(); }
-
-/** return first item in <parameter>n</parameter>'s relation
- */
-inline EST_Item *first(const EST_Item *n) { return n->first(); }
-
-/** return next item of <parameter>n</parameter> as seen from relation
-<parameter>relname</parameter> */
-inline EST_Item *next(const EST_Item *n,const char *relname)
-    { return next(as(n,relname)); }
-
-/** return previous item of <parameter>n</parameter> as seen from relation
-<parameter>relname</parameter> */
-inline EST_Item *prev(const EST_Item *n,const char *relname)
-    { return prev(as(n,relname)); }
-
-/** return first item of <parameter>n</parameter> as seen from relation
-<parameter>relname</parameter> */
-inline EST_Item *first(const EST_Item *n,const char *relname) 
-    { return first(as(n,relname)); }
-
-/** return last item of <parameter>n</parameter> as seen from relation
-<parameter>relname</parameter> */
-inline EST_Item *last(const EST_Item *n,const char *relname) 
-    { return last(as(n,relname)); }
-
-#endif
-
 /** Given a node <parameter>l</parameter>, return true if
     <parameter>c</parameter> after it in a list relation. */
 int in_list(const EST_Item *c, const  EST_Item *l);

@@ -982,7 +982,7 @@ enum EST_read_status read_esps_hdr(esps_hdr *uhdr,FILE *fd)
 	hdr->field_name[0] = wstrdup("samples");
 	fseek(fd,hdr->hdr_size,SEEK_SET);
 	/* In this cases its just in the header as a float */
-	sd_sample_rate = *((float *)&fhdr.fil4[0]);
+	sd_sample_rate = *((float *)(void *)&fhdr.fil4[0]);
 	add_fea_d(hdr,"record_freq",0,(double)sd_sample_rate);
 	*uhdr = hdr;
 	return format_ok;

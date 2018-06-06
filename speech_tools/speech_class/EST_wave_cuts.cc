@@ -60,7 +60,7 @@ int wave_divide(EST_WaveList &wl, EST_Wave &sig, EST_Relation &keylab,
     EST_String filename;
     float start = 0,end;
     
-    for (k = keylab.head(); k; k = k->next())
+    for (k = keylab.head(); k; k = inext(k))
     {
 	a.clear();
 	end = k->F("end",0);
@@ -84,7 +84,7 @@ int wave_extract(EST_Wave &part, EST_Wave &sig, EST_Relation &keylab,
     EST_String key_file_name;
     float start=0, end;
     
-    for (k = keylab.head(); k; k = k->next())
+    for (k = keylab.head(); k; k = inext(k))
     {
 	end = k->F("end",0);
 	key_file_name = (EST_String)k->f("file");
@@ -168,7 +168,7 @@ int track_divide(EST_TList<EST_Track> &mtfr, EST_Track &fv, EST_Relation &key)
 	    mtfr.append(a);
 	    
 	    kstart = k->F("end");
-	    k = k->next();
+	    k = inext(k);
 	    a.set_name(k->name());
 	    length = k->F("end") - kstart;
 	    n = (int)(length / (float) fv.shift()) + 2;

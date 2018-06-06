@@ -94,7 +94,7 @@ int writable_file(char *filename)
 EST_String stdin_to_file()
 {
     /* Copy stding to a file and return the name of that tmpfile */
-    EST_String tmpname = make_tmp_filename();
+    EST_String tmpname = (const char *)make_tmp_filename();
     char buff[1024];
     FILE *fd;
     unsigned int n;
@@ -205,7 +205,7 @@ EST_String
 uncompress_file_to_temporary(const EST_String &filename, const EST_String &prog_name)
 {
     
-    EST_String new_filename = make_tmp_filename();
+    EST_String new_filename = (const char *)make_tmp_filename();
     EST_String sysstr = prog_name + " " + filename + " > " + new_filename;
     
     //cerr << "Uncompressing file : " << sysstr << endl;

@@ -149,11 +149,11 @@ void EST_SCFG_Chart::setup_wfst(EST_Item *s, EST_Item *e,const EST_String &name)
     int n;
 
     delete_edge_table();
-    for (n_vertices=1,p=s; p != e; p=p->next())
+    for (n_vertices=1,p=s; p != e; p=inext(p))
 	n_vertices++;
     setup_edge_table();
 
-    for (n=0,p=s; p != e; p=p->next(),n++)
+    for (n=0,p=s; p != e; p=inext(p),n++)
     {
 	int term = grammar->terminal(p->f(name).string());
 	if (term == -1)
@@ -315,7 +315,7 @@ void EST_SCFG_Chart::extract_parse(EST_Relation *syn,
     EST_Item *p;
     int num_words;
 
-    for (num_words=0,p=s; p != e; p=p->next())
+    for (num_words=0,p=s; p != e; p=inext(p))
 	num_words++;
 
     if (num_words != (n_vertices-1))
@@ -363,7 +363,7 @@ void EST_SCFG_Chart::extract_forced_parse(int start, int end,
 	EST_Item *st = s->append_daughter();
 	st->set_name(grammar->nonterminal(grammar->distinguished_symbol()));
 	st->set("prob",0.0);  // maybe should be epsilon
-	EST_Item *nw = w->next();
+	EST_Item *nw = inext(w);
 	extract_forced_parse(start+1,end,st,nw);
     }
 }
@@ -385,7 +385,7 @@ void EST_SCFG_Chart::extract_edge(int start, int end, int p,
 	s->append_daughter((*word));
 	s->set_name(grammar->nonterminal(p));	
 	s->set("prob",(float)e->prob());
-	*word = (*word)->next();  // increment along "word" stream
+	*word = inext(*word);  // increment along "word" stream
 	return;
     }
     else 

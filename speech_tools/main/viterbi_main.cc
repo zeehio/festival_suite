@@ -387,7 +387,7 @@ static void print_results(EST_Relation &wstream)
 	exit(-1);
     }
 
-    for (s=wstream.head(); s != 0 ; s=s->next())
+    for (s=wstream.head(); s != 0 ; s=inext(s))
     {
 	predict = s->f("best").string();
 	pscore = s->f("best_score");
@@ -451,8 +451,13 @@ static void load_wstream(const EST_String &filename,
     }
 	
     if(w.empty())
+    {
 	for (i=0; i < obs.num_frames(); i++)
+        {
 	    add_word(w,itoString(i),i);
+        }
+
+    }
 }
 
 
@@ -493,8 +498,12 @@ static void load_vocab(const EST_String &vfile)
     }
 
     while (!ts.eof())
+    {
 	if (ts.peek() != "")
+        {
 	    vocab.append(ts.get().string());
+        }
+    }
 
     ts.close();
 }
@@ -806,11 +815,13 @@ static void top_n_candidates(EST_VTCandidate* &all_c)
 	    // best was head of list
 	    all_c = this_best->next;
 	else
+        {
 	    // best was not head of all_c
 	    prev_to_best->next = this_best->next;
 
 	    this_best->next = top_c;
 	    top_c = this_best;
+        }
     }
 
     delete all_c;

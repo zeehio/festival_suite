@@ -418,74 +418,74 @@ EST_write_status EST_DMatrix::est_save(const EST_String &filename,
 EST_read_status EST_DMatrix::est_load(const EST_String &filename)
 {
 
-  // ascii/binary load with short header for byte swap and sizes
-  int i,j,k;
-  int rows, cols, swap;
-  EST_TokenStream ts;
-  EST_read_status r;
-  EST_EstFileType t;
-  EST_Option hinfo;
-  bool ascii;
+    // ascii/binary load with short header for byte swap and sizes
+    int i,j,k;
+    int rows, cols, swap;
+    EST_TokenStream ts;
+    EST_read_status r;
+    EST_EstFileType t;
+    EST_Option hinfo;
+    bool ascii;
     
-  if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
+    if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
     {
-      cerr << "DMatrix: can't open DMatrix input file " 
-	   << filename << endl;
-      return misc_read_error;
+        cerr << "DMatrix: can't open DMatrix input file " 
+             << filename << endl;
+        return misc_read_error;
     }
-  if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
-    return r;
+    if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
+        return r;
     if (t != est_file_dmatrix)
-      return misc_read_error;
+        return misc_read_error;
     if (hinfo.ival("version") != 1)
-      {
+    {
 	cerr << "DMatrix load: " << ts.pos_description() <<
-	  " wrong version of DMatrix format expected 1 but found " <<
-	  hinfo.ival("version") << endl;
+            " wrong version of DMatrix format expected 1 but found " <<
+            hinfo.ival("version") << endl;
 	return misc_read_error;
-      }
+    }
     rows = hinfo.ival("rows");
     cols = hinfo.ival("columns");
     resize(rows,cols);
     
     if (ascii)
-      {   // an ascii file
+    {   // an ascii file
 	for (i = 0; i < num_rows(); ++i)
-	  {
+        {
 	    for (j = 0; j < num_columns(); ++j)
-	      a_no_check(i,j) = atof(ts.get().string());
+                a_no_check(i,j) = atof(ts.get().string());
 	    if (!ts.eoln())
-	      {
+            {
 		cerr << "DMatrix load: " << ts.pos_description() <<
-		  " missing end of line at end of row " << i << endl;
+                    " missing end of line at end of row " << i << endl;
 		return misc_read_error;
-	      }
-	  }
-      }
+            }
+        }
+    }
     else
-      {   // a binary file
+    {   // a binary file
 	double *buff;
 	if ((EST_BIG_ENDIAN && (hinfo.sval("ByteOrder")=="LittleEndian")) ||
 	    (EST_LITTLE_ENDIAN && (hinfo.sval("ByteOrder") == "BigEndian")))
-	  swap = TRUE;
+            swap = TRUE;
 	else
-	  swap = FALSE;
+            swap = FALSE;
 	
 	buff = walloc(double,rows*cols);
 	// A single read is *much* faster than multiple reads
 	if (ts.fread(buff,sizeof(double),rows*cols) != rows*cols)
-	  {
+        {
 	    cerr << "EST_DMatrix: binload: short file in \""  
 		 << filename << "\"" << endl;
 	    return misc_read_error;
-	  }
+        }
 	if (swap)
-	  swap_bytes_double(buff,rows*cols);
+            swap_bytes_double(buff,rows*cols);
 	for (k = i = 0; i < num_rows(); ++i)
-	  for (j = 0; j < num_columns(); ++j)
-	    a_no_check(i,j) = buff[k++];
+            for (j = 0; j < num_columns(); ++j)
+                a_no_check(i,j) = buff[k++];
 	wfree(buff);
-      }
+    }
     
     ts.close();
     return read_ok;
@@ -548,63 +548,63 @@ EST_read_status EST_DMatrix::load(const EST_String &filename)
 
 EST_read_status EST_DVector::est_load(const EST_String &filename)
 {    
-  // ascii/binary load with short header for byte swap and sizes
-  int i,k;
-  int l, swap;
-  EST_TokenStream ts;
-  EST_read_status r;
-  EST_EstFileType t;
-  EST_Option hinfo;
-  bool ascii;
+    // ascii/binary load with short header for byte swap and sizes
+    int i,k;
+    int l, swap;
+    EST_TokenStream ts;
+    EST_read_status r;
+    EST_EstFileType t;
+    EST_Option hinfo;
+    bool ascii;
     
-  if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
+    if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
     {
-      cerr << "DVector: can't open DVector input file " 
-	   << filename << endl;
-      return misc_read_error;
+        cerr << "DVector: can't open DVector input file " 
+             << filename << endl;
+        return misc_read_error;
     }
-  if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
-    return r;
+    if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
+        return r;
     if (t != est_file_dvector)
-      return misc_read_error;
+        return misc_read_error;
     if (hinfo.ival("version") != 1)
-      {
+    {
 	cerr << "DVector load: " << ts.pos_description() <<
-	  " wrong version of DVector format expected 1 but found " <<
-	  hinfo.ival("version") << endl;
+            " wrong version of DVector format expected 1 but found " <<
+            hinfo.ival("version") << endl;
 	return misc_read_error;
-      }
+    }
     l = hinfo.ival("length");
     resize(l);
     
     if (ascii)
-      {   // an ascii file
+    {   // an ascii file
 	for (i = 0; i < length(); ++i)
-	  a_no_check(i) = atof(ts.get().string());
-      }
+            a_no_check(i) = atof(ts.get().string());
+    }
     else
-      {   // a binary file
+    {   // a binary file
 	double *buff;
 	if ((EST_BIG_ENDIAN && (hinfo.sval("ByteOrder")=="LittleEndian")) ||
 	    (EST_LITTLE_ENDIAN && (hinfo.sval("ByteOrder") == "BigEndian")))
-	  swap = TRUE;
+            swap = TRUE;
 	else
-	  swap = FALSE;
+            swap = FALSE;
 	
 	buff = walloc(double,l);
 	// A single read is *much* faster than multiple reads
 	if (ts.fread(buff,sizeof(double),l) != l)
-	  {
+        {
 	    cerr << "EST_DVector: binload: short file in \""  
 		 << filename << "\"" << endl;
 	    return misc_read_error;
-	  }
+        }
 	if (swap)
-	  swap_bytes_double(buff,l);
+            swap_bytes_double(buff,l);
 	for (k = i = 0; i < length(); ++i)
-	  a_no_check(i) = buff[k++];
+            a_no_check(i) = buff[k++];
 	wfree(buff);
-      }
+    }
     
     ts.close();
     return read_ok;
@@ -619,43 +619,43 @@ EST_read_status EST_DVector::load(const EST_String &filename)
 	return r;
     else if (r == wrong_format)
     {   // maybe its an ancient ascii file
-      EST_TokenStream ts;
-      EST_String s;
-      int i;
+        EST_TokenStream ts;
+        EST_String s;
+        int i;
 
-      i = 0;
+        i = 0;
       
-      if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
+        if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
 	{
-	  cerr << "can't open vector input file " << filename << endl;
-	  return misc_read_error;
+            cerr << "can't open vector input file " << filename << endl;
+            return misc_read_error;
 	}
-      ts.set_SingleCharSymbols(";");
+        ts.set_SingleCharSymbols(";");
       
-      while (!ts.eof())
+        while (!ts.eof())
 	{
-	  ts.get();
-	  ++i;
+            ts.get();
+            ++i;
 	}
-      resize(i);
+        resize(i);
       
-      ts.close();
-      if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
+        ts.close();
+        if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
 	{
-	  cerr << "can't open vector input file " << filename << endl;
-	  return misc_read_error;
+            cerr << "can't open vector input file " << filename << endl;
+            return misc_read_error;
 	}
       
-      for (i = 0; !ts.eof(); ++i)
+        for (i = 0; !ts.eof(); ++i)
 	{
-	  s = ts.get().string();
-	  (*this)[i] = atof(s);  // actually returns double
+            s = ts.get().string();
+            (*this)[i] = atof(s);  // actually returns double
 	}
-      ts.close();
-      return format_ok;
+        ts.close();
+        return format_ok;
     }
     else
-      return r;
+        return r;
 
     return format_ok;
 
@@ -667,7 +667,7 @@ EST_DVector & EST_DVector::operator+=(const EST_DVector &s)
     int i;
     if(n() != s.n()){
 	cerr << "Cannot elementwise add vectors of differing lengths" 
-	    << endl;
+             << endl;
 	return *this;
     }
     
@@ -683,7 +683,7 @@ EST_DVector& EST_DVector::operator*=(const EST_DVector &s)
 {
     if(n() != s.n()){
 	cerr << "Cannot elementwise multiply vectors of differing lengths" 
-	    << endl;
+             << endl;
 	return *this;
     }
 

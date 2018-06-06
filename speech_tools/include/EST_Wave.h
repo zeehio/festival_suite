@@ -187,6 +187,9 @@ public:
   /// Resample waveform to <tt>rate</tt>
   void resample(int rate);
 
+  /// Dynamic Range Compression - SaiKrishna May 2017
+  void compress(float mu, float limit);
+
   /** multiply all samples by a factor <tt>gain</tt>. This checks for
       overflows and puts them to the maximum positive or negative value
       as appropriate.

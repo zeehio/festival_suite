@@ -93,7 +93,6 @@ int main(int argc, char *argv[])
     EST_StrList files;
     EST_Option al;
     EST_Features op;
-    int orig_sr;
 
     EST_Wave sig;
     EST_Track spec;
@@ -124,7 +123,6 @@ int main(int argc, char *argv[])
 
     if (read_wave(sig, files.first(), al) != format_ok)
 	exit(-1);
-    orig_sr = sig.sample_rate();
 
     make_spectrogram(sig, spec, op);
     

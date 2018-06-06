@@ -63,25 +63,22 @@ int EST_Item_Content::unref_relation(const EST_String &relname)
 {
     // Unreference this item from this relation.  Returns TRUE
     // if no one else is referencing it, FALSE otherwise
-    if (this != 0)
-    {
-	if ((relname == "") && (relations.length() == 1))
-	{   // sigh, something to with isolated EST_Items and
-	    // SunCC causes a problems in exit(), so hit it with
-	    // a bigger stick
-	    relations.clear();
-	    return TRUE;
-	}
-	if (relations.present(relname))
-	    relations.remove_item(relname);
-	else
-	    printf("failed to find %s in %s at %g\n",
-		   (const char *)relname,
-		   (const char *)name(),
-		   f.F("end",0.0));
-	if (relations.length() == 0)
-	    return TRUE;
+    if ((relname == "") && (relations.length() == 1))
+    {   // sigh, something to with isolated EST_Items and
+        // SunCC causes a problems in exit(), so hit it with
+        // a bigger stick
+        relations.clear();
+        return TRUE;
     }
+    if (relations.present(relname))
+        relations.remove_item(relname);
+    else
+        printf("failed to find %s in %s at %g\n",
+               (const char *)relname,
+               (const char *)name(),
+               f.F("end",0.0));
+    if (relations.length() == 0)
+        return TRUE;
     return FALSE;
 }
 

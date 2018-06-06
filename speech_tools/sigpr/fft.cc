@@ -256,8 +256,7 @@ int power_spectrum(EST_FVector &real, EST_FVector &imag)
 int fastFFT(EST_FVector &invec) 
 {
     // Tony Robinsons
-    float fn;
-    int i, in, nn, n2pow, n4pow, nthpo;
+    int i, in, nn, n2pow, n4pow;
     
     // we could modify all the code to use vector classes ....
     // ... or we could do this:
@@ -277,8 +276,6 @@ int fastFFT(EST_FVector &invec)
 
     n2pow = fastlog2(n);
     if (n2pow <= 0) return 0;
-    nthpo = n;
-    fn = nthpo;
     n4pow = n2pow / 2;
     
     /* radix 2 iteration required; do it now */  

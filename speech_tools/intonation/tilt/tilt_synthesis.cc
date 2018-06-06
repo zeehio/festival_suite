@@ -138,7 +138,7 @@ void rfc_synthesis(EST_Track &fz, EST_Relation &ev, float f_shift, int no_conn)
 	fz.set_break(i);
 
     // synthesize events
-    for (e = ev.head(); e != 0; e = e->next())
+    for (e = ev.head(); e != 0; e = inext(e))
     {
 	if (event_item(*e))
 	{
@@ -169,11 +169,11 @@ void rfc_synthesis(EST_Track &fz, EST_Relation &ev, float f_shift, int no_conn)
 	return;
 
     // synthesize connections
-    for (e = ev.head(); e->next() != 0; e = e->next())
+    for (e = ev.head(); inext(e) != 0; e = inext(e))
     {
 	if (e->S("name") == "phrase_end")
 	    continue;
-	nn = e->next();
+	nn = inext(e);
 
 	// calculate start and stop times, with additional
 	// optional adjustment for rise and falls on events
@@ -355,7 +355,7 @@ int rfc_synthesis_ld(EST_Track &fz, EST_Relation &ev, float f_shift, int no_conn
     for (int i = 0; i < fz.num_frames(); ++i)
 	fz.set_break(i);
     
-    for (e = ev.head(); e != 0; e = e->next())
+    for (e = ev.head(); e != 0; e = inext(e))
     {
 	//	cout << "\ntype: " << e->fS("rfc.type") << endl;
 	//cout << "\ntype: " << *e << endl;
@@ -448,7 +448,7 @@ int rfc_synthesis_ld(EST_Track &fz, EST_Relation &ev, float f_shift, int no_conn
 	    else if (e->f("name", 1) == "phrase_start")
 	    {
 		//cout << "phrase start:\n" << *e << endl;
-		if ((nn = e->next()) == 0)
+		if ((nn = inext(e)) == 0)
 		    EST_error("phrase start command occurs as last item "
 			      "in rfc synthesis\n");
 		else if (event_item(*nn))
@@ -474,7 +474,7 @@ int rfc_synthesis_ld(EST_Track &fz, EST_Relation &ev, float f_shift, int no_conn
 			  (const char *)(e->fS("name")));
 	    continue;
 	}
-	if (((nn = e->next()) != 0) && (event_item(*nn)))
+	if (((nn = inext(e)) != 0) && (event_item(*nn)))
 	{
 	    float f0 = start_f0+rfc_amp(e);
 	    float pos = start_pos + rfc_dur(e);

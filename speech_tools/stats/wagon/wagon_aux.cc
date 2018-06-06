@@ -1042,6 +1042,7 @@ ostream & operator <<(ostream &s, WImpurity &imp)
         else /* output best in the cluster */
         {
             /* print out vector closest to center, rather than average */
+            /* printf("awb_debug outputing best\n"); */
             double best = WGN_HUGE_VAL;
             double x,d;
             int bestp = 0;
@@ -1050,14 +1051,13 @@ ostream & operator <<(ostream &s, WImpurity &imp)
             cs = new EST_SuffStats [wgn_VertexTrack.num_channels()+1];
             
             for (j=0; j<wgn_VertexFeats.num_channels(); j++)
-                if (wgn_VertexFeats.a(0,j) > 0.0)
+            {
+                cs[j].reset();
+                for (p=imp.members.head(); p != 0; p=p->next())
                 {
-                    cs[j].reset();
-                    for (p=imp.members.head(); p != 0; p=p->next())
-                    {
-                        cs[j] += wgn_VertexTrack.a(imp.members.item(p),j);
-                    }
+                    cs[j] += wgn_VertexTrack.a(imp.members.item(p),j);
                 }
+            }
 
             for (p=imp.members.head(); p != 0; p=p->next())
             {
@@ -1070,6 +1070,8 @@ ostream & operator <<(ostream &s, WImpurity &imp)
                     }
                 if (x < best)
                 {
+                    /* printf("awb_debug updating best %d %f %d %f\n",
+                       bestp, best, imp.members.item(p), x); */
                     bestp = imp.members.item(p);
                     best = x;
                 }

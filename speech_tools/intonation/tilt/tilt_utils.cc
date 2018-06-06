@@ -185,7 +185,7 @@ void rfc_to_tilt(EST_Relation &ev)
 	EST_error("Can't create Tilt parameters from intonation style: %s\n", 
 		  (const char *)ev.f.S("intonation_style"));
     
-    for (e = ev.head(); e != 0; e = e->next())
+    for (e = ev.head(); e != 0; e = inext(e))
 	if (event_item(*e))
 	{
 	    e->set("tilt", f);
@@ -212,7 +212,7 @@ void tilt_to_rfc(EST_Relation &ev)
 	EST_error("Can't create RFC parameters for intonation_style: %s\n", 
 		  (const char *)ev.f.S("intonation_style"));
     
-    for (e = ev.head(); e ; e = e->next())
+    for (e = ev.head(); e ; e = inext(e))
 	if (event_item(*e))
 	{
 	    e->set("rfc", f);
@@ -226,7 +226,7 @@ void scale_tilt(EST_Relation &ev, float shift, float scale)
 {
     EST_Item *e;
 
-    for (e = ev.head(); e; e = e->next())
+    for (e = ev.head(); e; e = inext(e))
     {
 	e->set("ev.f0", (e->F("ev.f0") + shift));
 	if (e->f_present("int_event"))
@@ -238,7 +238,7 @@ void fill_rfc_types(EST_Relation &ev)
 {
     EST_Item *e;
     
-    for (e = ev.head(); e; e = e->next())
+    for (e = ev.head(); e; e = inext(e))
     {
 	if (event_item(*e))
 	{
@@ -256,7 +256,7 @@ void fill_rfc_types(EST_Relation &ev)
 
 void int_segment_to_unit(EST_Relation &int_lab, EST_Relation &ev_lab)
 {
-    EST_Item *e, *inext;
+    EST_Item *e, *xnext;
     (void)ev_lab;
     float start = 0.0;
 
@@ -264,21 +264,21 @@ void int_segment_to_unit(EST_Relation &int_lab, EST_Relation &ev_lab)
 	EST_error("Undefined timing style:%s in relation\n", 
 		  (const char *)int_lab.f.S("timing_style"));
 
-    for (e = int_lab.head(); e != 0; e = e->next())
+    for (e = int_lab.head(); e != 0; e = inext(e))
     {
 	e->set("start", start);
 	start = e->F("end");
     }
 
-    for (e = int_lab.head(); e != 0; e = inext)
+    for (e = int_lab.head(); e != 0; e = xnext)
     {
-	inext = e->next();
+	xnext = inext(e);
 	if (event_item(*e) || sil_item(*e))
 	    continue;
 	int_lab.remove_item(e);
     }
 
-/*    for (e = int_lab.head(); e != 0; e = inext)
+/*    for (e = int_lab.head(); e != 0; e = xnext)
     {
 	if (event_item(*e))
 	    ev_lab.append(e);
@@ -291,13 +291,13 @@ void int_segment_to_unit(EST_Relation &int_lab, EST_Relation &ev_lab)
 
 void fn_start_to_real_start(EST_Relation &ev)
 {
-    for (EST_Item *e = ev.head(); e; e = e->next())
+    for (EST_Item *e = ev.head(); e; e = inext(e))
 	e->set("start", e->F("start"));
 }
 
 void set_fn_start(EST_Relation &ev)
 {
-    for (EST_Item *e = ev.head(); e; e = e->next())
+    for (EST_Item *e = ev.head(); e; e = inext(e))
 	e->set_function("start", "standard+start");
 
 }
@@ -313,9 +313,9 @@ void event_to_segment(EST_Relation &ev, float min_length)
     if (ev.f.S("timing_style") != "event")
 	return;
 
-    for (e = ev.head(); e->next() != 0; e = e->next())
+    for (e = ev.head(); inext(e) != 0; e = inext(e))
     {
-	n = e->next();
+	n = inext(e);
 	if ((n->F("start") - e->F("end"))  > min_length)
 	{
 	    dummy = e->insert_after();
@@ -351,7 +351,7 @@ void event_to_segment(EST_Relation &ev, float min_length)
 
 void remove_rfc_features(EST_Relation &ev)
 {
-    for (EST_Item *e = ev.head(); e != 0; e = e->next())
+    for (EST_Item *e = ev.head(); e != 0; e = inext(e))
     {
 	e->f_remove("rfc.rise_amp");
 	e->f_remove("rfc.rise_dur");
@@ -363,7 +363,7 @@ void remove_rfc_features(EST_Relation &ev)
 
 void remove_tilt_features(EST_Relation &ev)
 {
-    for (EST_Item *e = ev.head(); e != 0; e = e->next())
+    for (EST_Item *e = ev.head(); e != 0; e = inext(e))
     {
 	e->f_remove("tilt.amp");
 	e->f_remove("tilt.dur");

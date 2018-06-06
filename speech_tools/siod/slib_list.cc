@@ -75,14 +75,16 @@ static LISP eq(LISP x,LISP y)
 {if EQ(x,y) return(truth); else return(NIL);}
 
 LISP eql(LISP x,LISP y)
-{if EQ(x,y) return(truth); else 
- if NFLONUMP(x) return(NIL); else
- if NFLONUMP(y) return(NIL); else
+{if EQ(x,y) return(truth);
+ if NFLONUMP(x) return(NIL);
+ if NFLONUMP(y) return(NIL);
  if (FLONM(x) == FLONM(y)) return(truth);
  return(NIL);}
 
 static LISP nullp(LISP x)
-{if EQ(x,NIL) return(truth); else return(NIL);}
+{if EQ(x,NIL) 
+          return(truth); 
+    return(NIL);}
 
 LISP siod_flatten(LISP tree)
 {

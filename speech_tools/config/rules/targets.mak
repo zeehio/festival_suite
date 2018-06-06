@@ -54,7 +54,7 @@ FORCE:
 ${SUBDIRECTORIES} dummy_dir_name: FORCE
 	@if [ ! -f $@/Makefile ] ;\
 		then \
-		echo "Makeing new directory $(DIRNAME)/$@" ;\
+		echo "Making new directory $(DIRNAME)/$@" ;\
 		mkdir $@ ;\
 		: $(subst XXX,$@,$(MAKE_RCSED_DIR)) ;\
 		$(MAKE) MADE_FROM_ABOVE=1 --no-print-directory -C $@ update ; \

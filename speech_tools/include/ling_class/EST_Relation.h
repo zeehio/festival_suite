@@ -132,9 +132,7 @@ class EST_Relation
 
     // This have been replaced by Relation_Tree functions
     EST_Item *first() const { return head(); }
-    EST_Item *first_leaf() const;
-    EST_Item *last() const { return tail(); }
-    EST_Item *last_leaf() const;
+    EST_Item *rlast() const { return tail(); }
 
     /** Return the tail (last) item of the relation */
 //    EST_Item *id(int i);

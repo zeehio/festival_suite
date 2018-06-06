@@ -64,7 +64,7 @@ extern "C" void abort(void);
   * @see string_example
   * @author Alan W Black <awb@cstr.ed.ac.uk>
   * @author Richard Caley <rjc@cstr.ed.ac.uk>
-  * @version $Id: EST_String.h,v 1.10 2014/10/13 13:26:19 robert Exp $
+  * @version $Id: EST_String.h,v 1.11 2017/02/22 15:50:14 awb Exp $
   */
 
 class EST_String {
@@ -216,10 +216,12 @@ public:
       * We have to declare our own copy constructor to lie to the
       * compiler about the constness of the RHS.
       */
+    #if 0
     EST_String(const EST_String &s) {
       memory = NON_CONST_CHUNKPTR(s.memory);
       size = s.size;
     }
+    #endif
 
 #if __FSF_COMPATIBILITY__
     /** Construct from single char.
@@ -476,9 +478,11 @@ public:
     /// Assign C string to EST_String
     EST_String &operator = (const char *str);
     /// Assign single character to EST_String
+    #if 0
     EST_String &operator = (const char c);
     /// Assign EST_String to EST_String.
     EST_String &operator = (const EST_String &s);
+    #endif
     //@}
 
     /**@name Concatenation */

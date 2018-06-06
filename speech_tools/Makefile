@@ -2,7 +2,7 @@
 ##                                                                       ##
 ##                Centre for Speech Technology Research                  ##
 ##                     University of Edinburgh, UK                       ##
-##                       Copyright (c) 1996-2014                         ##
+##                       Copyright (c) 1996-2017                         ##
 ##                        All Rights Reserved.                           ##
 ##                                                                       ##
 ##  Permission is hereby granted, free of charge, to use and distribute  ##
@@ -34,7 +34,7 @@
 ##     Top level Makefile for Edinburgh Speech tools library             ##
 ##     Authors: Paul Taylor, Simon King, Alan W Black, Richard Caley     ##
 ##                 and others (see ACKNOWLEDGEMENTS)                     ##
-##     Version: 2.4 release December 2014                                ##
+#     Version: 2.5 release December 2017                                ##
 ##                                                                       ##
 ###########################################################################
 
@@ -52,7 +52,7 @@ ALL_DIRS = include $(BUILD_DIRS) $(EXTRA_DIRS) config doc
 VERSION=$(PROJECT_VERSION)
 CONFIG=configure configure.in config.sub config.guess \
        missing install-sh mkinstalldirs
-FILES=Makefile README INSTALL $(CONFIG)
+FILES=Makefile README.md INSTALL $(CONFIG)
 
 LOCAL_CLEAN= Build.trace Test.trace Templates.DB
 

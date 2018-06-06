@@ -396,7 +396,7 @@ int record_linux_wave(EST_Wave &inwave, EST_Option &al)
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-static const char *aud_sys_name = "ALSALINUX";
+#define aud_sys_name "ALSALINUX"
 
 // Code to block signals while sound is playing.
 // Needed inside Java on (at least some) linux systems
@@ -571,7 +571,17 @@ cst_audiodev *audio_open_alsa(int sps, int channels, cst_audiofmt fmt)
 	return NULL;
   }
 
-  /* Make sure the device is ready to accept data */
+    /* There doesn't seem to be another way to set the latency -- if done
+       here, it works, if not, it looses the first 2s or so */
+    snd_pcm_set_params(pcm_handle,
+                       format,
+                       SND_PCM_ACCESS_RW_INTERLEAVED,
+                       1,
+                       real_rate,
+                       1,
+                       50000);
+
+    /* Make sure the device is ready to accept data */
   assert(snd_pcm_state(pcm_handle) == SND_PCM_STATE_PREPARED);
 
   /* Write hardware parameters to flite audio device data structure */
@@ -647,74 +657,74 @@ static int recover_from_error(snd_pcm_t *pcm_handle, ssize_t res)
 
 int audio_write_alsa(cst_audiodev *ad, void *samples, int num_bytes)
 {
-  size_t frame_size;
-  ssize_t num_frames, res;
-  snd_pcm_t *pcm_handle;
-  char *buf = (char *) samples;
+    size_t frame_size;
+    ssize_t num_frames, res;
+    snd_pcm_t *pcm_handle;
+    char *buf = (char *) samples;
 
-  /* Determine frame size in bytes */
-  frame_size  = audio_bps(ad->real_fmt) * ad->real_channels;
-  /* Require that only complete frames are handed in */
-  assert((num_bytes % frame_size) == 0);
-  num_frames = num_bytes / frame_size;
-  pcm_handle = (snd_pcm_t *) ad->platform_data;
+    /* Determine frame size in bytes */
+    frame_size  = audio_bps(ad->real_fmt) * ad->real_channels;
+    /* Require that only complete frames are handed in */
+    assert((num_bytes % frame_size) == 0);
+    num_frames = num_bytes / frame_size;
+    pcm_handle = (snd_pcm_t *) ad->platform_data;
 
-  while (num_frames > 0) 
-  {
+    while (num_frames > 0) 
+    {
 	res = snd_pcm_writei(pcm_handle, buf, num_frames);
 	if (res != num_frames) 
 	{
-	  if (res == -EAGAIN || (res > 0 && res < num_frames)) 
-	  {
+            if (res == -EAGAIN || (res > 0 && res < num_frames)) 
+            {
 		snd_pcm_wait(pcm_handle, 100);
-	  }
-	  else if (recover_from_error(pcm_handle, res) < 0) 
-	  {
+            }
+            else if (recover_from_error(pcm_handle, res) < 0) 
+            {
 		return -1;
-	  }
+            }
 	}
 
 	if (res >0) 
 	{
-	  num_frames -= res;
-	  buf += res * frame_size;
+            num_frames -= res;
+            buf += res * frame_size;
 	}
-  }
-  return num_bytes;
+    }
+    return num_bytes;
 }
 
 int audio_flush_alsa(cst_audiodev *ad)
 {
-  int result;
-  result = snd_pcm_drain((snd_pcm_t *) ad->platform_data);
-  if (result < 0)
-  {
+    int result;
+    result = snd_pcm_drain((snd_pcm_t *) ad->platform_data);
+    if (result < 0)
+    {
 	EST_warning("audio_flush_alsa: Error: %s.\n", snd_strerror(result));
-  }
-	/* Prepare device for more data */
-  result = snd_pcm_prepare((snd_pcm_t *) ad->platform_data);
-if (result < 0)
-  {
+    }
+    /* Prepare device for more data */
+    result = snd_pcm_prepare((snd_pcm_t *) ad->platform_data);
+    if (result < 0)
+    {
 	EST_warning("audio_flush_alsa: Error: %s.\n", snd_strerror(result));
-  }
-  return result;
+    }
+    return result;
 }
 
 int audio_drain_alsa(cst_audiodev *ad)
 {
-  int result;
-  result = snd_pcm_drop((snd_pcm_t *) ad->platform_data);
-  if (result < 0)
-  {
+    int result;
+    result = snd_pcm_drop((snd_pcm_t *) ad->platform_data);
+    if (result < 0)
+    {
 	EST_warning("audio_drain_alsa: Error: %s.\n", snd_strerror(result));
-  }
-/* Prepare device for more data */
-  result = snd_pcm_prepare((snd_pcm_t *) ad->platform_data);
-if (result < 0)
-  {
+    }
+    /* Prepare device for more data */
+    result = snd_pcm_prepare((snd_pcm_t *) ad->platform_data);
+    if (result < 0)
+    {
 	EST_warning("audio_drain_alsa: Error: %s.\n", snd_strerror(result));
-  }
-  return result;
+    }
+    return result;
 }
 
 #define AUDIOBUFFSIZE 256
@@ -725,13 +735,15 @@ int play_linux_wave(EST_Wave &inwave, EST_Option &al)
     int sample_rate;
     short *waveform;
     int num_samples;
-    const char *audiodevice;
     cst_audiodev *ad;
 
+#if 0
+    const char *audiodevice;
     if (al.present("-audiodevice"))
 	audiodevice = al.val("-audiodevice");
     else
 	audiodevice = "/dev/dsp";
+#endif
 
     waveform = inwave.values().memory();
     num_samples = inwave.num_samples();

@@ -150,11 +150,11 @@ EST_write_status save_esps_label(ostream *outf,
         *outf << "timing_style unit\n";
 */
     
-    for (ptr = s.head(); ptr != 0; ptr = ptr->next())
+    for (ptr = s.head(); ptr != 0; ptr = inext(ptr))
     {
 	*outf << "\t";
 	outf->precision(5);
-	outf->setf(ios::fixed, ios::floatfield);
+	outf->setf(ios::scientific, ios::floatfield);
 	outf->width(8);
 	//	outf->fill('0');
 	if (s.f("timing_style","0") == "event")
@@ -278,7 +278,7 @@ EST_read_status read_label_portion(EST_TokenStream &ts, EST_Relation &s,
 				   int sample)
 {
     EST_Item *item;
-    float hstart, hend;
+    float hend;
     EST_String str;
     
     while(!ts.eof())
@@ -289,7 +289,6 @@ EST_read_status read_label_portion(EST_TokenStream &ts, EST_Relation &s,
 	
 	item = s.append();
 	
-	hstart = convert_long_num_string_to_time(str,sample);
 	str = ts.get().string();
 	hend = convert_long_num_string_to_time(str,sample);
 	
@@ -357,7 +356,7 @@ EST_write_status save_htk_label(ostream *outf,
     outf->precision(6);
 
     start = end = 0;
-    for (ptr = a.head(); ptr != 0; ptr = ptr->next())
+    for (ptr = a.head(); ptr != 0; ptr = inext(ptr))
     {
 	outf->width(15);
 	cout.setf(ios::left,ios::adjustfield);
@@ -396,17 +395,17 @@ EST_write_status save_label_spn(const EST_String &filename,
     outf->setf(ios::left, ios::adjustfield);
     outf->width(8);
     *outf << ptr->name();
-    outf->setf(ios::fixed, ios::floatfield);
+    outf->setf(ios::scientific, ios::floatfield);
     outf->width(8);
     *outf << (ptr->dur() * 1000.0) << "\t (0,140)" << endl;
     
-    for (; next(ptr) != 0; ptr = ptr->next())
+    for (; inext(ptr) != 0; ptr = inext(ptr))
     {
 	outf->precision(3);
 	outf->setf(ios::left, ios::adjustfield);
 	outf->width(8);
 	*outf << ptr->name();
-	outf->setf(ios::fixed, ios::floatfield);
+	outf->setf(ios::scientific, ios::floatfield);
 	outf->width(8);
 	*outf << (ptr->dur() * 1000.0) << endl;
     }
@@ -414,7 +413,7 @@ EST_write_status save_label_spn(const EST_String &filename,
     //    outf->setf(ios::left, ios::adjustfield);
     outf->width(8);
     *outf << ptr->name();
-    outf->setf(ios::fixed, ios::floatfield);
+    outf->setf(ios::scientific, ios::floatfield);
     outf->width(8);
     *outf << (ptr->dur() * 1000.0) << "\t (99,80)" << endl;
     
@@ -443,7 +442,7 @@ EST_write_status save_label_names(const EST_String &filename,
 	return misc_write_error;
     }
     
-    for (ptr = a.head(); next(ptr) != 0; ptr = ptr->next())
+    for (ptr = a.head(); inext(ptr) != 0; ptr = inext(ptr))
     {
 	*outf << ptr->name();
 	if ((features != "") && (features != "OneLine"))
@@ -490,7 +489,7 @@ EST_write_status save_RelationList(const EST_String &filename,
     {
 	outname = path ? plist(p).name() : basename(plist(p).name());
 	*outf << "\"*/" << outname<<"\"\n";
-	for (ptr = plist(p).head(); ptr != 0; ptr = ptr->next())
+	for (ptr = plist(p).head(); ptr != 0; ptr = inext(ptr))
 	{
 	    if (time)
 	    {
@@ -534,7 +533,7 @@ EST_write_status save_WordList(const EST_String &filename,
     
     for (p = plist.head(); p != 0; p = p->next())
     {
-	for (ptr = plist(p).head(); ptr->next() != 0; ptr = ptr->next())
+	for (ptr = plist(p).head(); inext(ptr) != 0; ptr = inext(ptr))
 	{
 	    *outf << ptr->name();
 	    if (style == 0)
@@ -621,7 +620,7 @@ static void pad_ends(EST_Relation &s, float length)
     EST_Item *p;
     int i;
     
-    for (i = 0, p = s.head(); p; p = p->next(), ++i)
+    for (i = 0, p = s.head(); p; p = inext(p), ++i)
 	p->set("end",(length * float(i)/float(s.length())));
 }
 

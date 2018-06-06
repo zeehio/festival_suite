@@ -75,7 +75,7 @@ void get_server(EST_Option &al)
 {
   if (al.present("-display"))
     {
-      EST_String display = al.val("-display");
+        EST_String display = (const char *)al.val("-display");
       if (display.contains(":"))
 	{
 	  server = display.before(":");

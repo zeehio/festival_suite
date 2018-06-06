@@ -186,7 +186,7 @@ static int pos_phone(const EST_Relation &seg, float x, float shift)
     // a boundary.
     EST_Item *p;
     
-    for (p = seg.head(); p != 0; p = p->next())
+    for (p = seg.head(); p != 0; p = inext(p))
 	if (p->f("pos") == 1)
 	    if ((x < (p->F("end") + (shift / 2.0))) &&
 		(x > (start(p) -  (shift / 2.0))))

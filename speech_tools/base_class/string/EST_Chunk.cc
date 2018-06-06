@@ -287,7 +287,8 @@ void cp_make_updatable(EST_ChunkPtr &cp, EST_Chunk::EST_chunk_size inuse)
 {
   if (cp.ptr && cp.ptr->count > 1)
     {
-      EST_Chunk *newchunk = new(cp.ptr->size) EST_Chunk;
+        /* Changed 2017/02/17 as ptr-size is often zero (gcc6-O2) */
+        EST_Chunk *newchunk = new(inuse /* cp.ptr->size */) EST_Chunk;
 
       memcpy(newchunk->memory, cp.ptr->memory, inuse);
 

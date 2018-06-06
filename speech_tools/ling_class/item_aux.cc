@@ -48,7 +48,7 @@ int in_list(const EST_Item *c,const EST_Item *l)
 {
     const EST_Item *i;
     
-    for (i=l; i != 0; i=i->next())
+    for (i=l; i != 0; i=inext(i))
 	if (i == c)
 	    return TRUE;
     return FALSE;
@@ -74,8 +74,8 @@ void remove_item_list(EST_Relation *rel, EST_Item *item)
     if (item==NULL)
 	return;
 
-    EST_Item *p = item->prev();
-    EST_Item *n = item->next();
+    EST_Item *p = iprev(item);
+    EST_Item *n = inext(item);
 
     rel->remove_item(item);
 
@@ -140,7 +140,7 @@ int move_sub_tree(EST_Item *from, EST_Item *to)
     // until after the copy in case from is within to's daughters
     d = to->grab_daughters();  
     if (rfrom == d)
-      d = d->next();
+        d = inext(d);
     if ((rfrom != 0) && (daughter1(rfrom)))
     {   // copy the descendant structure
 	copy_node_tree(daughter1(rfrom),to->insert_below(daughter1(rfrom)));
@@ -148,8 +148,8 @@ int move_sub_tree(EST_Item *from, EST_Item *to)
     }
     for (r=d; r; r=nr)
     {
-       nr = r->next();
-       delete r;
+        nr = inext(r);
+        delete r;
     }
 
     return TRUE;
@@ -220,13 +220,13 @@ EST_Item *item_jump(EST_Item *from, const EST_String &to)
     switch(t) {
     case 2:
       // Syllable
-      return(from->as_relation("SylStructure")->up()->as_relation("Syllable"));
+        return(iup(from->as_relation("SylStructure"))->as_relation("Syllable"));
     case 3:
       // Word
-      return(from->as_relation("SylStructure")->up()->up()->as_relation("Word"));
+        return(iup(iup(from->as_relation("SylStructure")))->as_relation("Word"));
     case 4:
       // IntEvent
-      return(from->as_relation("SylStructure")->up()->as_relation("Intonation")->down()->as_relation("IntEvent"));
+        return(idown(iup(from->as_relation("SylStructure"))->as_relation("Intonation"))->as_relation("IntEvent"));
     }
 
   case 2:
@@ -234,13 +234,13 @@ EST_Item *item_jump(EST_Item *from, const EST_String &to)
     switch(t) {
     case 1:
       // Segment
-      return(from->as_relation("SylStructure")->down()->as_relation("Segment"));
+        return(idown(from->as_relation("SylStructure"))->as_relation("Segment"));
     case 3:
       // Word
-      return(from->as_relation("SylStructure")->up()->as_relation("Word"));
+        return(iup(from->as_relation("SylStructure"))->as_relation("Word"));
       // IntEvent
     case 4:
-      return(from->as_relation("Intonation")->down()->as_relation("IntEvent"));
+        return(idown(from->as_relation("Intonation"))->as_relation("IntEvent"));
     }
 
   case 3:
@@ -248,12 +248,12 @@ EST_Item *item_jump(EST_Item *from, const EST_String &to)
     switch(t) {
     case 1:
       // Segment
-      return(from->as_relation("SylStructure")->down()->down()->as_relation("Segment"));
+        return(idown(idown(from->as_relation("SylStructure")))->as_relation("Segment"));
     case 2:
       // Syllable
-      return(from->as_relation("SylStructure")->down()->as_relation("Syllable"));
+        return(idown(from->as_relation("SylStructure"))->as_relation("Syllable"));
     case 4:
-      return(from->as_relation("SylStructure")->down()->as_relation("Intonation")->down()->as_relation("IntEvent"));
+        return(idown(idown(from->as_relation("SylStructure"))->as_relation("Intonation"))->as_relation("IntEvent"));
     }
 
   case 4:
@@ -261,13 +261,13 @@ EST_Item *item_jump(EST_Item *from, const EST_String &to)
     switch(t) {
     case 1:
       // Segment
-      return(from->as_relation("Intonation")->up()->as_relation("SylStructure")->down()->as_relation("Segment"));
+        return(idown(iup(from->as_relation("Intonation"))->as_relation("SylStructure"))->as_relation("Segment"));
     case 2:
       // Syllable
-      return(from->as_relation("Intonation")->up()->as_relation("Syllable"));
+        return(iup(from->as_relation("Intonation"))->as_relation("Syllable"));
     case 3:
       // Word
-      return(from->as_relation("Intonation")->up()->as_relation("SylStructure")->up()->as_relation("Word"));
+        return(iup(iup(from->as_relation("Intonation"))->as_relation("SylStructure"))->as_relation("Word"));
     }
   }
 

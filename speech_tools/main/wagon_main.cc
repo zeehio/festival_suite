@@ -218,17 +218,31 @@ static int wagon_main(int argc, char **argv)
 	 "-balance <float>  For derived stop size, if dataset at node, divided\n"+
 	 "                  by balance is greater than stop it is used as stop\n"+
 	 "                  if balance is 0 (default) always use stop as is.\n"+
+         "-cos              Use mean cosine distance rather than gausian (TBD).\n"+
+         "-dof <float>      Randomly dropout feats in training (prob).\n"+
+         "-dos <float>      Randomly dropout samples in training (prob).\n"+
          "-vertex_output <string> Output <mean> or <best> of cluster\n"+
 	 "-held_out <int>   Percent to hold out for pruning\n"+
+         "-max_questions <int> Maximum number of questions in tree\n"+
 	 "-heap <int> {210000}\n"+
 	 "              Set size of Lisp heap, should not normally need\n"+
 	 "              to be changed from its default, only with *very*\n"+
 	 "              large description files (> 1M)\n"+
+	 "-omp_nthreads <int> {1}\n"+
+	 " 		  Set number of OMP threads to run wagon in\n"+
+	 "		  tree building; this overrides $OMP_NUM_THREADS\n"+
+	 "		  (ignored if not supported)\n"+
 	 "-noprune          No (same class) pruning required\n",
 		       files, al);
 
     if (al.present("-held_out"))
 	wgn_held_out = al.ival("-held_out");
+    if (al.present("-dof"))
+	wgn_dropout_feats = al.fval("-dof");
+    if (al.present("-dos"))
+	wgn_dropout_samples = al.fval("-dos");
+    if (al.present("-cos"))
+	wgn_cos = al.ival("-cos");
     if (al.present("-balance"))
 	wgn_balance = al.fval("-balance");
     if ((!al.present("-desc")) || ((!al.present("-data"))))
@@ -244,6 +258,8 @@ static int wagon_main(int argc, char **argv)
 
     if (al.present("-stop"))
 	wgn_min_cluster_size = atoi(al.val("-stop"));
+    if (al.present("-max_questions"))
+	wgn_max_questions = atoi(al.val("-max_questions"));
     if (al.present("-noprune"))
 	wgn_prune = FALSE;
     if (al.present("-predictee"))
@@ -294,7 +310,7 @@ static int wagon_main(int argc, char **argv)
 
     if (al.present("-ignore"))
     {
-	EST_String ig = al.val("-ignore");
+	EST_String ig = (const char *)al.sval("-ignore");
 	if (ig[0] == '(')
 	    ignores = read_from_string(ig);
 	else
@@ -350,7 +366,7 @@ static int wagon_main(int argc, char **argv)
     }
     if (al.present("-track_feats"))
     {   /* overrides start and end numbers */
-        EST_String wagon_track_features = al.val("-track_feats");
+        EST_String wagon_track_features = (const char *)al.val("-track_feats");
         set_Vertex_Feats(wgn_VertexFeats,wagon_track_features);
     }
 
@@ -365,6 +381,20 @@ static int wagon_main(int argc, char **argv)
         /* into VertexTrack to the first vector in the segment */
         wgn_UnitTrack.load(al.val("-unittrack"));
     }
+
+#ifdef OMP_WAGON
+    if (al.present ("-omp_nthreads"))
+    {
+	omp_set_num_threads(atoi(al.val("-omp_nthreads")));
+    }else{
+	omp_set_num_threads(1);
+    }
+#else
+    if (al.present ("-omp_nthreads"))
+    {
+        printf("wagon: -omp_nthreads ignored: not supported in this build.\n");
+    }
+#endif
 
     if (al.present("-test"))
 	wgn_load_dataset(wgn_test_dataset,al.val("-test"));

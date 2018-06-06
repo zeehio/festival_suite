@@ -732,7 +732,6 @@ void fbank2melcep(const EST_FVector &fbank_vec,
 
     for(i=0;i<mfcc_vec.length();i++)
     {
-
 	actual_mfcc_index = include_c0 ? i : i+1;
 
 	pi_i_over_N  = 

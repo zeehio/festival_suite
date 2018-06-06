@@ -314,7 +314,8 @@ public:
     {
         int i; 
         for (i = 0; i < m.n(); ++i) 
-            st << m(i) << " "; st << endl; 
+            st << m(i) << " "; 
+        st << endl; 
         return st;
     }
 
@@ -327,8 +328,11 @@ public:
 
 //@}
 /// assignment operator: fill track with values in list <parameter>s</parameter>.
-template<class T>
-extern EST_TVector<T> &set(EST_TVector<T> &v, const EST_TList<T> &s);
+
+// This appears unuset and potentially causes a namespace clashes with std::set
+// is sparrowhawk is used. 
+//   template<class T>
+//     extern EST_TVector<T> &set(EST_TVector<T> &v, const EST_TList<T> &s);
 
 #undef A_CHECK
 #endif

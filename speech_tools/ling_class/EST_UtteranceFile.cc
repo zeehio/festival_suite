@@ -320,8 +320,8 @@ static EST_write_status utt_save_all_contents(ostream &outf,
 	utt_save_ling_content(outf,n,sinames,si_count);
 	// As we have more complex structures this will need to
 	// be updated (i.e. we'll need a marking method for nodes)
-	utt_save_all_contents(outf,n->next(),sinames,si_count);
-	utt_save_all_contents(outf,n->down(),sinames,si_count);
+	utt_save_all_contents(outf,inext(n),sinames,si_count);
+	utt_save_all_contents(outf,idown(n),sinames,si_count);
     }
     return write_ok;
 }
@@ -364,7 +364,7 @@ EST_read_status EST_UtteranceFile::load_xlabel(EST_TokenStream &ts,
     {
       i->set("start", t);
       t = i->F("end");
-      i = i->next();
+      i = inext(i);
     }
 
   return status;
@@ -373,34 +373,34 @@ EST_read_status EST_UtteranceFile::load_xlabel(EST_TokenStream &ts,
 EST_write_status EST_UtteranceFile::save_xlabel(ostream &outf,
 						const EST_Utterance &utt)
 {
-  EST_write_status status = write_error;
+    EST_write_status status = write_error;
 
-  EST_Relation *rel;
+    EST_Relation *rel;
 
-  EST_Features::Entries p;
+    EST_Features::Entries p;
 
-  for (p.begin(utt.relations); p; p++)
+    for (p.begin(utt.relations); p; p++)
     {
-      rel = ::relation(p->v);
+        rel = ::relation(p->v);
 
-      EST_Item * hd = rel->head();
+        EST_Item * hd = rel->head();
 
       
-      while (hd)
-	{
-	  if (hd->up() || hd->down())
-	    break;
-	  hd=hd->next();
-	}
+        while (hd)
+        {
+            if (iup(hd) || idown(hd))
+                break;
+            hd=inext(hd);
+        }
 
-      // didn't find anything => this is linear
-      if(!hd)
-	  return rel->save(outf, "esps", 0);
+        // didn't find anything => this is linear
+        if(!hd)
+            return rel->save(outf, "esps", 0);
     }
 
-  // Found no linear relations
+    // Found no linear relations
   
-  return status;
+    return status;
 }
 
 #if defined(INCLUDE_XML_FORMATS)
@@ -480,95 +480,89 @@ EST_read_status EST_UtteranceFile::load_genxml(EST_TokenStream &ts,
 EST_write_status EST_UtteranceFile::save_genxml(ostream &outf,
 						const EST_Utterance &utt)
 {
-  EST_write_status status=write_ok;
+    EST_write_status status=write_ok;
+    EST_TStringHash<int> features(20);
+    EST_Features::Entries p;
 
-  EST_TStringHash<int> features(20);
-
-  EST_Features::Entries p;
-
-  for (p.begin(utt.relations); p; ++p)
+    for (p.begin(utt.relations); p; ++p)
     {
-      EST_Relation *rel = ::relation(p->v);
-
-      EST_Item * hd = rel->head();
+        EST_Relation *rel = ::relation(p->v);
+        EST_Item * hd = rel->head();
       
-      while (hd)
+        while (hd)
 	{
-	  EST_Features::Entries fp;
-	  for (fp.begin(hd->features()); fp; ++fp)
-	    features.add_item(fp->k, 1);
-	  hd=hd->next();
+            EST_Features::Entries fp;
+            for (fp.begin(hd->features()); fp; ++fp)
+                features.add_item(fp->k, 1);
+            hd=inext(hd);
 	}
     }
 
-  outf << "<?xml version='1.0'?>\n";
+    outf << "<?xml version='1.0'?>\n";
 
-  outf << "<!DOCTYPE utterance PUBLIC '//CSTR EST//DTD cstrutt//EN' 'cstrutt.dtd'\n\t[\n";
+    outf << "<!DOCTYPE utterance PUBLIC '//CSTR EST//DTD cstrutt//EN' 'cstrutt.dtd'\n\t[\n";
 
-  EST_TStringHash<int>::Entries f;
+    EST_TStringHash<int>::Entries f;
 
-  outf << "\t<!ATTLIST item\n";
-  for (f.begin(features); f; ++f)
+    outf << "\t<!ATTLIST item\n";
+    for (f.begin(features); f; ++f)
     {
-      if (f->k != "id")
+        if (f->k != "id")
 	{
-	  outf << "\t\t" << f->k << "\tCDATA #IMPLIED\n";
+            outf << "\t\t" << f->k << "\tCDATA #IMPLIED\n";
 	}
     }
 
-  outf << "\t\t>\n";
+    outf << "\t\t>\n";
+    outf << "\t]>\n";
+    outf << "<utterance>\n";
+    outf << "<language name='unknown'/>\n";
 
-  outf << "\t]>\n";
-
-  outf << "<utterance>\n";
-
-  outf << "<language name='unknown'/>\n";
-
-  for (p.begin(utt.relations); p; ++p)
+    for (p.begin(utt.relations); p; ++p)
     {
-      EST_Relation *rel = ::relation(p->v);
+        EST_Relation *rel = ::relation(p->v);
 
-      EST_Item * hd = rel->head();
+        EST_Item * hd = rel->head();
 
       
-      while (hd)
+        while (hd)
 	{
-	  if (hd->up() || hd->down())
-	    break;
-	  hd=hd->next();
+            if (iup(hd) || idown(hd))
+                break;
+            hd=inext(hd);
 	}
 
-      // didn't find anything => this is linear
-      if(!hd)
+        // didn't find anything => this is linear
+        if(!hd)
 	{
-	  outf << "<relation name='"<< rel->name()<< "' structure-type='list'>\n";
+            outf << "<relation name='"<< rel->name()<< "' structure-type='list'>\n";
 
-	  hd = rel->head();
-	  while (hd)
+            hd = rel->head();
+            while (hd)
 	    {
-	      outf << "    <item\n";
+                outf << "    <item\n";
 
-	      EST_Features::Entries p;
-	      for (p.begin(hd->features()); p; ++p)
-		if (p->k != "estContentFeature")
-		  outf << "         " << p->k << "='" << p->v << "'\n";
+                EST_Features::Entries p;
+                for (p.begin(hd->features()); p; ++p)
+                    if (p->k != "estContentFeature")
+                        outf << "         " << p->k << "='" << p->v << "'\n";
 
-	      outf << "         />\n";
+                outf << "         />\n";
 	      
-	      hd=hd->next();
+                hd=inext(hd);
 	    }
 	  
-	  outf << "</relation>\n";
+            outf << "</relation>\n";
 	}
-      else // for now give an error for non-linear relations
-	status=write_partial;
+        else // for now give an error for non-linear relations
+            status=write_partial;
     }
   
 
-  outf << "</utterance>\n";
+    outf << "</utterance>\n";
 
-  return status;
-;
+    return status;
+    ;
 }
 #endif
 

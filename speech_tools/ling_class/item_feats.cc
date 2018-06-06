@@ -137,8 +137,8 @@ EST_Val start_time(EST_Item *s)
 
 	if ((asrel == "0") || (asrel == s->relation_name()))
 	{
-	    if (prev(s))
-		return prev(fl)->f("end");
+	    if (iprev(s))
+		return iprev(fl)->f("end");
 	    else
 		return 0.0;
 	}
