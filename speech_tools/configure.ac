@@ -169,5 +169,16 @@ AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([dup2 floor getcwd gethostbyname gethostname gettimeofday inet_ntoa memmove memset pow putenv rint socket sqrt strcasecmp strchr strcspn strdup strerror strrchr strspn strstr strtol])
 
+OMP_OPTS=
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <omp.h>]], [[int j=1;]])],
+                  [OMP_OPTS="-fopenmp"])
+AC_SUBST(OMP_OPTS)
+
+OMP_DEFS=
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <omp.h>]], [[int j=1;]])],
+                  [OMP_DEFS="-DOMP_WAGON=1"])
+AC_SUBST(OMP_DEFS)
+
+
 AC_CONFIG_FILES([config/config config/user_flags.mak config/compilers/custom.mak])
 AC_OUTPUT

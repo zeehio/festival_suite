@@ -623,6 +623,8 @@ ac_includes_default="\
 #endif"
 
 ac_subst_vars='LTLIBOBJS
+OMP_DEFS
+OMP_OPTS
 POW_LIB
 LIBOBJS
 DEBUG
@@ -5065,6 +5067,43 @@ _ACEOF
 
 fi
 done
+
+
+OMP_OPTS=
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <omp.h>
+int
+main ()
+{
+int j=1;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  OMP_OPTS="-fopenmp"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+
+OMP_DEFS=
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <omp.h>
+int
+main ()
+{
+int j=1;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  OMP_DEFS="-DOMP_WAGON=1"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 
 
 ac_config_files="$ac_config_files config/config config/user_flags.mak config/compilers/custom.mak"
