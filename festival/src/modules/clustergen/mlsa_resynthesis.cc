@@ -173,9 +173,6 @@ DVECTOR synthesis_body(DMATRIX mcep,      // input mel-cep sequence
   double volume = 1.0;
 
   // Mixed Excitation Stuff
-  LISP filters;
-  LISP f;
-  int fl;
   int i, j;
   int me_num_filters = 0;
   int me_filter_order = 0;

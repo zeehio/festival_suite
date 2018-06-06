@@ -53,7 +53,7 @@ EST_Item *add_target(EST_Utterance *u,EST_Item *seg,
   // Check time is NOT the same as the last target, as this causes problems...
 
   float last_time;
-  EST_Item* last_item = u->relation(Targetname)->last_leaf();
+  EST_Item* last_item = last_leaf(u->relation(Targetname)->first());
   if (last_item)
     last_time = last_item->f("pos");
   else 
@@ -95,10 +95,10 @@ void targets_to_f0(EST_Relation &targ, EST_Track &f0, const float shift)
     EST_Item *s;
     int i;
 
-    f0.resize(int(ceil(targ.last_leaf()->F("pos",0) / shift)), 1);
+    f0.resize(int(ceil(last_leaf(targ.first())->F("pos",0) / shift)), 1);
     f0.fill_time(shift);
 
-    s = targ.first_leaf();
+    s = first_leaf(targ.first());
 
     // fill with zeros until first target;
     for (i = 0; i < f0.num_frames(); ++i)

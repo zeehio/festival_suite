@@ -418,17 +418,17 @@ static LISP utt_save_f0(LISP utt, LISP fname)
 static void utt_save_f0_from_targets(EST_Utterance *u,EST_String &filename)
 {
     // Modifications by Gregor Moehler to do proper target tracing (GM)
-  EST_Item *s;
+    EST_Item *s;
     EST_Track f0;
     float p = 0.0;
-    float length = u->relation("Segment")->last()->f("end");
+    float length = u->relation("Segment")->rlast()->f("end");
     int i,frames = (int)(length / 0.010);
     f0.resize(frames,4);
     
     EST_Item *ptval, *tval;
 
-    ptval = tval = u->relation("Target")->first_leaf();
-    for (i=0,s=u->relation("Segment")->first(); s != 0; s=s->next())
+    ptval = tval = first_leaf(u->relation("Target")->first());
+    for (i=0,s=u->relation("Segment")->first(); s != 0; s=inext(s))
     {
 	if (i >= frames)
 	    break;  // may hit here one before end

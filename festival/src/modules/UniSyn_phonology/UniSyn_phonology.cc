@@ -125,7 +125,7 @@ LISP FT_focus_nth_item(LISP utt, LISP lrel, LISP w)
 
     cout << "Focusing item " << f << " in relation " << relname << endl;
 
-    for (i = 1, n = u->relation(relname)->head(); n; n = n->next(), ++i)
+    for (i = 1, n = u->relation(relname)->head(); n; n = inext(n), ++i)
 	if (i == f)
 	    break;
 
@@ -183,7 +183,7 @@ LISP FT_foot_nth_item(LISP utt, LISP w)
 
     cout << "Footing item " << f << endl;
 
-    for (i = 1, n = u->relation("Syllable")->head(); n; n = n->next(), ++i)
+    for (i = 1, n = u->relation("Syllable")->head(); n; n = inext(n), ++i)
 	if (i == f)
 	    break;
 
@@ -250,7 +250,7 @@ LISP FT_extend_tree(LISP l_utt, LISP largs)
 
     u->create_relation(new_tree);
 
-    for (m = u->relation(first_tree)->head(); m; m = m->next())
+    for (m = u->relation(first_tree)->head(); m; m = inext(m))
     {
 	p = u->relation(new_tree)->append(m);
 	extend_tree(m, p, terminal, second_tree);
@@ -265,7 +265,7 @@ static void add_keep_nodes(EST_Item *n, EST_String keep)
 
     n->set(keep, 1);
     
-    for (EST_Item *p = daughter1(n); p; p = p->next())
+    for (EST_Item *p = daughter1(n); p; p = inext(p))
 	add_keep_nodes(p, keep);
 }
 
@@ -278,7 +278,7 @@ static void remove_sisters(EST_Item *n)
 
     for (EST_Item *s = daughter1(p); s; s = m)
     {
-	m = s->next();
+	m = inext(s);
 	if (s != n)
 	    s->unref_all();
     }
@@ -308,7 +308,7 @@ LISP FT_copy_sub_tree(LISP l_utt, LISP l_id, LISP l_relation)
     for (s = new_utt->relation(get_c_string(l_relation))->head();
 	 s; s = m)
     {
-	m = s->next();
+	m = inext(s);
 	if (s != n)
 	    s->unref_all();
     }
@@ -320,21 +320,21 @@ LISP FT_copy_sub_tree(LISP l_utt, LISP l_id, LISP l_relation)
 
     for (s = new_utt->relation("Segment")->head(); s; s = m)
     {
-	m = s->next();
+	m = inext(s);
 	if (!s->f_present("keep"))
 	    s->unref_all();
     }
 
     for (s = new_utt->relation("Syllable")->head(); s; s = m)
     {
-	m = s->next();
+	m = inext(s);
 	if (!s->f_present("keep"))
 	    s->unref_all();
     }
 
     for (s = new_utt->relation("Word")->head(); s; s = m)
     {
-	m = s->next();
+	m = inext(s);
 	if (!s->f_present("keep"))
 	    s->unref_all();
     }
@@ -342,14 +342,14 @@ LISP FT_copy_sub_tree(LISP l_utt, LISP l_id, LISP l_relation)
 /*    for (s = new_utt->relation("Segment")->head(); 
 	 s->S("id") != first_leaf(n)->S("id"); s = m)
     {
-	m = s->next();
+	m = inext(s);
 	cout << "deleting segment :" << s->S("name") << endl;
 	s->unref_all();
     }
 
-    for (s = next(last_leaf(n)->as_relation("Segment")); s; s = m)
+    for (s = inext(last_leaf(n)->as_relation("Segment")); s; s = m)
     {
-	m = s->next();
+	m = inext(s);
 	cout << "deleting segment :" << s->S("name") << endl;
 	s->unref_all();
     }
@@ -373,13 +373,13 @@ LISP FT_add_match_features(LISP l_utt)
     EST_Item *p;
     EST_Utterance *u = get_c_utt(l_utt);
 
-    for (p = u->relation("Word")->head(); p; p = p->next())
+    for (p = u->relation("Word")->head(); p; p = inext(p))
 	p->set("match", p->S("name"));
 
-    for (p = u->relation("Segment")->head(); p; p = p->next())
+    for (p = u->relation("Segment")->head(); p; p = inext(p))
 	p->set("match", p->S("name"));
 	
-    for (p = u->relation("Syllable")->head(); p; p = p->next())
+    for (p = u->relation("Syllable")->head(); p; p = inext(p))
 	add_syllable_name(p, "match");
 
     EST_Features tf;
@@ -453,7 +453,7 @@ LISP FT_legal_metrical_tree(LISP l_utt)
     EST_Utterance *u = get_c_utt(l_utt);
     EST_Item *s;
 
-    for (s = u->relation("MetricalTree")->head(); s; s= s->next())
+    for (s = u->relation("MetricalTree")->head(); s; s= inext(s))
 	legal_metrical_tree(s);
 
     return l_utt;
@@ -617,7 +617,7 @@ void festival_UniSyn_phonology_init(void)
      load data.");
 
     init_subr_4("intonation_diagnostics", FT_intonation_diagnostics, 
-    "(intonation_diagnostics UTT
+    "(intonation_diagnostics UTT))\n\
      Foot nth item in relation.");
 
     // semi redundant

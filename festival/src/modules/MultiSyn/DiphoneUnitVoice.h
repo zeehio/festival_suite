@@ -87,7 +87,8 @@ public:
 		    const EST_String& uttExt  = ".utt",
 		    const EST_String& wavExt  = ".wav",
 		    const EST_String& pmExt   = ".pm", 
-		    const EST_String& coefExt = ".coef" );
+		    const EST_String& JCCoefExt = ".coef",
+        const EST_String& TCCoefExt = ".tcoef" );
   
   virtual ~DiphoneUnitVoice();
 
@@ -121,7 +122,8 @@ public:
 		       const EST_String& uttExt  = ".utt",
 		       const EST_String& wavExt  = ".wav",
 		       const EST_String& pmExt   = ".pm",
-		       const EST_String& coefExt = ".coef" );
+		       const EST_String& JCCoefExt = ".coef",
+           const EST_String& TCCoefExt = ".tcoef" );
 
 
   // assume responsibility to delete vm when done with it
@@ -170,6 +172,9 @@ public:
   unsigned int get_wav_samplerate( ) const { return wav_srate; }
 
   void precomputeJoinCosts( const EST_StrList &phones, bool verbose=true );
+
+  void fill_target_coefficients(EST_Utterance *utt, EST_Track *tcCoefs);
+
 
 private:
   // don't allow copying of Voices (for now?)

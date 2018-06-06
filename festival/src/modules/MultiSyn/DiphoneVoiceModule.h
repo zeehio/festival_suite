@@ -113,7 +113,8 @@ public:
 		      const EST_String& uttExt  = ".utt",
 		      const EST_String& wavExt  = ".wav",
 		      const EST_String& pmExt   = ".pm",
-		      const EST_String& coefExt = ".coef" );
+		      const EST_String& JCCoefExt = ".coef",
+          const EST_String& TCCoefExt = ".tcoef" );
 
   virtual ~DiphoneVoiceModule();
 
@@ -165,7 +166,8 @@ private:
   // Flatpack
   void flatPack( EST_Relation *segs, const EST_TargetCost *tc) const;
 
-  void addCoefficients( EST_Relation *segs, const EST_Track& coefs );
+  void addTCoefficients( EST_Relation *segs, const EST_Track& coefs );
+  void addJCoefficients( EST_Relation *segs, const EST_Track& coefs );
   void addToCatalogue( const EST_Utterance *utt, int *num_ignored, bool ignore_bad=false ); 
   void getDiphone( const EST_Item *phone1, 
 		   EST_Track* coef, EST_Wave* sig, int* midframe,
@@ -180,7 +182,8 @@ private:
   EST_String pm_dir;   // pitch marks  
   EST_String pm_ext;
   EST_String coef_dir; // for coefficients that aren't pitch syncronous
-  EST_String coef_ext; 
+  EST_String JCCoef_ext; 
+  EST_String TCCoef_ext; 
   EST_String wave_dir; // waveform (or residual)
   EST_String wave_ext;
 

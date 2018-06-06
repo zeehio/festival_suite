@@ -296,8 +296,8 @@ static LISP stream_tree_to_lisp(EST_Item *s)
     {
 	LISP desc = cons(strintern(s->name()),
 			 cons(item_features(s, false),NIL));
-	return cons(cons(desc,stream_tree_to_lisp(s->down())),
-		    stream_tree_to_lisp(s->next()));
+	return cons(cons(desc,stream_tree_to_lisp(idown(s))),
+		    stream_tree_to_lisp(inext(s)));
     }
 }
 
@@ -414,22 +414,22 @@ static LISP utt_relation_append(LISP utt, LISP relname, LISP li)
 
 static LISP item_next(LISP li)
 {
-    return (li == NIL) ? NIL : siod(item(li)->next());
+    return (li == NIL) ? NIL : siod(inext(item(li)));
 }
 
 static LISP item_prev(LISP li)
 {
-    return (li == NIL) ? NIL : siod(item(li)->prev());
+    return (li == NIL) ? NIL : siod(iprev(item(li)));
 }
 
 static LISP item_up(LISP li)
 {
-    return (li == NIL) ? NIL : siod(item(li)->up());
+    return (li == NIL) ? NIL : siod(iup(item(li)));
 }
 
 static LISP item_down(LISP li)
 {
-    return (li == NIL) ? NIL : siod(item(li)->down());
+    return (li == NIL) ? NIL : siod(idown(item(li)));
 }
 
 static LISP item_parent(LISP li)

@@ -196,7 +196,7 @@ static SPN *make_spn(EST_Utterance &u)
     ps->targ_freq = walloc(int,ps->t_max);
     ps->abs_targ = walloc(int,ps->t_max);
     
-    for (j=i=0,s=seg->first(); s != 0; s=s->next(),i++)
+    for (j=i=0,s=seg->first(); s != 0; s=inext(s),i++)
     {
 	if (((cps=ft_get_param("PhoneSet")) == NIL) ||
 	    ((streq(get_c_string(cps),"holmes"))))
@@ -214,7 +214,7 @@ static SPN *make_spn(EST_Utterance &u)
 	ps->cum_dur[i] += ps->duration[i];
 	for (rt = daughter1(s,"Target");
 	     rt != 0;
-	     rt = rt->next(),j++)
+	     rt = inext(rt),j++)
 	{
 	    ps->targ_phon[j] = i;
 	    ps->targ_freq[j] = rt->I("f0");

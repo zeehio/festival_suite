@@ -340,7 +340,7 @@ ev_synth."
   "Syllable.lisp_get_rhyme_length
   Length from start of the vowel to end of syllable.")
 (define (get_rhyme_length syl)
-  (- (item.feat syl 'end)
+  (- (item.feat syl 'R:SylStructure.daughtern.end)
      (item.feat syl 'vowel_start syl)))
 
 (def_feature_docstring 'SylStructure.lisp_get_onset_length

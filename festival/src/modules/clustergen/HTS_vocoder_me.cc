@@ -182,156 +182,156 @@ void HTS_Vocoder_synthesize_me(HTS_Vocoder_ME * v_me,
                                double beta, double volume,
                                double *rawdata, HTS_Audio * audio)
 {
-  double x;
-  int i, j;
-  int k;
-  short xs;
-  int rawidx = 0;
-  double p;
-  HTS_Vocoder *v = v_me->v; /* access to original HTS_Vocoder struct */
-  double xpulse;
-  double xnoise;
-  double fxpulse;
-  double fxnoise;
-  double e1, e2;
+    double x = 0.0;
+    int i, j;
+    int k;
+    short xs;
+    int rawidx = 0;
+    double p;
+    HTS_Vocoder *v = v_me->v; /* access to original HTS_Vocoder struct */
+    double xpulse;
+    double xnoise;
+    double fxpulse;
+    double fxnoise;
+    double e1, e2;
 
 
-  /* Copy in str's and build pulse and noise shaping filter for this frame */
-  for (i = 0; i < v_me->filter_order; i++)
-  {
-    v_me->hp[i] = v_me->hn[i] = 0.0;
-    for (j = 0; j < v_me->num_filters; j++)
+    /* Copy in str's and build pulse and noise shaping filter for this frame */
+    for (i = 0; i < v_me->filter_order; i++)
     {
-      v_me->hp[i] += strengths[j] * v_me->h[j][i];
-      v_me->hn[i] += (1 - strengths[j]) * v_me->h[j][i];
-    }
-  }
-
-   /* lf0 -> pitch */
-   if (lf0 == LZERO)
-      p = 0.0;
-   else
-      p = v->rate / exp(lf0);
-
-   /* first time */
-   if (v->p1 < 0.0) {
-     HTS_Vocoder_initialize_excitation(v, 0);
-     if (v->stage == 0) {      /* for MCP */
-       HTS_mc2b(spectrum, v->c, m, alpha);
-     } else {                  /* for LSP */
-       if (v->use_log_gain)
-         v->c[0] = LZERO;
-       else
-         v->c[0] = ZERO;
-       for (i = 1; i <= m; i++)
-         v->c[i] = i * PI / (m + 1);
-       HTS_lsp2mgc(v, v->c, v->c, m, alpha);
-       HTS_mc2b(v->c, v->c, m, alpha);
-       HTS_gnorm(v->c, v->c, m, v->gamma);
-       for (i = 1; i <= m; i++)
-         v->c[i] *= v->gamma;
-     }
-   }
-
-  HTS_Vocoder_start_excitation(v, p, 0);
-  if (v->stage == 0) {         /* for MCP */
-    HTS_Vocoder_postfilter_mcp(v, spectrum, m, alpha, beta);
-    HTS_mc2b(spectrum, v->cc, m, alpha);
-    for (i = 0; i <= m; i++)
-      v->cinc[i] = (v->cc[i] - v->c[i]) * IPERIOD / v->fprd;
-  } else {                     /* for LSP */
-    HTS_Vocoder_postfilter_lsp(v, spectrum, m, alpha, beta);
-    HTS_check_lsp_stability(spectrum, m);
-    HTS_lsp2mgc(v, spectrum, v->cc, m, alpha);
-    HTS_mc2b(v->cc, v->cc, m, alpha);
-    HTS_gnorm(v->cc, v->cc, m, v->gamma);
-    for (i = 1; i <= m; i++)
-      v->cc[i] *= v->gamma;
-    for (i = 0; i <= m; i++)
-      v->cinc[i] = (v->cc[i] - v->c[i]) * IPERIOD / v->fprd;
-  }
-
-
-  for (j = 0, i = (IPERIOD + 1) / 2; j < v->fprd; j++)
-  {
-    if (v->stage == 0) {      /* for MCP */
-      if (v->p1 == 0.0)
-      {
-        x = HTS_white_noise(v);
-
-        /* MIXED EXCITATION */
-        xnoise = x;
-        xpulse = 0.0;
-      }
-      else
-      {
-        if ((v->pc += 1.0) >= v->p1)
+        v_me->hp[i] = v_me->hn[i] = 0.0;
+        for (j = 0; j < v_me->num_filters; j++)
         {
-          x = sqrt(v->p1);
-          v->pc = v->pc - v->p1;
+            v_me->hp[i] += strengths[j] * v_me->h[j][i];
+            v_me->hn[i] += (1 - strengths[j]) * v_me->h[j][i];
         }
-        else
-        {
-          x = 0.0;
-        }
-
-        /* MIXED EXCITATION */
-        xpulse = x;
-        xnoise = HTS_mseq(v);  /* ABY: plus or minus 1 */
-      }
-
-      /* MIXED EXCITATION */
-      /* The real work -- apply shaping filters to pulse and noise */
-      fxpulse = fxnoise = 0.0;
-      for (k = v_me->filter_order - 1; k > 0; k--)
-      {
-        fxpulse += v_me->hp[k] * v_me->xp_sig[k];
-        fxnoise += v_me->hn[k] * v_me->xn_sig[k];
-
-        v_me->xp_sig[k] = v_me->xp_sig[k-1];
-        v_me->xn_sig[k] = v_me->xn_sig[k-1];
-      }
-
-      fxpulse += v_me->hp[0] * xpulse;
-      fxnoise += v_me->hn[0] * xnoise;
-      v_me->xp_sig[0] = xpulse;
-      v_me->xn_sig[0] = xnoise;
-
-      x = fxpulse + fxnoise; /* excitation is pulse plus noise */
-
-      x *= exp(v->c[0]);
-      x = HTS_mlsadf(x, v->c, m, alpha, PADEORDER, v->d1);
-
-    } else {                  /* for LSP */
-      if (!NGAIN)
-        x *= v->c[0];
-      x = HTS_mglsadf(x, v->c, m, alpha, v->stage, v->d1);
     }
 
-    x *= volume;
+    /* lf0 -> pitch */
+    if (lf0 == LZERO)
+        p = 0.0;
+    else
+        p = v->rate / exp(lf0);
 
-      /* output */
-      if (rawdata)
-         rawdata[rawidx++] = x;
-      if (audio) {
-         if (x > 32767.0)
-            xs = 32767;
-         else if (x < -32768.0)
-            xs = -32768;
-         else
-            xs = (short) x;
-         HTS_Audio_write(audio, xs);
-      }
+    /* first time */
+    if (v->p1 < 0.0) {
+        HTS_Vocoder_initialize_excitation(v, 0);
+        if (v->stage == 0) {      /* for MCP */
+            HTS_mc2b(spectrum, v->c, m, alpha);
+        } else {                  /* for LSP */
+            if (v->use_log_gain)
+                v->c[0] = LZERO;
+            else
+                v->c[0] = ZERO;
+            for (i = 1; i <= m; i++)
+                v->c[i] = i * PI / (m + 1);
+            HTS_lsp2mgc(v, v->c, v->c, m, alpha);
+            HTS_mc2b(v->c, v->c, m, alpha);
+            HTS_gnorm(v->c, v->c, m, v->gamma);
+            for (i = 1; i <= m; i++)
+                v->c[i] *= v->gamma;
+        }
+    }
 
-      if (!--i) {
-         for (i = 0; i <= m; i++)
-            v->c[i] += v->cinc[i];
-         i = IPERIOD;
-      }
-   }
+    HTS_Vocoder_start_excitation(v, p, 0);
+    if (v->stage == 0) {         /* for MCP */
+        HTS_Vocoder_postfilter_mcp(v, spectrum, m, alpha, beta);
+        HTS_mc2b(spectrum, v->cc, m, alpha);
+        for (i = 0; i <= m; i++)
+            v->cinc[i] = (v->cc[i] - v->c[i]) * IPERIOD / v->fprd;
+    } else {                     /* for LSP */
+        HTS_Vocoder_postfilter_lsp(v, spectrum, m, alpha, beta);
+        HTS_check_lsp_stability(spectrum, m);
+        HTS_lsp2mgc(v, spectrum, v->cc, m, alpha);
+        HTS_mc2b(v->cc, v->cc, m, alpha);
+        HTS_gnorm(v->cc, v->cc, m, v->gamma);
+        for (i = 1; i <= m; i++)
+            v->cc[i] *= v->gamma;
+        for (i = 0; i <= m; i++)
+            v->cinc[i] = (v->cc[i] - v->c[i]) * IPERIOD / v->fprd;
+    }
 
-   HTS_Vocoder_end_excitation(v, nlpf);
-   HTS_movem(v->cc, v->c, m + 1);
+
+    for (j = 0, i = (IPERIOD + 1) / 2; j < v->fprd; j++)
+    {
+        if (v->stage == 0) {      /* for MCP */
+            if (v->p1 == 0.0)
+            {
+                x = HTS_white_noise(v);
+
+                /* MIXED EXCITATION */
+                xnoise = x;
+                xpulse = 0.0;
+            }
+            else
+            {
+                if ((v->pc += 1.0) >= v->p1)
+                {
+                    x = sqrt(v->p1);
+                    v->pc = v->pc - v->p1;
+                }
+                else
+                {
+                    x = 0.0;
+                }
+
+                /* MIXED EXCITATION */
+                xpulse = x;
+                xnoise = HTS_mseq(v);  /* ABY: plus or minus 1 */
+            }
+
+            /* MIXED EXCITATION */
+            /* The real work -- apply shaping filters to pulse and noise */
+            fxpulse = fxnoise = 0.0;
+            for (k = v_me->filter_order - 1; k > 0; k--)
+            {
+                fxpulse += v_me->hp[k] * v_me->xp_sig[k];
+                fxnoise += v_me->hn[k] * v_me->xn_sig[k];
+
+                v_me->xp_sig[k] = v_me->xp_sig[k-1];
+                v_me->xn_sig[k] = v_me->xn_sig[k-1];
+            }
+
+            fxpulse += v_me->hp[0] * xpulse;
+            fxnoise += v_me->hn[0] * xnoise;
+            v_me->xp_sig[0] = xpulse;
+            v_me->xn_sig[0] = xnoise;
+
+            x = fxpulse + fxnoise; /* excitation is pulse plus noise */
+
+            x *= exp(v->c[0]);
+            x = HTS_mlsadf(x, v->c, m, alpha, PADEORDER, v->d1);
+
+        } else {                  /* for LSP */
+            if (!NGAIN)
+                x *= v->c[0];
+            x = HTS_mglsadf(x, v->c, m, alpha, v->stage, v->d1);
+        }
+
+        x *= volume;
+
+        /* output */
+        if (rawdata)
+            rawdata[rawidx++] = x;
+        if (audio) {
+            if (x > 32767.0)
+                xs = 32767;
+            else if (x < -32768.0)
+                xs = -32768;
+            else
+                xs = (short) x;
+            HTS_Audio_write(audio, xs);
+        }
+
+        if (!--i) {
+            for (i = 0; i <= m; i++)
+                v->c[i] += v->cinc[i];
+            i = IPERIOD;
+        }
+    }
+
+    HTS_Vocoder_end_excitation(v, nlpf);
+    HTS_movem(v->cc, v->c, m + 1);
 }
 
 /* HTS_Vocoder_clear_me: clear vocoder (mixed excitation) */

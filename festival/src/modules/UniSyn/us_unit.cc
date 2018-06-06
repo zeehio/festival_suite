@@ -267,7 +267,7 @@ void window_units( EST_Relation &unit_stream,
     float scale;
     EST_WindowFunc *window_function;
     
-    for (u = unit_stream.head(); u; u = u->next())
+    for (u = unit_stream.head(); u; u = inext(u))
 	num += track(u->f("coefs"))->num_frames();
     frames.resize(num);
 
@@ -279,7 +279,7 @@ void window_units( EST_Relation &unit_stream,
 
     window_function =  EST_Window::creator(window_name);
     
-    for (i = 0, u = unit_stream.head(); u; u = u->next())
+    for (i = 0, u = unit_stream.head(); u; u = inext(u))
     {
 	sig = wave(u->f("sig"));
 	coefs = track(u->f("coefs"));
@@ -336,7 +336,7 @@ void us_get_copy_wave(EST_Utterance &utt, EST_Wave &source_sig,
 
     utt.create_relation("TmpSegment");
 
-    for (s = source_seg.head(); s; s = s->next())
+    for (s = source_seg.head(); s; s = inext(s))
     {
 	n = utt.relation("TmpSegment")->append();
 	merge_features(n, s, 0);
@@ -367,7 +367,7 @@ void us_energy_normalise(EST_Relation &unit)
 {
     EST_Wave *sig;
 
-    for (EST_Item *s = unit.head(); s; s = s->next())
+    for (EST_Item *s = unit.head(); s; s = inext(s))
     {
 	sig = wave(s->f("sig"));
 	if (s->f_present("energy_factor"))
@@ -392,7 +392,7 @@ void us_unit_raw_concat(EST_Utterance &utt)
     sig->fill(0);
     j = 0;
 
-    for (EST_Item *s = utt.relation("Unit", 1)->head(); s; s = s->next())
+    for (EST_Item *s = utt.relation("Unit", 1)->head(); s; s = inext(s))
     {
 	unit_sig = wave(s->f("sig"));
 	unit_coefs = track(s->f("coefs"));
@@ -447,7 +447,7 @@ void concatenate_unit_coefs(EST_Relation &unit_stream, EST_Track &source_lpc)
     }
     else{
       EST_Track *t = 0;
-      for ( ; u; u = u->next())
+      for ( ; u; u = inext(u))
 	{
 	  t = track(u->f("coefs"));
 	  num_source_frames += t->num_frames();
@@ -460,7 +460,7 @@ void concatenate_unit_coefs(EST_Relation &unit_stream, EST_Track &source_lpc)
       
       prev_time = 0.0;
       // copy basic information
-      for (i = 0, l = 0, u = unit_stream.head(); u; u = u->next())
+      for (i = 0, l = 0, u = unit_stream.head(); u; u = inext(u))
 	{
 	  coefs = track(u->f("coefs"));
 	  
@@ -573,14 +573,14 @@ void us_linear_smooth_amplitude( EST_Utterance *utt )
 
   FILE *ofile = fopen( "./join_times.est", "w" );
   EST_Relation *units = utt->relation("Unit");
-  for( EST_Item *u=units->head(); u; u=u->next() ){
+  for( EST_Item *u=units->head(); u; u=inext(u) ){
 
     EST_Item *diphone_left = u;
-    //    EST_Item *diphone_right = u->next();
+    //    EST_Item *diphone_right = inext(u);
 
     fprintf( ofile, "%s\t%f\n", diphone_left->S("name").str(), diphone_left->F("end"));
 
-    EST_Item *join_phone_left = item(diphone_left->f("ph1"))->next();
+    EST_Item *join_phone_left = inext(item(diphone_left->f("ph1")));
     EST_String phone_name = join_phone_left->S("name");
     if( ph_is_sonorant( phone_name ) && !ph_is_silence( phone_name )){
 

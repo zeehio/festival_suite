@@ -118,7 +118,7 @@ static void make_segment_varied_mapping(EST_Relation &source_lab,
     n_i = 0;
     s_i = 0;
     ltime = 0;
-    for (u = source_lab.head(); u; u = u->next())
+    for (u = source_lab.head(); u; u = inext(u))
     {
 	u_frames = u->I("num_frames");
 //	stime = source_pm.t(s_i+u_frames-1) - source_pm.t(s_i);

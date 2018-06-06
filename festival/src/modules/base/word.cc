@@ -62,7 +62,7 @@ LISP FT_Classic_Word_Utt(LISP utt)
     u->create_relation("Segment");
     SylStructure = u->create_relation("SylStructure");
 
-    for (w=u->relation("Word")->first(); w != 0; w = w->next())
+    for (w=u->relation("Word")->first(); w != 0; w = inext(w))
     {
 	lpos = NIL;
 	pos = (EST_String)ffeature(w,"hg_pos");
@@ -111,7 +111,7 @@ LISP FT_Unilex_Word_Utt(LISP utt)
     u->create_relation("Segment");
     SylStructure = u->create_relation("SylStructure");
     
-    for (w=u->relation("Word")->first(); w != 0; w = w->next())
+    for (w=u->relation("Word")->first(); w != 0; w = inext(w))
     {
 	lpos = NIL;
 	pos = EST_String(ffeature(w,"hg_pos"));

@@ -40,6 +40,8 @@
 (require 'multisyn_pauses)
 (require 'target_cost)
 
+
+
 ;; use a global parameter to specify which UnitSelection voice
 ;; to use to synthesise a given utterance for now, because the
 ;; standard Festival synthesis mainline doesn't accept a voice
@@ -47,6 +49,7 @@
 (defvar currentMultiSynVoice nil)
 (defvar relp t)
 (defvar flattenVoice nil)
+(defvar MultiSyn_module_hooks nil)
 
 ; extract utt list from a .data file
 (define (load_utt_list filename)
@@ -65,7 +68,6 @@ l))
 
 (defSynthType MultiSyn
   ;(print "Multisyn unit selection synthesis")
-  (defvar MultiSyn_module_hooks nil)
   (Param.def "unisyn.window_name" "hanning")
   (Param.def "unisyn.window_factor" 1.0)
   ;; Unisyn requires these to be set.
@@ -106,6 +108,9 @@ l))
 ;; specify something else if you don't want lpc
   (us_generate_wave utt 'lpc)
 )
+
+
+
 
 
 ; target cost scheme code 
@@ -177,8 +182,6 @@ Add voice modules to a voice."
 voice))
 
 
-
-
 (define (define_current_voice_reset)
 "(define_current_voice_reset)
 Re-define (current_voice_reset) correctly."
@@ -192,4 +195,6 @@ Reset multisyn specific global variables."
 (Param.set 'unisyn.window_symmetric 1))
 
 
+
 (provide 'multisyn)
+

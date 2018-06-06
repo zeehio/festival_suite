@@ -65,10 +65,10 @@ void subword_list(EST_Item *w, EST_Relation &syllable,
 
     n = metricaltree.append(w);
 
-    if (next(syllable.head()) == 0)
+    if (inext(syllable.head()) == 0)
 	return;
 
-    for (s = syllable.head(); s ; s = s->next())
+    for (s = syllable.head(); s ; s = inext(s))
     {
 	cout << "appending syl\n";
 	n->append_daughter(s);
@@ -82,14 +82,14 @@ void subword_metrical_tree(EST_Item *w, EST_Relation &syllable,
     EST_Item *new_leaf;
     
     // single syllable
-    if (next(syllable.head()) == 0)
+    if (inext(syllable.head()) == 0)
     {
 	new_leaf = metricaltree.append(w);
 	return;
     }
     
     // absorb initial unstressed syllables
-    for (s = syllable.head(); s && (s->f("stress_num") == 0); s = s->next())
+    for (s = syllable.head(); s && (s->f("stress_num") == 0); s = inext(s))
     {
 	new_leaf = metricaltree.append(s);
 	new_leaf->set("MetricalValue", "w");
@@ -99,14 +99,14 @@ void subword_metrical_tree(EST_Item *w, EST_Relation &syllable,
     {
 	new_leaf = metricaltree.append(s);
 	new_leaf->set("MetricalValue", "s");
-	s = make_foot(w, new_leaf, next(s));
+	s = make_foot(w, new_leaf, inext(s));
     }
     
     if (siod_get_lval("mettree_debug", NULL) != NIL)
 	metricaltree.utt()->save("foot.utt", "est");
     
     s = metricaltree.head(); 
-    make_super_foot(w, s, next(s));
+    make_super_foot(w, s, inext(s));
     
     if (siod_get_lval("mettree_debug", NULL) != NIL)
 	metricaltree.utt()->save("super_foot.utt", "est");
@@ -130,11 +130,11 @@ EST_Item *make_foot(EST_Item *w, EST_Item *met_node, EST_Item *next_syl_node)
 	
 	fl = first_leaf(met_node);
 	
-	if (next(next_syl_node))
+	if (inext(next_syl_node))
 	    new_parent = met_node->insert_parent();
 	else
 	{
-	    if (prev(fl))
+	    if (iprev(fl))
 		new_parent = met_node->insert_parent();
 	    else
 	    {
@@ -150,7 +150,7 @@ EST_Item *make_foot(EST_Item *w, EST_Item *met_node, EST_Item *next_syl_node)
 	}
 	new_parent->append_daughter(next_syl_node);
 	
-	next_syl_node = make_foot(w, new_parent, next(next_syl_node));
+	next_syl_node = make_foot(w, new_parent, inext(next_syl_node));
     }
     return next_syl_node;
 }
@@ -165,7 +165,7 @@ static void make_super_foot(EST_Item *w, EST_Item *met_node,
 	return;
     
     // make sure root node is w, i.e. word
-    if (next(next_syl_node))
+    if (inext(next_syl_node))
 	new_parent = met_node->insert_parent();
     else
     {
@@ -182,7 +182,7 @@ static void make_super_foot(EST_Item *w, EST_Item *met_node,
     
     new_parent->append_daughter(next_syl_node);
     
-    make_super_foot(w, new_parent, next(new_parent));
+    make_super_foot(w, new_parent, inext(new_parent));
 }
 
 
@@ -191,7 +191,7 @@ static void all_stress(EST_Relation &syllable, EST_Relation &mettree)
     EST_Item *n, *s;
     int stress_num = -1;
     
-    for (s = syllable.head(); s; s = s->next())
+    for (s = syllable.head(); s; s = inext(s))
 	if (s->I("stress_num",0) > stress_num)
 	    stress_num = s->I("stress_num");
     
@@ -199,7 +199,7 @@ static void all_stress(EST_Relation &syllable, EST_Relation &mettree)
     
     for (; stress_num > 0; --stress_num)
     {
-	for (s = syllable.head(); s; s = s->next())
+	for (s = syllable.head(); s; s = inext(s))
 	    if (s->I("stress_num",0) == stress_num)
 		break;
 	

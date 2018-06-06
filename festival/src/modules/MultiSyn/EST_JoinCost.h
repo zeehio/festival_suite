@@ -131,7 +131,7 @@ inline float EST_JoinCost::operator()( const EST_Item* left, const EST_Item* rig
 
   //default zero cost if units contiguous in database
   // (i.e. this is the cost between a phone and *itself*
-  if( left == right->prev() )
+  if( left == iprev(right) )
     return 0.0;
 
   // An "infinite" join cost for bad units. The idea here is that if
@@ -200,7 +200,7 @@ inline float EST_JoinCost::operator()( const DiphoneCandidate* left, const Dipho
   
   //default zero cost if units contiguous in database
   // (i.e. this is the cost between a phone and *itself*
-  if( left->ph1->next() == right->ph1 )
+  if( inext(left->ph1) == right->ph1 )
     return 0.0;     
 
   //use cached costs in preference to calculating

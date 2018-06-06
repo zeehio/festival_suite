@@ -231,17 +231,17 @@ EST_Val ffeature(EST_Item *item,const EST_String &fname)
 	const EST_String &Sname = ts.get().string();
 	const char *name = Sname;
 	if (streq(name,"n"))
-	    s=s->next();
+	    s=inext(s);
 	else if (streq(name,"p"))
-	    s=s->prev();
+	    s=iprev(s);
 	else if (streq(name,"nn"))
-	    s=s->next()->next();
+	    s=inext(inext(s));
 	else if (streq(name,"pp"))
-	    s=s->prev()->prev();
+	    s=iprev(iprev(s));
 	else if (streq(name,"up"))  // up down should really be private
-	    s=s->up();
+	    s=iup(s);
 	else if (streq(name,"down"))
-	    s=s->down();
+	    s=idown(s);
 	else if (streq(name,"parent"))
 	    s=parent(s);
 	else if (streq(name,"parent_to"))
@@ -259,9 +259,9 @@ EST_Val ffeature(EST_Item *item,const EST_String &fname)
 	else if (streq(name,"daughtern"))
 	    s=daughtern(s);
 	else if (streq(name,"last"))
-	    s=s->last();
+	    s=last(s);
 	else if (streq(name,"first"))
-	    s=s->first();
+	    s=first(s);
 	else if (strncmp(name,"R:",2) == 0)  // new relation structure
 	    s = s->as_relation(&name[2]);
 	else if (s->f_present(Sname))

@@ -1,7 +1,9 @@
 
               The Festival Speech Synthesis System
-                   version 2.4 December 2014
- 
+                   version 2.5 December 2017
+
+https://github.com/festvox/festival/
+
 This directory contains the Festival Speech Synthesis System,
 developed at CSTR, University of Edinburgh. The project was originally
 started by Alan W Black and Paul Taylor but many others have been
@@ -33,9 +35,10 @@ INSTALL
 Festival should run on any standard Unix platform.  It has already run
 on Solaris, SunOS, Linux and FreeBSD.  It requires a C++ compiler (GCC
 2.7.2, 2.8.1, 2.95.[123], 3.2.3 3.3.2 RedHat "gcc-2.96", gcc 3.3, gcc
-4.4.x and gcc-4.5.x are our standard compilers) to install. A port to
-Windows XP/NT/95/98 and 2000 using either Cygnus GNUWIN32, this is
-still new but many people are successfully using it.
+4.4.x and gcc-4.5.x, gcc-6.2.0 are our standard compilers) to
+install. A port to Windows XP/NT/95/98 and 2000 using either Cygnus
+GNUWIN32, this is still new but many people are successfully using it,
+it works fine with Windows 10 bash
 
 A detailed description of installation and requirements for the whole
 system is given in the file INSTALL read that for details.
@@ -46,6 +49,11 @@ Keep abreast of Festival News by regularly checking the Festival homepage
    http://www.cstr.ed.ac.uk/projects/festival/
 or the US site
    http://festvox.org/festival/
+otr on github
+   https://github.com/festvox/festival/
+
+New in Festival 2.5
+   Support for gcc6 (which is a somewhat different dialect of C++)
 
 New in Festival 2.2
    updates to hts (hts_engine 1.07) and clustergen

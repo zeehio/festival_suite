@@ -1,9 +1,10 @@
-###########################################################################
+#!/bin/sh
+#####################################################-*-mode:shell-script-*-
 ##                                                                       ##
-##                Centre for Speech Technology Research                  ##
-##                 (University of Edinburgh, UK) and                     ##
-##                           Korin Richmond                              ##
-##                         Copyright (c) 2002                            ##
+##                                                                       ##
+##                  Language Technologies Institute                      ##
+##                     Carnegie Mellon University                        ##
+##                         Copyright (c) 2017                            ##
 ##                        All Rights Reserved.                           ##
 ##                                                                       ##
 ##  Permission is hereby granted, free of charge, to use and distribute  ##
@@ -12,7 +13,6 @@
 ##  distribute, sublicense, and/or sell copies of this work, and to      ##
 ##  permit persons to whom this work is furnished to do so, subject to   ##
 ##  the following conditions:                                            ##
-##                                                                       ##
 ##   1. The code must retain the above copyright notice, this list of    ##
 ##      conditions and the following disclaimer.                         ##
 ##   2. Any modifications must be clearly marked as such.                ##
@@ -21,10 +21,10 @@
 ##      derived from this software without specific prior written        ##
 ##      permission.                                                      ##
 ##                                                                       ##
-##  THE UNIVERSITY OF EDINBURGH AND THE CONTRIBUTORS TO THIS WORK        ##
+##  CARNEGIE MELLON UNIVERSITY AND THE CONTRIBUTORS TO THIS WORK         ##
 ##  DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING      ##
-##  ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT   ##
-##  SHALL THE UNIVERSITY OF EDINBURGH NOR THE CONTRIBUTORS BE LIABLE     ##
+##  ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT   ##
+##  SHALL CARNEGIE MELLON UNIVERSITY NOR THE CONTRIBUTORS BE LIABLE      ##
 ##  FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    ##
 ##  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN   ##
 ##  AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,          ##
@@ -32,47 +32,40 @@
 ##  THIS SOFTWARE.                                                       ##
 ##                                                                       ##
 ###########################################################################
-#                                                                         #
-#  Contains implementation of Generalis[ed/able] synthesis                #
-#  (like unit selection)                                                  #
-#                                                                         #
-#  Author: Korin Richmond (korin@cstr.ed.ac.uk) Aug  2002                 #
+##                                                                       ##
+##  Download and install the defauly voice and lexicons                  ##
+##                                                                       ##
 ###########################################################################
-TOP=../../..
-DIRNAME=src/modules/MultiSyn
 
-LIB_BUILD_DIRS = inst_tmpl
-BUILD_DIRS = $(LIB_BUILD_DIRS)
+if [ ! -f ../festival/src/include/festival.h ]
+then
+    echo Not in the right directory: cannot install Festival default voice
+    echo You should be in the festival source top level directory
+    echo Where ls -l src/include/festival.h is found
 
-ALL_DIRS = $(BUILD_DIRS)
+    exit -1
+fi
 
-H = UnitSelection.h \
-    VoiceBase.h DiphoneUnitVoice.h \
-    VoiceModuleBase.h DiphoneVoiceModule.h \
-    EST_TargetCost.h TargetCostRescoring.h \
-    EST_JoinCost.h EST_JoinCostCache.h \
-    DiphoneBackoff.h safety.h EST_DiphoneCoverage.h \
-    EST_FlatTargetCost.h EST_HybridTargetCost.h
+if [ ! -d packed ]
+then
+   mkdir packed
+fi
 
+( cd packed;
+  wget http://www.festvox.org/packed/festival/2.4/voices/festvox_kallpc16k.tar.gz;
+  wget http://www.festvox.org/packed/festival/2.4/festlex_CMU.tar.gz;
+  wget http://www.festvox.org/packed/festival/2.4/festlex_POSLEX.tar.gz
+)
 
-SRCS =  UnitSelection.cc \
-        VoiceBase.cc DiphoneUnitVoice.cc \
-        VoiceModuleBase.cc DiphoneVoiceModule.cc \
-        EST_TargetCost.cc TargetCostRescoring.cc \
-        EST_JoinCost.cc EST_JoinCostCache.cc \
-	DiphoneBackoff.cc EST_DiphoneCoverage.cc \
-        EST_FlatTargetCost.cc EST_HybridTargetCost.cc
+THISDIR=`pwd`
 
-OBJS = $(SRCS:.cc=.o)
+( cd ..;
+  tar zxvf $THISDIR/packed/festvox_kallpc16k.tar.gz;
+  tar zxvf $THISDIR/packed/festlex_CMU.tar.gz;
+  tar zxvf $THISDIR/packed/festlex_POSLEX.tar.gz
+)
 
-FILES = Makefile $(SRCS) $(H)
+exit 0
 
-LOCAL_INCLUDES = -I../include
-
-INLIB = $(TOP)/src/lib/libFestival.a
-
-ALL = .buildlib
-
-include $(TOP)/config/common_make_rules
 
 

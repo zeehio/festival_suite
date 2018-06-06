@@ -69,7 +69,7 @@ LISP FT_Int_Targets_Default_Utt(LISP utt)
 	return utt;
 
     add_target(u,seg->first(),0,start);
-    s = seg->last();
+    s = seg->rlast();
     add_target(u,s,(float)ffeature(s,"segment_end"),end);
 
     return utt;

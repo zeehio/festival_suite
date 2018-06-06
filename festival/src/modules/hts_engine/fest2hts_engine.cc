@@ -169,7 +169,7 @@ static LISP HTS_Synthesize_Utt(LISP utt) {
   r->load(get_param_str("-od", hts_output_params, "tmp.lab"), "htk");
 
   for (o = r->first(), s = u->relation("Segment")->first();
-       (o != NULL) && (s != NULL); o = o->next(), s = s->next())
+       (o != NULL) && (s != NULL); o = inext(o), s = inext(s))
     if (o->S("name").before("+").after("-").matches(s->S("name")))
       s->set("end", o->F("end"));
     else
@@ -188,7 +188,7 @@ static LISP HTS_Synthesize_Utt(LISP utt) {
 void HTS_get_copyright(char *str) {
   int i, nCopyright = HTS_NCOPYRIGHT;
   char url[] = HTS_URL, version[] = HTS_VERSION;
-  char *copyright[] = { HTS_COPYRIGHT };
+  const char *copyright[] = { HTS_COPYRIGHT };
 
   sprintf(str,
            "\nThe HMM-Based Speech Synthesis Engine \"hts_engine API\"\n");

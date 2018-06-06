@@ -160,7 +160,7 @@ int festival_load_file(const EST_String &fname)
     EST_String b;
     b = EST_String("(load ")+quote_string(fname,"\"","\\",1)+")";
     // I used to do the above without the b intermediate variable
-    // but that caused a crash for some compilers on some machines 
+    // but that caused a crash for some compilers on some machines
     return festival_eval_command(b);
 }
 
@@ -182,9 +182,10 @@ int festival_eval_command(const EST_String &command)
     }
     else
     {
-	EST_String ll = command;  // copy it;
-	l = read_from_string((char *)ll);
-	leval(l,NIL); 
+        char *w = wstrdup((const char *)command);  // copy it;
+	l = read_from_string(w);
+	leval(l,NIL);
+        wfree(w);
 	rvalue = TRUE;
     }
 

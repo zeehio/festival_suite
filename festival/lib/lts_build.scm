@@ -71,28 +71,39 @@ Special cases for when epsilon may be inserted before letter."
 	(pp (intern (string-append phone "-" nphone))))
     (assoc_string pp (cdr ll))))
 
-(define (find-aligns phones letters)
+(define (find-aligns phones letters ecount)
   "(find-aligns phones letters)
 Find all feasible alignments."
-  (let ((r nil))
+  (let ((r nil) (lp nil) (ll nil))
     (cond
      ((and (null (cdr phones)) (null (cdr letters))
 	   (equal? (car phones) (car letters))
 	   (equal? '# (car phones)))
       (list (list (cons '# '#)))) ;; valid end match
+     ;; Give up with alignment if its out of sync too much 
+     ((and (> (sqrt (* ecount ecount)) 3))
+      r)
+     ((and nil (> 4 (set! lp (length phones)))
+           (> (sqrt (* (- lp (set! ll (length letters)))
+                       (- lp ll)))
+              2))
+;      (format t "out of sync %d %l %l\n"
+;              (- (length phones) (length letters))
+;              phones letters)
+      r)
      (t
       (if (valid-pair '_epsilon_ (car letters))
 	  (set! r (mapcar
 		   (lambda (p)
 		     (cons (cons '_epsilon_ (car letters)) p))
-		   (find-aligns phones (cdr letters)))))
+		   (find-aligns phones (cdr letters) (+ 1 ecount)))))
       (if (valid-pair (car phones) (car letters))
 	  (set! r 
 		(append r
 			(mapcar
 			 (lambda (p)
 			   (cons (cons (car phones) (car letters)) p))
-			 (find-aligns (cdr phones) (cdr letters))))))
+			 (find-aligns (cdr phones) (cdr letters) ecount)))))
       ;; Hmm, change this to always check doubles
       (if (valid-pair-e (car phones) (car (cdr phones)) (car letters))
 	  (set! r
@@ -104,11 +115,11 @@ Find all feasible alignments."
 						       (car (cdr phones))))
 				       (car letters)) p))
 			 (find-aligns (cdr (cdr phones)) 
-				      (cdr letters))))))
+				      (cdr letters) (+ ecount 1))))))
       r))))
 
 (define (findallaligns phones letters)
-  (let ((a (find-aligns phones letters)))
+  (let ((a (find-aligns phones letters 0)))
     (if (null a)
 	(begin
 	  (set! failedaligns (+ 1 failedaligns))
@@ -621,7 +632,8 @@ model, if appropriate)."
             ((string-equal ltype "utf8")
              (format ofd
                        "( %l %l ("
-                       (utf8explode (car entry))
+                       ;; Note sure downcase is generic enough for utf8 
+                       (mapcar downcase (utf8explode (car entry)))
                        (cadr entry)))
             ((string-equal ltype "asis")
              (format ofd
@@ -629,7 +641,7 @@ model, if appropriate)."
                      (car entry)
                      (cadr entry)))
             (t
-             (format ofd
+            (format ofd
                      "( \"%s\" %l ("
                      (downcase (car entry))
                      (cadr entry))))

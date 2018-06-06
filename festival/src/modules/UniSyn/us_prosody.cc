@@ -353,7 +353,7 @@ void merge_pitchmarks(EST_Utterance &u, EST_Track &pm1,
     target_pm.resize(1000000, 0);
     s_start = 0.0;
 
-    for (s = guide.head(); s; s = s->next())
+    for (s = guide.head(); s; s = inext(s))
 	{
 	    s_end = s->F("end", 1);
 	    if (s->fI("use_pm") == 1)
@@ -397,7 +397,7 @@ void warp_f0(EST_Track &source_f0, EST_Relation &source_seg,
 
     cout << "tag: " << target_seg << endl;
 
-    for (t = target_seg.head(); t; t = t->next())
+    for (t = target_seg.head(); t; t = inext(t))
     {
 	s = daughter1(t,"Match");
 	if (s == 0) // ie extra phone in target specification

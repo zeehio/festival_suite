@@ -58,60 +58,60 @@
 
 void rescoreCandidates( EST_VTCandidate *candidates, float beam_width, float mult )
 {
-  // first calculate the stats for the "model"
-  float dur = 0.0;  
-  EST_Item *ph1 = 0;
-  EST_Item *ph2 = 0;
-  //EST_FVector *ph1_mid = 0;
-  //EST_FVector *ph2_mid = 0;
+    // first calculate the stats for the "model"
+    float dur = 0.0;  
+    EST_Item *ph1 = 0;
+    EST_Item *ph2 = 0;
+    //EST_FVector *ph1_mid = 0;
+    //EST_FVector *ph2_mid = 0;
   
-  EST_TList<ScorePair> scores;
+    EST_TList<ScorePair> scores;
   
-  // get all scores to work out what durations are "suitable"
-  for( EST_VTCandidate *it = candidates; it != 0; it=it->next ){
-    ph1 = it->s;
-    ph2 = ph1->next();
-    //       ph1_mid = fvector( ph1->f( "midcoef" ) );
-    //       ph2_mid = fvector( ph2->f( "midcoef" ) );
+    // get all scores to work out what durations are "suitable"
+    for( EST_VTCandidate *it = candidates; it != 0; it=it->next ){
+        ph1 = it->s;
+        ph2 = inext(ph1);
+        //       ph1_mid = fvector( ph1->f( "midcoef" ) );
+        //       ph2_mid = fvector( ph2->f( "midcoef" ) );
     
-    dur = getJoinTime(ph2) - getJoinTime(ph1); // duration of diphone unit
-    scores.append( ScorePair(it->score,dur, it)  );
-  }
-  
-  sort( scores );
-  //cerr << scores << endl;
-  
-  // calculate simple mean duration of some or all of candidates
-  float meandur = 0.0;
-  int n = 0;
-
-  if( beam_width < 0 ){ // just average all of them
-    for( EST_Litem *li = scores.head(); li != 0; li = li->next() ){
-      meandur += scores(li)._dur;
-      n++;
+        dur = getJoinTime(ph2) - getJoinTime(ph1); // duration of diphone unit
+        scores.append( ScorePair(it->score,dur, it)  );
     }
-  }
-  else{
-    float score_cutoff = scores.first()._score + beam_width;
-    for( EST_Litem *li = scores.head(); li != 0; li = li->next() ){
-      if( scores(li)._score > score_cutoff )
-	break;
-      else{
-	meandur += scores(li)._dur;
-	n++;
-      }
-    }    
-  }
   
-  meandur /= n;
+    sort( scores );
+    //cerr << scores << endl;
+  
+    // calculate simple mean duration of some or all of candidates
+    float meandur = 0.0;
+    int n = 0;
 
-  // then tweak the scores based on that
-  for( EST_Litem *li = scores.head(); li != 0; li = li->next() ){
-    float cand_dur = scores(li)._dur; 
-    //    cerr << scores(li)._cand->score << " ";
-    scores(li)._cand->score += (mult * abs( cand_dur - meandur ) );
-    //    cerr << scores(li)._cand->score << endl;
-  }
+    if( beam_width < 0 ){ // just average all of them
+        for( EST_Litem *li = scores.head(); li != 0; li = li->next() ){
+            meandur += scores(li)._dur;
+            n++;
+        }
+    }
+    else{
+        float score_cutoff = scores.first()._score + beam_width;
+        for( EST_Litem *li = scores.head(); li != 0; li = li->next() ){
+            if( scores(li)._score > score_cutoff )
+                break;
+            else{
+                meandur += scores(li)._dur;
+                n++;
+            }
+        }    
+    }
+  
+    meandur /= n;
+
+    // then tweak the scores based on that
+    for( EST_Litem *li = scores.head(); li != 0; li = li->next() ){
+        float cand_dur = scores(li)._dur; 
+        //    cerr << scores(li)._cand->score << " ";
+        scores(li)._cand->score += (mult * abs( cand_dur - meandur ) );
+        //    cerr << scores(li)._cand->score << endl;
+    }
 }
 
 ostream& operator << ( ostream& out, const ScorePair &sp )

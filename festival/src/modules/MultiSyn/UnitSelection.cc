@@ -48,6 +48,7 @@
 #include "EST_JoinCost.h"
 #include "EST_TargetCost.h"
 #include "EST_FlatTargetCost.h"
+#include "EST_HybridTargetCost.h"
 #include "safety.h"
 
 
@@ -88,7 +89,7 @@ static LISP FT_utt_tag_unit( LISP l_utt, LISP l_unitnum )
   EST_Item *it = u->relation("Unit")->first();  
   int i;
   for( i=1; i<=n && it!= 0; i++ )
-    it=it->next();
+    it=inext(it);
   
   if( i<=n )
     EST_error( "unit number greater than number of items in unit relation") ;
@@ -165,21 +166,27 @@ static void parseVoiceDataParams( LISP l_dataparams,
 				  EST_String *uttExt,
 				  EST_String *wavExt,
 				  EST_String *pmExt,
-				  EST_String *coefExt )
+				  EST_String *JCCoefExt,
+          EST_String *TCCoefExt)
 {
   int listlen = siod_llength( l_dataparams );
 
-  if( listlen == 8 ){
+  if( listlen == 8 || listlen == 9){
     *uttExt  = get_c_string( CAR1(CDR4(l_dataparams)) );
     *wavExt  = get_c_string( CAR2(CDR4(l_dataparams)) );
     *pmExt   = get_c_string( CAR3(CDR4(l_dataparams)) );
-    *coefExt = get_c_string( CAR4(CDR4(l_dataparams)) );
+    *JCCoefExt = get_c_string( CAR4(CDR4(l_dataparams)) );
+    if( listlen == 8 )
+      *TCCoefExt = EST_String::Empty;
+    else 
+      *TCCoefExt = get_c_string( CAR5(CDR4(l_dataparams)) );
   }
   else if( listlen == 4 ){ //set some defaults
     *uttExt  = ".utt";
     *wavExt  = ".wav";
     *pmExt   = ".pm";
-    *coefExt = ".coef"; 
+    *JCCoefExt = ".coef"; 
+    *TCCoefExt = EST_String::Empty;
   }
   else
     EST_error( "Incorrect number of voice data parameters" );    
@@ -194,7 +201,7 @@ static void parseVoiceDataParams( LISP l_dataparams,
 static LISP FT_make_du_voice( LISP l_bnames, LISP l_datadirs, LISP l_srate ) 
 { 
   EST_String uttDir, wavDir, pmDir, coefDir;
-  EST_String uttExt, wavExt, pmExt, coefExt;
+  EST_String uttExt, wavExt, pmExt, JCCoefExt, TCCoefExt;
   
   int wav_srate = get_c_int( l_srate );
   if( wav_srate <= 0 )
@@ -202,7 +209,7 @@ static LISP FT_make_du_voice( LISP l_bnames, LISP l_datadirs, LISP l_srate )
   
   parseVoiceDataParams( l_datadirs,
 			&uttDir, &wavDir, &pmDir, &coefDir,
-			&uttExt, &wavExt, &pmExt, &coefExt );
+			&uttExt, &wavExt, &pmExt, &JCCoefExt, &TCCoefExt );
 
   EST_StrList bnames;
   siod_list_to_strlist( l_bnames, bnames );
@@ -211,7 +218,7 @@ static LISP FT_make_du_voice( LISP l_bnames, LISP l_datadirs, LISP l_srate )
   v = new DiphoneUnitVoice( bnames, 
 			    uttDir, wavDir, pmDir, coefDir,
 			    static_cast<unsigned int>(wav_srate),
-			    uttExt, wavExt, pmExt, coefExt );
+			    uttExt, wavExt, pmExt, JCCoefExt, TCCoefExt );
 
   CHECK_PTR(v);
   
@@ -222,7 +229,7 @@ static LISP FT_make_du_voice( LISP l_bnames, LISP l_datadirs, LISP l_srate )
 static LISP FT_make_du_voice_module( LISP l_bnames, LISP l_datadirs, LISP l_srate )
 {
   EST_String uttDir, wavDir, pmDir, coefDir;
-  EST_String uttExt, wavExt, pmExt, coefExt;
+  EST_String uttExt, wavExt, pmExt, JCCoefExt, TCCoefExt;
 
   int wav_srate = get_c_int( l_srate );
   if( wav_srate <= 0 )
@@ -230,7 +237,7 @@ static LISP FT_make_du_voice_module( LISP l_bnames, LISP l_datadirs, LISP l_srat
 
   parseVoiceDataParams( l_datadirs,
 			&uttDir, &wavDir, &pmDir, &coefDir,
-			&uttExt, &wavExt, &pmExt, &coefExt );
+			&uttExt, &wavExt, &pmExt, &JCCoefExt, &TCCoefExt );
   
   EST_StrList bnames;
   siod_list_to_strlist( l_bnames, bnames );
@@ -239,7 +246,7 @@ static LISP FT_make_du_voice_module( LISP l_bnames, LISP l_datadirs, LISP l_srat
   vm = new DiphoneVoiceModule( bnames, 
 			       uttDir, wavDir, pmDir, coefDir,
 			       static_cast<unsigned int>(wav_srate),
-			       uttExt, wavExt, pmExt, coefExt );
+			       uttExt, wavExt, pmExt, JCCoefExt, TCCoefExt );
   CHECK_PTR(vm);
 
   return siod( vm );
@@ -248,7 +255,7 @@ static LISP FT_make_du_voice_module( LISP l_bnames, LISP l_datadirs, LISP l_srat
 static LISP FT_voice_add_module( LISP l_duv, LISP l_bnames, LISP l_datadirs, LISP l_srate )
 {
   EST_String uttDir, wavDir, pmDir, coefDir;
-  EST_String uttExt, wavExt, pmExt, coefExt;
+  EST_String uttExt, wavExt, pmExt, JCCoefExt, TCCoefExt;
 
 
   int wav_srate = get_c_int( l_srate );
@@ -257,7 +264,7 @@ static LISP FT_voice_add_module( LISP l_duv, LISP l_bnames, LISP l_datadirs, LIS
 
   parseVoiceDataParams( l_datadirs,
 			&uttDir, &wavDir, &pmDir, &coefDir,
-			&uttExt, &wavExt, &pmExt, &coefExt );
+			&uttExt, &wavExt, &pmExt, &JCCoefExt, &TCCoefExt );
   
   EST_StrList bnames;
   siod_list_to_strlist( l_bnames, bnames );
@@ -265,7 +272,7 @@ static LISP FT_voice_add_module( LISP l_duv, LISP l_bnames, LISP l_datadirs, LIS
   if( DiphoneUnitVoice* duv = dynamic_cast<DiphoneUnitVoice*>(voice(l_duv)) ){
     if( ! duv->addVoiceModule(bnames, uttDir, wavDir, pmDir, coefDir,
 			      static_cast<unsigned int>(wav_srate),
-			      uttExt, wavExt, pmExt, coefExt ) )
+			      uttExt, wavExt, pmExt, JCCoefExt, TCCoefExt ) )
       EST_error( "voice.addModule failed" );
   }
   else
@@ -442,6 +449,10 @@ static LISP FT_du_voice_setTargetCost(LISP l_voice, LISP l_tc)
       else if(streq(get_c_string(l_tc),"apml")){
 	tc = new EST_APMLTargetCost();
 	CHECK_PTR(tc);
+      }
+      else if(streq(get_c_string(l_tc),"hybrid")){
+  tc = new EST_HybridTargetCost();
+  CHECK_PTR(tc);
       }
       else if(streq(get_c_string(l_tc),"singing")){
 	tc = new EST_SingingTargetCost();
@@ -626,6 +637,20 @@ static LISP FT_du_voice_get_jc_spectral_weight( LISP l_voice )
   return NIL;
 }
 
+static LISP FT_fill_target_coefficients(LISP l_voice, LISP l_utt, LISP l_trackfile)
+{
+  EST_Utterance *utt = get_c_utt(l_utt);
+  DiphoneUnitVoice *duv = dynamic_cast<DiphoneUnitVoice*>(voice(l_voice));
+  EST_String filename = get_c_string(l_trackfile);
+
+  EST_Track tcCoefs;
+  if( (tcCoefs.load(filename) != read_ok ))
+    EST_error( "Couldn't load data file %s", (const char*)filename );
+  duv->fill_target_coefficients(utt, &tcCoefs);
+
+  return l_utt;
+}
+
 
 void festival_MultiSyn_init(void)
 {
@@ -804,6 +829,10 @@ void festival_MultiSyn_init(void)
   "(du_voice.getDiphoneCoverage DU_VOICE FILENAME)\n\
    prints diphone coverage information for this voice\n\
    use filename '-' for stdout.");
+
+  init_subr_3("multisyn_hybrid_fill_target_coefficients", FT_fill_target_coefficients,
+  "(multisyn_hybrid_fill_target_coefficients VOICE UTT TRACKFILE)\n\
+    Use the voice to add the given target cost coefficients to the utterance.");
   
 
 }

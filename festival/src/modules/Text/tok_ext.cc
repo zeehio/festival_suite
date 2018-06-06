@@ -141,7 +141,7 @@ static EST_Item *next_token(EST_TokenStream &ts,
 	for (i=0; i < lhc; i++)
 	    append_token(ps,EST_Token("*lhc*"));
 	append_token(ps,ts.get());
-	ns = ps.last();
+	ns = ps.rlast();
 	for (i=0; i < rhc; i++)
 	    append_token(ps,ts.get());
 	return ns;
@@ -153,7 +153,7 @@ static EST_Item *next_token(EST_TokenStream &ts,
 	append_token(ps,ts.get());
     remove_item(ps.first(),"Token");
 
-    return s->next();
+    return inext(s);
 }
 
 static void append_token(EST_Relation &ps, const EST_Token &t)

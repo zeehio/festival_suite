@@ -300,6 +300,16 @@ SABLE mode token specific analysis."
   (")EMPH" (ATTLIST UTT)
    (set! xxml_word_features (sable_pop_word_features))
    UTT)
+  ("(BC" (ATTLIST UTT)
+   (xxml_synth UTT)
+   (format t "pre BC\n")
+   (set! bc_feats ATTLIST)
+   nil)
+  (")BC" (ATTLIST UTT)
+   (xxml_synth UTT)
+   (format t "post BC\n")
+   (set! bc_feats nil)
+   nil)
   ("(PITCH" (ATTLIST UTT)
    ;; Status: probably complete
    ;; At present festival requires an utterance break here

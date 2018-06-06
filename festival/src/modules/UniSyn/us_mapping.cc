@@ -70,7 +70,7 @@
 //     //cout << "Source_pm" << source_pm.equal_space() << endl << endl;
 //     //cout << "Target_pm" << target_pm.equal_space() << endl << endl;
 
-//     for (s = source_lab.head(); s; s = s->next())
+//     for (s = source_lab.head(); s; s = inext(s))
 //     {
 // 	s_end = s->F("source_end");
 // 	t_end = s->F("end");
@@ -104,120 +104,120 @@ void make_segment_single_mapping(EST_Relation &source_lab,
 				 EST_Track &source_pm, 
 				 EST_Track &target_pm, EST_IVector &map) 
 {
-  int i = 0;
-  int s_i_start, s_i_end, t_i_start, t_i_end;
-  EST_Item *s;
-  float s_end, s_start, t_end, t_start, m;
-  map.resize(target_pm.num_frames());
+    int i = 0;
+    int s_i_start, s_i_end, t_i_start, t_i_end;
+    EST_Item *s;
+    float s_end, s_start, t_end, t_start, m;
+    map.resize(target_pm.num_frames());
   
-  s_start = t_start = 0.0;
-  s_i_start = t_i_start = 0;
+    s_start = t_start = 0.0;
+    s_i_start = t_i_start = 0;
 
-  if (target_pm.t(target_pm.num_frames() - 1) < 
-      source_lab.tail()->F("end",0))
+    if (target_pm.t(target_pm.num_frames() - 1) < 
+        source_lab.tail()->F("end",0))
     {
-      EST_warning("Target pitchmarks end before end of target segment "
-		  "timings (%f vs %f). Expect a truncated utterance\n",
-		  target_pm.t(target_pm.num_frames() - 1),
-		  source_lab.tail()->F("end",0.0));
+        EST_warning("Target pitchmarks end before end of target segment "
+                    "timings (%f vs %f). Expect a truncated utterance\n",
+                    target_pm.t(target_pm.num_frames() - 1),
+                    source_lab.tail()->F("end",0.0));
     }
   
   
   
-  for (s = source_lab.head(); s; s = s->next())
+    for (s = source_lab.head(); s; s = inext(s))
     {
 
-      //      printf( "*********************************************\nphone %s\n", s->S("name").str());
+        //      printf( "*********************************************\nphone %s\n", s->S("name").str());
 
-      s_end = s->F("source_end");
-      t_end = s->F("end");
+        s_end = s->F("source_end");
+        t_end = s->F("end");
 
-      s_i_end = source_pm.index_below(s_end);
-      t_i_end = target_pm.index_below(t_end);
+        s_i_end = source_pm.index_below(s_end);
+        t_i_end = target_pm.index_below(t_end);
 
-      // make sure that at least one frame is available
-      if (s_i_end <= s_i_start)
-	s_i_end += 1;
+        // make sure that at least one frame is available
+        if (s_i_end <= s_i_start)
+            s_i_end += 1;
 
-//       printf("(s_i_start s_i_end t_i_start t_i_end) %d %d %d %d\n",
-//       	     s_i_start, s_i_end, t_i_start, t_i_end ); 
-//       printf("(s_i_start-s_i_end t_i_start-t_i_end) %d %d\n",
-// 	     s_i_end - s_i_start, t_i_end - t_i_start); 
+        //       printf("(s_i_start s_i_end t_i_start t_i_end) %d %d %d %d\n",
+        //       	     s_i_start, s_i_end, t_i_start, t_i_end ); 
+        //       printf("(s_i_start-s_i_end t_i_start-t_i_end) %d %d\n",
+        // 	     s_i_end - s_i_start, t_i_end - t_i_start); 
       
 
 
-      // OK for time alignment mapping function here to be single 
-      // linear across subcomponents?...
-      //      m =  float(t_i_end-t_i_start+1)/float (s_i_end-s_i_start+1);
-      m = (t_end-t_start)/(s_end-s_start);
-      //m =1.0;
-      //      printf( "m=%f\n", m );
+        // OK for time alignment mapping function here to be single 
+        // linear across subcomponents?...
+        //      m =  float(t_i_end-t_i_start+1)/float (s_i_end-s_i_start+1);
+        m = (t_end-t_start)/(s_end-s_start);
+        //m =1.0;
+        //      printf( "m=%f\n", m );
 
-      // time offsets for relative times 
-      float apm_t_off = (s_i_start==0) ? 0.0 : source_pm.t(s_i_start-1);
-      float tpm_t_off = (t_i_start==0) ? 0.0 : target_pm.t(t_i_start-1);
+        // time offsets for relative times 
+        float apm_t_off = (s_i_start==0) ? 0.0 : source_pm.t(s_i_start-1);
+        float tpm_t_off = (t_i_start==0) ? 0.0 : target_pm.t(t_i_start-1);
 
-//       printf("apm_t_off = %f\ntpm_t_off = %f\n", apm_t_off, tpm_t_off); 
+        //       printf("apm_t_off = %f\ntpm_t_off = %f\n", apm_t_off, tpm_t_off); 
 
-      int apm_i = s_i_start;                         // analysis pitch mark index
-      float apm_t = source_pm.t(apm_i)-apm_t_off;// analysis pitch mark time
-      float next_apm_t = source_pm.t(apm_i+1)-apm_t_off;
+        int apm_i = s_i_start;                         // analysis pitch mark index
+        float apm_t = source_pm.t(apm_i)-apm_t_off;// analysis pitch mark time
+        float next_apm_t = source_pm.t(apm_i+1)-apm_t_off;
        
-      for( i=t_i_start; i<=t_i_end; ++i ){
-	float tpm_t = target_pm.t(i)-tpm_t_off;      // target pitch mark time
+        for( i=t_i_start; i<=t_i_end; ++i ){
+            float tpm_t = target_pm.t(i)-tpm_t_off;      // target pitch mark time
 	
-	// find closest pitchmark (assume only need forward search from current
-	// point, since pitchmarks should always be increasing)
-	while( (apm_i<=s_i_end) && (fabs((next_apm_t*m)-tpm_t) <= fabs((apm_t*m)-tpm_t)) ){
-// 	  printf("(next_apm_t apm_t) %f %f\n", 
-// 		 fabs((next_apm_t*m)-tpm_t), fabs((apm_t*m)-tpm_t) );
-	  apm_t = next_apm_t;
-	  ++apm_i;
-          next_apm_t = source_pm.t(apm_i+1)-apm_t_off;
-	}
+            // find closest pitchmark (assume only need forward search from current
+            // point, since pitchmarks should always be increasing)
+            while( (apm_i<=s_i_end) && (fabs((next_apm_t*m)-tpm_t) <= fabs((apm_t*m)-tpm_t)) ){
+                // 	  printf("(next_apm_t apm_t) %f %f\n", 
+                // 		 fabs((next_apm_t*m)-tpm_t), fabs((apm_t*m)-tpm_t) );
+                apm_t = next_apm_t;
+                ++apm_i;
+                next_apm_t = source_pm.t(apm_i+1)-apm_t_off;
+            }
 	
-// // 	printf( "tpm %d = apm %d\n", i, apm_i );
+            // // 	printf( "tpm %d = apm %d\n", i, apm_i );
 
-// 	int slow_index = source_pm.index( target_pm(i) );
+            // 	int slow_index = source_pm.index( target_pm(i) );
 
-// 	printf( "(my slow) %d %d\n", apm_i, slow_index ); 
+            // 	printf( "(my slow) %d %d\n", apm_i, slow_index ); 
 	
-	map[i] = apm_i;
-      }
+            map[i] = apm_i;
+        }
       
-      // for next loop
-      if (s->next())
-      {
-          s_i_start = s_i_end+1;
-          t_i_start = t_i_end+1;
-          s_start = source_pm.t(s_i_start);
-          t_start = target_pm.t(t_i_start);
-      }
+        // for next loop
+        if (inext(s))
+        {
+            s_i_start = s_i_end+1;
+            t_i_start = t_i_end+1;
+            s_start = source_pm.t(s_i_start);
+            t_start = target_pm.t(t_i_start);
+        }
     }
-  if (i == 0)
-    map.resize(0);  // nothing to synthesize
-  else
-    map.resize(i);
+    if (i == 0)
+        map.resize(0);  // nothing to synthesize
+    else
+        map.resize(i);
 }
 
 
 void make_linear_mapping(EST_Track &pm, EST_IVector &map) 
 {
-  int pm_num_frames = pm.num_frames();
+    int pm_num_frames = pm.num_frames();
   
-  map.resize(pm_num_frames);
+    map.resize(pm_num_frames);
   
-  for (int i = 0; i < pm_num_frames; ++i)
-    map[i] = i;
+    for (int i = 0; i < pm_num_frames; ++i)
+        map[i] = i;
 }
 
 
 static bool contiguous( const EST_Item*left, const EST_Item* right )
 {
-  if( (item(left->f("source_ph1")))->next() == item(right->f("source_ph1")) )
-    return true;
+    if( (inext(item(left->f("source_ph1")))) == item(right->f("source_ph1")) )
+        return true;
   
-  return false;
+    return false;
 } 
 
 
@@ -269,9 +269,9 @@ void make_join_interpolate_mapping( const EST_Track &source_pm,
     voicing[i] = 0;
   }
   // middle loop 
-  for( EST_Item *diphone_right=diphone_left->next(); 
+  for( EST_Item *diphone_right=inext(diphone_left); 
        diphone_right; 
-       diphone_right=diphone_left->next() ){
+       diphone_right=inext(diphone_left) ){
 
     printf( "%s\t%f\n", diphone_left->S("name").str(), diphone_left->F("end"));
     
@@ -284,7 +284,7 @@ void make_join_interpolate_mapping( const EST_Track &source_pm,
 	    right_start_index,
 	    right_end_index );
 
-    EST_String join_phone_name = item(diphone_left->f("ph1"))->next()->S("name");
+    EST_String join_phone_name = inext(item(diphone_left->f("ph1")))->S("name");
 
     cerr << "phone contigous " << contiguous(diphone_left,diphone_right) << endl;
 
@@ -461,9 +461,9 @@ void make_join_interpolate_mapping2( const EST_Track &source_pm,
     voicing[i] = 0;
   }
   // middle loop 
-  for( EST_Item *diphone_right=diphone_left->next(); 
+  for( EST_Item *diphone_right=inext(diphone_left); 
        diphone_right; 
-       diphone_right=diphone_left->next() ){
+       diphone_right=inext(diphone_left) ){
 
     printf( "%s\t%f\n", diphone_left->S("name").str(), diphone_left->F("end"));
     
@@ -476,7 +476,7 @@ void make_join_interpolate_mapping2( const EST_Track &source_pm,
 	    right_start_index,
 	    right_end_index );
 
-    EST_String join_phone_name = item(diphone_left->f("ph1"))->next()->S("name");
+    EST_String join_phone_name = inext(item(diphone_left->f("ph1")))->S("name");
 
     cerr << "phone contigous " << contiguous(diphone_left,diphone_right) << endl;
 
@@ -691,10 +691,10 @@ void map_to_relation(EST_IVector &map, EST_Relation &r,
 
     EST_Item *last_s = 0;
 
-    for (s = u->relation("smap")->head(); s; s = s->next())
+    for (s = u->relation("smap")->head(); s; s = inext(s))
     {
 	int n = s->I("index");
-	for (t = u->relation("tmap")->head(); t; t = t->next())
+	for (t = u->relation("tmap")->head(); t; t = inext(t))
 	{
 	    if (map(t->I("index")) == n)
 	    {
@@ -728,7 +728,7 @@ void make_segment_double_mapping(EST_Relation &source_lab,
 		    "timings. Expect a truncated utterance.\n");
 
     for (s = source_lab.head(), t = target_lab.head(); s && t; 
-	 s = s->next(), t = t->next())
+	 s = inext(s), t = inext(t))
     {
         if (s->S("name") != t->S("name"))
 	  cerr << "Warning: Source and Target segment names do not match: "
@@ -778,14 +778,14 @@ void make_dp_mapping(EST_Relation &source_lab, EST_Track &source_pm,
     s_start = t_start = 0.0;
 
     // should really be replaced by feature functions.
-    for (prev_end = 0.0, s = source_lab.head(); s; s = s->next())
+    for (prev_end = 0.0, s = source_lab.head(); s; s = inext(s))
     {
 	s->set("start", prev_end);
 	prev_end = s->F("end");
     }
 
     // should really be replaced by feature functions.
-    for (prev_end = 0.0, s = target_lab.head(); s; s = s->next())
+    for (prev_end = 0.0, s = target_lab.head(); s; s = inext(s))
     {
 	s->set("start", prev_end);
 	prev_end = s->F("end");
@@ -796,14 +796,14 @@ void make_dp_mapping(EST_Relation &source_lab, EST_Track &source_pm,
 	EST_warning("Target pitchmarks end before end of target segment "
 		    "timings. Expect a truncated utterance.\n");
 
-    for (s = source_lab.head(); s; s = s->next())
+    for (s = source_lab.head(); s; s = inext(s))
     {
 	s_start = s->F("start");
 
 	cout << "source: " << *s << endl;
 
 	while (s && (!s->in_relation(match_name)))
-	    s = s->next();
+	    s = inext(s);
 
 	cout << "active source: " << *s << endl;
 

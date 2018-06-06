@@ -104,7 +104,8 @@ DiphoneVoiceModule::DiphoneVoiceModule( const EST_StrList& basenames,
 					const EST_String& uttExt,
 					const EST_String& wavExt,
 					const EST_String& pmExt,
-					const EST_String& coefExt )
+					const EST_String& JCCoefExt,
+          const EST_String& TCCoefExt )
 					
   : fileList( basenames ),
     utt_dir ( uttDir  ),
@@ -112,7 +113,8 @@ DiphoneVoiceModule::DiphoneVoiceModule( const EST_StrList& basenames,
     pm_dir( pmDir  ),
     pm_ext( pmExt  ),
     coef_dir( coefDir ),
-    coef_ext( coefExt ),
+    JCCoef_ext( JCCoefExt ),
+    TCCoef_ext( TCCoefExt ),
     wave_dir( wavDir  ),
     wave_ext( wavExt  ),
     wav_srate( sr ),
@@ -123,58 +125,123 @@ DiphoneVoiceModule::DiphoneVoiceModule( const EST_StrList& basenames,
   
 }
 
-void DiphoneVoiceModule::addCoefficients( EST_Relation *segs, const EST_Track& coefs )
+
+void DiphoneVoiceModule::addTCoefficients( EST_Relation *segs, const EST_Track& coefs )
 {
-  float startt, midt, endt;
-  EST_FVector *startf, *midf, *endf;
-  const int num_coefs = coefs.num_channels();
-  
-  // hack to avoid overhead of string creation and deletion
-  // (EST feature access should really be changed to take 
-  // const char* instead of const EST_String& )
-  static const EST_String startcoef_str("startcoef");
-  static const EST_String midcoef_str("midcoef");
-  static const EST_String endcoef_str("endcoef");
-  static const EST_String start_str("start");
+    // This currently copies 4 frames into the segment.
+    // The first at the start time, second 0.25 through the segment, etc...
 
-  EST_Item *seg=segs->head();
-  startt = seg->F(start_str);
-  
-  startf = new EST_FVector(num_coefs);
-  CHECK_PTR(startf);
-  coefs.copy_frame_out(coefs.index(startt), *startf); //this one not shared
+    float t0, t5, tstep;
+    EST_FVector *f;
+    const int num_coefs = coefs.num_channels();
+
+    // Feature names. There is also a copy of these in EST_HybridTargetCost.cc
+    static const EST_String start_str("start");
+    static const EST_String ll_str("target_ll");
+    static const EST_String l_str("target_l");
+    static const EST_String r_str("target_r");
+    static const EST_String rr_str("target_rr");
+
+    EST_Item *seg=segs->head();
  
-  for( ; seg!=0; seg=seg->next() ){
+    for( ; seg!=0; seg=inext(seg) )
+    {
+        if(iprev(seg))
+            t0 = iprev(seg)->features().val("end").Float();
+        else 
+            t0 = 0.0;
+        t5 = seg->features().val("end").Float();
+        tstep = (t5 - t0)/4;
     
-    // work out boundary for diphone join
-    midt = getJoinTime( seg );
-    
-    // copy frames out and set as features
-    seg->features().set_val( startcoef_str, est_val(startf) );
 
-    midf = new EST_FVector(num_coefs);
-    CHECK_PTR(midf);
-    coefs.copy_frame_out(coefs.index(midt), *midf);    
-    seg->features().set_val( midcoef_str, est_val(midf) );
+        //cout << "Processing phone: " << seg->name() << endl;
     
-    endt = seg->features().val("end").Float();
-    endf = new EST_FVector(num_coefs);
-    CHECK_PTR(endf);
-    coefs.copy_frame_out(coefs.index(endt), *endf);    
-    seg->features().set_val( endcoef_str, est_val(endf) );
+        f = new EST_FVector(num_coefs);
+        CHECK_PTR(f);
+        coefs.copy_frame_out(coefs.index(t0), *f);
+        seg->features().set_val( ll_str, est_val(f) );
+        //cout << " ll: " << t0 << endl;
+        //f->est_save("-","est_ascii");
+
+
+        f = new EST_FVector(num_coefs);
+        CHECK_PTR(f);
+        coefs.copy_frame_out(coefs.index(t0 + tstep), *f);
+        seg->features().set_val( l_str, est_val(f) );    
+        //cout << " l: " << t0 + tstep << endl;
+        //f->est_save("-","est_ascii");
+
+
+        f = new EST_FVector(num_coefs);
+        CHECK_PTR(f);
+        coefs.copy_frame_out(coefs.index(t0 + 2.0*tstep), *f);
+        seg->features().set_val( r_str, est_val(f) );    
+        //cout << " r: " << t0 + 2.0*tstep << endl;
+        //f->est_save("-","est_ascii");
+
+        f = new EST_FVector(num_coefs);
+        CHECK_PTR(f);
+        coefs.copy_frame_out(coefs.index(t0 + 3.0*tstep), *f);
+        seg->features().set_val( rr_str, est_val(f) );    
+        //cout << " rr: " << t0 + 3.0*tstep << endl;
+        //f->est_save("-","est_ascii");
+
+    }
+}
+
+
+void DiphoneVoiceModule::addJCoefficients( EST_Relation *segs, const EST_Track& coefs )
+{
+    float startt, midt, endt;
+    EST_FVector *startf, *midf, *endf;
+    const int num_coefs = coefs.num_channels();
+  
+    // hack to avoid overhead of string creation and deletion
+    // (EST feature access should really be changed to take 
+    // const char* instead of const EST_String& )
+    static const EST_String startcoef_str("startcoef");
+    static const EST_String midcoef_str("midcoef");
+    static const EST_String endcoef_str("endcoef");
+    static const EST_String start_str("start");
+
+    EST_Item *seg=segs->head();
+    startt = seg->F(start_str);
+  
+    startf = new EST_FVector(num_coefs);
+    CHECK_PTR(startf);
+    coefs.copy_frame_out(coefs.index(startt), *startf); //this one not shared
+ 
+    for( ; seg!=0; seg=inext(seg) )
+    {
+        // work out boundary for diphone join
+        midt = getJoinTime( seg );
     
-    startf = endf; // phones share frame at phone boundary (reference counted in EST_Val)
-  }
+        // copy frames out and set as features
+        seg->features().set_val( startcoef_str, est_val(startf) );
+
+        midf = new EST_FVector(num_coefs);
+        CHECK_PTR(midf);
+        coefs.copy_frame_out(coefs.index(midt), *midf);    
+        seg->features().set_val( midcoef_str, est_val(midf) );
+    
+        endt = seg->features().val("end").Float();
+        endf = new EST_FVector(num_coefs);
+        CHECK_PTR(endf);
+        coefs.copy_frame_out(coefs.index(endt), *endf);    
+        seg->features().set_val( endcoef_str, est_val(endf) );
+    
+        startf = endf; // phones share frame at phone boundary (reference counted in EST_Val)
+    }
 }
 
 void DiphoneVoiceModule::flatPack( EST_Relation *segs,
 				   const EST_TargetCost *tc ) const
 {
 
-  const EST_FlatTargetCost *ftc = (EST_FlatTargetCost *)tc;
+    const EST_FlatTargetCost *ftc = (EST_FlatTargetCost *)tc;
 
-  for( EST_Item *seg=segs->head(); seg->next() !=0; seg=seg->next() )
-    tcdatahash->add_item(seg, ftc->flatpack(seg));
+    for( EST_Item *seg=segs->head(); inext(seg) !=0; seg=inext(seg) )
+        tcdatahash->add_item(seg, ftc->flatpack(seg));
 
 }
 
@@ -210,12 +277,26 @@ void DiphoneVoiceModule::initialise( const EST_TargetCost *tc, bool ignore_bad_t
     segs = u->relation( "Segment" );
     
     // add join cost coefficients (at middle of phones)
-    EST_Track coefs;
-    if( (coefs.load((coef_dir+fileList(it)+coef_ext))) != read_ok )
+    EST_Track JCCoefs;
+    if( (JCCoefs.load((coef_dir+fileList(it)+JCCoef_ext))) != read_ok )
       EST_error( "Couldn't load data file %s", 
-		 (const char*) (coef_dir+fileList(it)+coef_ext) );      
+		 (const char*) (coef_dir+fileList(it)+JCCoef_ext) );      
     
-    addCoefficients( segs, coefs );
+    addJCoefficients( segs, JCCoefs );
+
+    // Load target cost Coefficients if specified
+    if ( TCCoef_ext != EST_String::Empty ) {
+      
+      EST_Track TCCoefs;
+      
+      if( (TCCoefs.load((coef_dir+fileList(it)+TCCoef_ext))) != read_ok )
+        EST_error( "Couldn't load data file %s", 
+     (const char*) (coef_dir+fileList(it)+TCCoef_ext) );      
+    
+    addTCoefficients( segs, TCCoefs );
+
+    }    
+
 
     if (tc->is_flatpack())
       {
@@ -255,78 +336,78 @@ DiphoneVoiceModule::~DiphoneVoiceModule()
 
 void DiphoneVoiceModule::addToCatalogue( const EST_Utterance *utt, int *num_ignored, bool ignore_bad )
 {
-  EST_Item *item, *next_item;
-  ItemList *diphoneList;
-  const EST_String *ph1, *ph2;
-  int found=0;
+    EST_Item *item, *next_item;
+    ItemList *diphoneList;
+    const EST_String *ph1, *ph2;
+    int found=0;
   
-  static const EST_String bad_str( "bad" );
+    static const EST_String bad_str( "bad" );
 
-  item = (utt->relation( "Segment" ))->tail();
-  if( item!=0 ){
-    ph2 = &(item->features().val("name").String());
+    item = (utt->relation( "Segment" ))->tail();
+    if( item!=0 ){
+        ph2 = &(item->features().val("name").String());
     
-    while( (item=item->prev()) != 0 ){
+        while( (item=iprev(item)) != 0 )
+        {
+            next_item = inext(item);
 
-      next_item = item->next();
+            // You'd think we need to check both item->f_present(bad_str) and 
+            // next_item->f_present(bad_str) like this:
+            //if((item->f_present(bad_str) || next_item->f_present(bad_str)) && ignore_bad == true){
+            // But experiment showed that then each time one diphone too many would be
+            // ignored.  This was partly compensated by a bug pesent up to r1.14     
+            // (a iteration within "if(item=item->prev()!=0)" just before the "continue")
+            // which caused the leftmost bad phone in a row of bad phones NOT to be ignored
+            // when the length of the row was even (or when it was odd and ended in the 
+            // utterance-final phone, which is never checked for badness).
+            if(item->f_present(bad_str) && ignore_bad == true){
 
-      // You'd think we need to check both item->f_present(bad_str) and 
-      // next_item->f_present(bad_str) like this:
-      //if((item->f_present(bad_str) || next_item->f_present(bad_str)) && ignore_bad == true){
-      // But experiment showed that then each time one diphone too many would be
-      // ignored.  This was partly compensated by a bug pesent up to r1.14     
-      // (a iteration within "if(item=item->prev()!=0)" just before the "continue")
-      // which caused the leftmost bad phone in a row of bad phones NOT to be ignored
-      // when the length of the row was even (or when it was odd and ended in the 
-      // utterance-final phone, which is never checked for badness).
-      if(item->f_present(bad_str) && ignore_bad == true){
+                (*num_ignored)++;
 
-	(*num_ignored)++;
-
- 	EST_warning( "Ignoring diphone \"%s_%s\" (LEFT %s in %s at %fs, bad flag \"%s\")", 
- 		     item->S("name").str(), 
- 		     next_item->S("name").str(), 
- 		     item->S("name").str(), 
- 		     utt->f.S("fileid").str(), 
- 		     item->F("end"),
- 		     item->S("bad").str() );
+                EST_warning( "Ignoring diphone \"%s_%s\" (LEFT %s in %s at %fs, bad flag \"%s\")", 
+                             item->S("name").str(), 
+                             next_item->S("name").str(), 
+                             item->S("name").str(), 
+                             utt->f.S("fileid").str(), 
+                             item->F("end"),
+                             item->S("bad").str() );
 	
-	if(item->prev() != 0){
-	  continue;
-	}
-	else 
-	  break; //already at start of list, so finish up
-      }
+                if(iprev(item) != 0){
+                    continue;
+                }
+                else 
+                    break; //already at start of list, so finish up
+            }
       
-      ph1 = &(item->features().val("name").String());
+            ph1 = &(item->features().val("name").String());
 
-//    EST_warning( "Adding phone \"%s\" (%s, %f) to diphoneList %s_%s",
-//                item->S("name").str(),
-//                utt->f.S("fileid").str(),
-//                item->F("end"),
-//                item->S("name").str(),
-//                next_item->S("name").str());
+            //    EST_warning( "Adding phone \"%s\" (%s, %f) to diphoneList %s_%s",
+            //                item->S("name").str(),
+            //                utt->f.S("fileid").str(),
+            //                item->F("end"),
+            //                item->S("name").str(),
+            //                next_item->S("name").str());
       
-      diphoneList = catalogue->val(EST_String::cat(*ph1,"_",*ph2), found);
+            diphoneList = catalogue->val(EST_String::cat(*ph1,"_",*ph2), found);
       
-      if( !found ){
-	diphoneList = new ItemList;
-	CHECK_PTR(diphoneList);
-	catalogue->add_item(EST_String::cat(*ph1,"_",*ph2), diphoneList, 1); // no_search=1
-      }
+            if( !found ){
+                diphoneList = new ItemList;
+                CHECK_PTR(diphoneList);
+                catalogue->add_item(EST_String::cat(*ph1,"_",*ph2), diphoneList, 1); // no_search=1
+            }
      
-      diphoneList->append( item );
+            diphoneList->append( item );
       
-      ph2 = ph1;
+            ph2 = ph1;
+        }
     }
-  }
 }
 
 void DiphoneVoiceModule::getDiphone( const EST_Item *phone1, 
 				     EST_Track* coef, EST_Wave* sig, int *midframe,
 				     bool extendLeft, bool extendRight ) const
 {
-  EST_Item *phone2 = phone1->next();
+    EST_Item *phone2 = inext(phone1);
 	
   // load the relevant parts
   const EST_String &fname = phone1->relation()->utt()->f.val("fileid").String();
@@ -435,7 +516,7 @@ inline EST_VTCandidate* makeCandidate( const EST_Item *target_ph1,
   EST_VTCandidate *c = new EST_VTCandidate;
   CHECK_PTR(c);
   
-  EST_Item *cand_ph2 = cand_ph1->next();
+  EST_Item *cand_ph2 = inext(cand_ph1);
 
   // set up all the members we can here
   c->s = const_cast<EST_Item*>(cand_ph1);
@@ -446,7 +527,7 @@ inline EST_VTCandidate* makeCandidate( const EST_Item *target_ph1,
   else
     left = fvector( cand_ph1->features().val( "midcoef" ) );
 
-  if( target_ph1->next()->f_present( extendRight_str ) )
+  if( inext(target_ph1)->f_present( extendRight_str ) )
     right = fvector( cand_ph2->features().val( "endcoef" ) );
   else
     right = fvector( cand_ph2->features().val( "midcoef" ) );
@@ -554,7 +635,7 @@ int DiphoneVoiceModule::getPhoneList( const EST_String &phone, ItemList &list )
   if( utt_dbase != 0 ){
     for( EST_Litem *it=utt_dbase->head(); it!=0 ; it=it->next() ){
       EST_Item *ph=(*utt_dbase)(it)->relation("Segment")->head();
-      for( ; ph!=0; ph=ph->next() ){
+      for( ; ph!=0; ph=inext(ph) ){
 	if( ph->S("name") == phone ){
 	  list.append( ph );
 	  n++;

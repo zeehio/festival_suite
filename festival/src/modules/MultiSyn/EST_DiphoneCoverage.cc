@@ -74,40 +74,44 @@ static EST_String get_syl_pos_name(const int index);
 
 void EST_DiphoneCoverage::add_stats(const EST_Utterance *utt)
 {
-  EST_Relation *segs = utt->relation("Segment");
-  EST_Item *it=segs->head();
+    EST_Relation *segs = utt->relation("Segment");
+    EST_Item *it=segs->head();
 
-  for( ; it->next(); it=it->next() )
-    if(it->next())
-      {
-	EST_String key =
-	  EST_String::cat(get_diphone_name(it),"-",
-			  get_stress_name(get_stress_index(it)),"-",
-			  get_syl_pos_name(get_syl_pos_index(it)));
-	int val = 0;
-	if (strhash.present(key))
-	  {
-	    val = strhash.val(key);
-	    strhash.remove_item(key);
-	  }
-	++val;
-	strhash.add_item(key,val);
-      }
+    for( ; inext(it); it=inext(it) )
+    {
+        if(inext(it))
+        {
+            EST_String key =
+                EST_String::cat(get_diphone_name(it),"-",
+                                get_stress_name(get_stress_index(it)),"-",
+                                get_syl_pos_name(get_syl_pos_index(it)));
+            int val = 0;
+            if (strhash.present(key))
+            {
+                val = strhash.val(key);
+                strhash.remove_item(key);
+            }
+            ++val;
+            strhash.add_item(key,val);
+        }
+    }
 }
 	
 void EST_DiphoneCoverage::print_stats(const EST_String filename)
 {
-  ostream *outf;
+    ostream *outf;
     
-  if (filename == "-")
-    outf = &cout;
-  else
-    outf = new ofstream(filename);
+    if (filename == "-")
+        outf = &cout;
+    else
+        outf = new ofstream(filename);
     
-  EST_THash<EST_String, int>::Entries them;
+    EST_THash<EST_String, int>::Entries them;
 
-  for(them.begin(strhash); them; them++)
-    *outf << them->k << " " << them->v << "\n";
+    for (them.begin(strhash); them; them++)
+    {
+        *outf << them->k << " " << them->v << "\n";
+    }
     
     if (outf != &cout)
 	delete outf;
@@ -119,23 +123,23 @@ void EST_DiphoneCoverage::print_stats(const EST_String filename)
 
 static EST_String get_diphone_name(const EST_Item *seg1)
 {
-  return EST_String::cat(seg1->S("name"),"_",seg1->next()->S("name"));
+    return EST_String::cat(seg1->S("name"),"_",inext(seg1)->S("name"));
 }
 
 
 static int get_stress_index(const EST_Item *seg1)
 {
-  int i1 = 0, i2=0;
+    int i1 = 0, i2=0;
 
-  if( ph_is_vowel(seg1->S("name")) && 
-      !ph_is_silence(seg1->S("name")) )
-    i1 = (parent(seg1,"SylStructure")->I("stress") > 0) ? 1 : 0;
+    if( ph_is_vowel(seg1->S("name")) && 
+        !ph_is_silence(seg1->S("name")) )
+        i1 = (parent(seg1,"SylStructure")->I("stress") > 0) ? 1 : 0;
 
-  if( ph_is_vowel(seg1->next()->S("name")) && 
-      !ph_is_silence(seg1->next()->S("name")) )
-    i2 = (parent(seg1->next(),"SylStructure")->I("stress") > 0) ? 1 : 0;
+    if( ph_is_vowel(inext(seg1)->S("name")) && 
+        !ph_is_silence(inext(seg1)->S("name")) )
+        i2 = (parent(inext(seg1),"SylStructure")->I("stress") > 0) ? 1 : 0;
 
-  return i2+2*i1;
+    return i2+2*i1;
 }
 
 static EST_String get_stress_name(const int index)
@@ -148,9 +152,9 @@ static int get_syl_pos_index(const EST_Item *seg1)
   int pos = TCPOS_MEDIAL;
 
   const EST_Item *syl = parent(seg1,"SylStructure");
-  const EST_Item *next_syl = parent(seg1->next(),"SylStructure");
-  const EST_Item *next_next_syl = parent(seg1->next()->next(),"SylStructure");
-  const EST_Item *prev_syl = parent(seg1->prev(),"SylStructure");
+  const EST_Item *next_syl = parent(inext(seg1),"SylStructure");
+  const EST_Item *next_next_syl = parent(inext(inext(seg1)),"SylStructure");
+  const EST_Item *prev_syl = parent(iprev(seg1),"SylStructure");
 
   if( syl != next_syl )
     pos = TCPOS_INTER;

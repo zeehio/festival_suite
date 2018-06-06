@@ -84,12 +84,12 @@ LISP acost_utt_load_coeffs(LISP utt, LISP params)
     c_si->set_val("Acoustic_Coeffs", est_val(track));
 
     // Now add subtracks for each segment
-    for (EST_Item *s=u->relation(segrelation)->first(); s != 0; s=s->next())
+    for (EST_Item *s=u->relation(segrelation)->first(); s != 0; s=inext(s))
     {
 	EST_Track *st = new EST_Track;
 	float start = ffeature(s,"segment_start");
 	float end = ffeature(s,"segment_end");
-	if (s->prev())
+	if (iprev(s))
 	    start -= ac_left_context*
 		ffeature(s,"p.segment_duration").Float();
 	int startf = track->index(start);

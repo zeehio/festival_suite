@@ -59,7 +59,7 @@ LISP FT_Intonation_Simple_Utt(LISP utt)
     u->create_relation("IntEvent");
     u->create_relation("Intonation");
 
-    for (s=u->relation("Syllable")->first(); s != 0; s = s->next())
+    for (s=u->relation("Syllable")->first(); s != 0; s = inext(s))
     {	
 	paccent = wagon_predict(s,accent_tree);
 	if (paccent != "NONE")
@@ -89,7 +89,7 @@ LISP FT_Int_Targets_Simple_Utt(LISP utt)
     
     u->create_relation("Target");
     
-    for (p=u->relation("Phrase")->first(); p != 0 ; p=p->next())
+    for (p=u->relation("Phrase")->first(); p != 0 ; p=inext(p))
     {
 	baseline = f0_mean + (f0_std * 0.6);
 	start = ffeature(p,"R:Phrase.daughter1.word_start");
@@ -103,8 +103,8 @@ LISP FT_Int_Targets_Simple_Utt(LISP utt)
 	    add_target(u,daughter1(start_syl,"SylStructure"),
 	       ffeature(start_syl,"R:SylStructure.daughter1.segment_start"),
 		       baseline);
-	for (s=start_syl->as_relation("Syllable"); s != end_syl->next(); 
-	     s = s->next())
+	for (s=start_syl->as_relation("Syllable"); s != inext(end_syl); 
+	     s = inext(s))
 	{
 	    if (ffeature(s,"accented") == 1)
 		add_targets(u,s,baseline,f0_std);
@@ -131,7 +131,7 @@ static void add_targets(EST_Utterance *u,EST_Item *syl,
     add_target(u,first_seg,ffeature(first_seg,"segment_start"),baseline);
 
     vowel_seg = end_seg; // by default
-    for (t = first_seg; t != 0; t = t->next())
+    for (t = first_seg; t != 0; t = inext(t))
 	if (ph_is_vowel(t->name()))
 	{
 	    vowel_seg = t;
