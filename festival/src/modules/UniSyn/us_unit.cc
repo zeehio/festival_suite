@@ -438,7 +438,7 @@ void concatenate_unit_coefs(EST_Relation &unit_stream, EST_Track &source_lpc)
     int num_source_frames   = 0;
     int num_source_channels = 0;;
     float prev_time, abs_offset, rel_offset, period, offset;
-    int i, j, k;
+    int i, j, k, l;
     EST_Track *coefs;
 
     EST_Item *u = unit_stream.head();

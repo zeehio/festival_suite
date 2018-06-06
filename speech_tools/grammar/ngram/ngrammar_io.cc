@@ -77,8 +77,6 @@ load_ngram_arpa(const EST_String filename, EST_Ngrammar &n, const EST_StrList &v
     EST_TokenStream ts;
     EST_String s;
     int i,j,k, order=0;
-    //double weight;
-    /*double occur;*/
     int this_num,this_order;
 
     if (ts.open(filename) == -1)
@@ -181,13 +179,13 @@ load_ngram_arpa(const EST_String filename, EST_Ngrammar &n, const EST_StrList &v
 	    cerr << "ooooooooops" << endl;
 	    return wrong_format;
 
-	    occur = atof(ts.get().string());
+	    double occur = atof(ts.get().string());
 	    n.accumulate(window,occur);
 
 	    // backoff weight ?
 	    if (!ts.eoln())
 	    {
-		weight = atof(ts.get().string());
+		double weight = atof(ts.get().string());
 		n.set_backoff_weight(window,weight);
 	    }
 	    

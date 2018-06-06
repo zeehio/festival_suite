@@ -46,7 +46,7 @@
 #include "EST_HybridTargetCost.h"
 #include "EST_FMatrix.h"
 #include "ling_class/EST_Item.h"
-
+using namespace std;
 
 static float kl_divergence(EST_FVector *a, EST_FVector *b);
 
