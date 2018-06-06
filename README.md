@@ -39,6 +39,8 @@ of the static analysis coverity tool
    * Improve speech tools documentation
    * man page for text2wave
    * Update EST_strcasecmp.c license to BSD-3 as allowed by the copyright owner
+   * Festival documentation built in html and info formats with make doc
+   * Festival reference card: Code updated from deprecated LaTeX-2.09 to LaTeX2e
  - Features
    * Provide compatibility with Festival-1.96 HTS voices
    * Avoid editing festival/lib/languages.scm to add new language
