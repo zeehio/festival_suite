@@ -39,6 +39,7 @@
 /*                                                                       */
 /*=======================================================================*/
 #include <cstdio>
+#include <list>
 
 using namespace std;
 
@@ -71,8 +72,7 @@ static void festival_main(int argc, char **argv)
 {
     EST_Option al;
     int stdin_input,interactive;
-    EST_Litem *p;
-    EST_StrList files;
+    std::list<EST_String>  files;
     int real_number_of_files = 0;
     int heap_size = FESTIVAL_HEAP_SIZE;
 
@@ -136,22 +136,22 @@ static void festival_main(int argc, char **argv)
 	festival_init_lang(al.val("--language"));
     
     // File processing
-    for (p=files.head(); p != 0; p=p->next())
+    for (std::list<EST_String>::const_iterator p=files.cbegin(); p != files.cend(); ++p)
     {
-	if (files(p) == "-")  // paul thinks I want the "-" -- I don't
+	if (*p == "-")  // paul thinks I want the "-" -- I don't
 	    continue;
 	real_number_of_files++;
 	if (al.present("--tts"))
 	{
-	    if (!festival_say_file(files(p)))
+	    if (!festival_say_file(*p))
 		festival_error();
 	}
-	else if (files(p).matches(make_regex("^(.*")))
+	else if (p->matches(make_regex("^(.*")))
 	{
-	    if (!festival_eval_command(files(p)))
+	    if (!festival_eval_command(*p))
 		festival_error(); // fail if it fails
 	}
-	else if (!festival_load_file(files(p)))
+	else if (!festival_load_file(*p))
 	    festival_error();
     }
 

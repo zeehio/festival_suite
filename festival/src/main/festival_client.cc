@@ -39,6 +39,7 @@
 /*=======================================================================*/
 
 #include <cstdio>
+#include <list>
 
 using namespace std;
 
@@ -80,7 +81,7 @@ int main(int argc, char **argv)
 static void festival_client_main(int argc, char **argv)
 {
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_String server;
     int port;
     FILE *infd;
@@ -190,17 +191,17 @@ static void festival_client_main(int argc, char **argv)
     }
 
     if (al.present("--ttw"))
-	ttw_file(serverfd,files.nth(0));
+	ttw_file(serverfd,files.front());
     else
     {
-	if ((files.length() == 0) || (files.nth(0) == "-"))
+	if ((files.size() == 0) || (files.front() == "-"))
 	    copy_to_server(stdin,serverfd);
 	else 
 	{
-	    if ((infd=fopen(files.nth(0),"rb")) == NULL)
+	    if ((infd=fopen(files.front(),"rb")) == NULL)
 	    {
 		cerr << "festival_client: can't open \"" <<
-		    files.nth(0) << "\"\n";
+		    files.front() << "\"\n";
 		exit(-1);
 	    }
 	    copy_to_server(infd,serverfd);

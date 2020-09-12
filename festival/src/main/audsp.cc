@@ -45,6 +45,7 @@
 #include <cstdio>
 #include <cstring>
 #include <csignal>
+#include <list>
 
 using namespace std;
 
@@ -196,7 +197,7 @@ int main(int argc, char **argv)
 static void auspl_main(int argc, char **argv)
 {
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String> files;
 
     parse_command_line(argc, argv, 
 	 EST_String("Usage: audio spooler \n")+
