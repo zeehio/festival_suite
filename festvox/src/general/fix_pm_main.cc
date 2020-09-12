@@ -36,7 +36,7 @@
 /*                                                                       */
 /*************************************************************************/
 
-
+#include <list>
 #include "EST.h"
 
 int main(int argc,char **argv)
@@ -44,7 +44,7 @@ int main(int argc,char **argv)
     EST_Wave w;
     EST_Track pm_in, pm_out, pm_out2;
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String> files;
     int i,j,window,prewindow,max;
     float maxperiod, minperiod,t;
     int k;

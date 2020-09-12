@@ -63,7 +63,7 @@ int FileExist(char *fnm) {
   int rv = 1;
   ifstream fp_in;
   fp_in.open(fnm, ios::in);
-  if (fp_in == 0) {
+  if (!fp_in.is_open()) {
     cout << "Local: Cannot open file..."<< fnm <<endl;
     rv = 0;
     exit(1);

@@ -37,10 +37,11 @@
 /*                                                                       */
 /*************************************************************************/
 
+#include <list>
 #include "EST.h"
 using namespace std;
 
-static void find_meanstd(EST_Track &ss, EST_StrList &files);
+static void find_meanstd(EST_Track &ss, std::list<EST_String> &files);
 static void cep_normalize(EST_Track &tt, const EST_Track &ss, EST_Relation &rr);
 
 #define num_phones 44
@@ -66,8 +67,7 @@ static int get_phone_id(const char* phone)
 int main(int argc,char **argv)
 {
     EST_Option al;
-    EST_StrList files;
-    EST_Litem *p;
+    std::list<EST_String>  files;
     EST_Track ss,tt;
     EST_Relation rr;
 
@@ -83,26 +83,25 @@ int main(int argc,char **argv)
     find_meanstd(ss,files);
 
     printf("Applying stats\n");
-    for (p=files.head(); p != 0; p=p->next())
+    for (std::list<EST_String>::const_iterator p=files.cbegin(); p != files.cend(); ++p)
     {
-	tt.load(files(p));
-	printf("%s\n",(const char *)files(p));
-	rr.load(EST_String("lab/")+basename(files(p)).before(".")+".lab");
+	tt.load(*p);
+	printf("%s\n",(const char *)(*p));
+	rr.load(EST_String("lab/")+basename(*p).before(".")+".lab");
 	cep_normalize(tt,ss,rr);
-	tt.save(EST_String("n")+files(p),"est_binary");
+	tt.save(EST_String("n")+ *p,"est_binary");
 	rr.clear();
     }
 
     return 0;
 }
 
-static void find_meanstd(EST_Track &ss, EST_StrList &files)
+static void find_meanstd(EST_Track &ss, std::list<EST_String> &files)
 {
     // Find means and stddev for each coefficient
     int i,j;
     float v;
     FILE *fd;
-    EST_Litem *p;
     EST_Track tt;
     EST_Item *s;
     EST_Relation rr;
@@ -110,22 +109,22 @@ static void find_meanstd(EST_Track &ss, EST_StrList &files)
     int phoneid;
     EST_String lll;
 
-    p = files.head();
-    if (p == NULL)
+    if (files.empty())
     {
 	cerr << "cmn: no files to build stats from" << endl;
 	exit(-1);
     }
-    tt.load(files(p));
+    std::list<EST_String>::const_iterator p = files.cbegin();
+    tt.load(*p);
 
     sstable = new EST_SuffStats*[num_phones];
     for (i=0; i< num_phones; i++)
 	sstable[i] = new EST_SuffStats[tt.num_channels()];
     
-    for (p=files.head(); p != 0; p=p->next())
+    for (p=files.cbegin(); p != files.cend(); ++p)
     {
-	tt.load(files(p));
-	lll = EST_String("lab/")+basename(files(p)).before(".")+".lab";
+	tt.load(*p);
+	lll = EST_String("lab/")+basename(*p).before(".")+".lab";
         /*	printf("%s\n",(const char *)lll); */
 	rr.clear();
 	rr.load(lll);

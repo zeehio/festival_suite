@@ -344,7 +344,7 @@ void PostProcess(int *path, int *stMap, int ns, int nt, ofstream& fp_log, char *
   sprintf(stfile, "%s/%s.sl", _labD,fnm);
 
   fp_out.open(myfile, ios::out);
-  if (fp_out == 0) {
+  if (!fp_out.is_open()) {
      cout<<"Cannot open "<<myfile<<endl;
      cout<<"pls create a directory called: lab/ (in the current folder) "<<endl;
      exit(1);

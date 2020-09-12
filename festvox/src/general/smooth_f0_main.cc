@@ -39,7 +39,8 @@
 /*                                                                       */
 /*************************************************************************/
 
-#include <math.h>
+#include <cmath>
+#include <list>
 #include "EST.h"
 #include "EST_cmd_line_options.h"
 
@@ -60,7 +61,7 @@ int main(int argc,char **argv)
     EST_Track f0_in, f0_interpolated, pm_in;
     EST_Option al;
     EST_Features op;
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_String silences;
     EST_Utterance utt; /* to hold labels */
     int i;
@@ -104,13 +105,13 @@ int main(int argc,char **argv)
 
     if (al.present("-pm_input"))
     {
-	if (read_track(pm_in, files.first(), al) != format_ok)
+	if (read_track(pm_in, files.front(), al) != format_ok)
 	    exit(-1);
 	pm_to_f0(pm_in,f0_in,
 		 al.fval("-pm_min_f0"),
 		 al.fval("-pm_f0_shift"));
     }
-    else if (read_track(f0_in, files.first(), al) != format_ok)
+    else if (read_track(f0_in, files.front(), al) != format_ok)
 	exit(-1);
 
     // EST_Track should preserve file_type, it doesn't

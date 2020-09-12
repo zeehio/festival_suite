@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
 
   fp_in.open(argv[1], ios::in);
 
-  if (fp_in == 0) {
+  if (!fp_in.is_open()) {
     cout << "Cannot open file " << argv[1] << endl;
     exit(1);
   }
@@ -832,7 +832,7 @@ int binarytoascii_new(char *inF, char *ouF, int hdrL) {
   int nS = 0;
 
   fp_in.open(inF, ios::in | ios::binary);
-  if (fp_in == 0) {
+  if (!fp_in.is_open()) {
     cout << "Cannot open " << inF << " for binarytoascii_new()\n";
   }
 

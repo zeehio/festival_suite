@@ -40,7 +40,7 @@
 /*                                                                       */
 /*************************************************************************/
 
-
+#include <list>
 #include "EST.h"
 
 int main(int argc,char **argv)
@@ -48,7 +48,7 @@ int main(int argc,char **argv)
     EST_Wave w;
     EST_Relation powcont;
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_Item *powerpoint;
     int i, end_sample, start_sample;
     float factor,increment;

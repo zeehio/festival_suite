@@ -40,6 +40,7 @@
 /*                                                                       */
 /*************************************************************************/
 
+#include <list>
 #include <EST.h>
 #include <EST_math.h>
 
@@ -70,7 +71,7 @@ int main(int argc, char **argv)
 {
     // Phone alignment given cepstrum original
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_Track itrack, otrack;
     EST_Relation ilabel, olabel;
 
