@@ -600,19 +600,19 @@ void EST_WFST::extend_alphabets(const EST_WFST &b)
     // Extend current in/out alphabets to accommodate anything in b's
     // that are not in a's
     // This guarantees that the number in this will still be valid
-    EST_StrList ivocab, ovocab;
+    std::list<EST_String> ivocab, ovocab;
     int i;
     
     for (i=0; i<p_in_symbols.length(); i++)
- 	ivocab.append(in_symbol(i));
+ 	ivocab.push_back(in_symbol(i));
     for (i=0; i<b.p_in_symbols.length(); i++)
 	if (!strlist_member(ivocab,b.in_symbol(i)))
-	    ivocab.append(b.in_symbol(i));
+	    ivocab.push_back(b.in_symbol(i));
     for (i=0; i<p_out_symbols.length(); i++)
-	ovocab.append(out_symbol(i));
+	ovocab.push_back(out_symbol(i));
     for (i=0; i<b.p_out_symbols.length(); i++)
 	if (!strlist_member(ovocab,b.out_symbol(i)))
-	    ovocab.append(b.out_symbol(i));
+	    ovocab.push_back(b.out_symbol(i));
 
     p_in_symbols.init(ivocab);
     p_out_symbols.init(ovocab);

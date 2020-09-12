@@ -1,5 +1,6 @@
 
-#include <stdio.h>
+#include <cstdio>
+#include <list>
 
 #include "EST.h"
 #include "EST_types.h"
@@ -7,7 +8,7 @@
 
 int main(int argc, char *argv[]) 
 { 
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Option cmd_line;
 
     parse_command_line

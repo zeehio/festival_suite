@@ -40,6 +40,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <list>
 #include <iostream>
 #include "EST_error.h"
 #include "EST_cutils.h"
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
 {
   My_Parser_Class pclass;
   EST_Option al;
-  EST_StrList files;
+  std::list<EST_String> files;
   EST_String filename;
   Parse_State state;
 
@@ -116,11 +117,11 @@ int main(int argc, char *argv[])
        "-h               Options help\n",
 			files, al);
 
-  switch (files.length())
+  switch (files.size())
     {
     case 0: filename="-";
       break;
-    case 1: filename=files.first();
+    case 1: filename=files.front();
       break;
     default:
       EST_error("Expected only one filename");

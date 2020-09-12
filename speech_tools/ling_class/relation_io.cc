@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <fstream>
+#include <list>
 #include "EST_unix.h"
 #include "EST_types.h"
 #include "ling_class/EST_Relation.h"
@@ -634,27 +635,27 @@ static void pad_ends(EST_Relation &s, float length)
 }
 
 EST_read_status read_RelationList(EST_RelationList &plist, 
-				  EST_StrList &files, EST_Option &al)
+				  const std::list<EST_String> &files, EST_Option &al)
 {
-    EST_Litem *p, *plp;
+    EST_Litem *plp;
     
     if (al.val("-itype", 0) == "mlf")
     {
-	if (load_RelationList(files.first(), plist) != format_ok)
+	if (load_RelationList(files.front(), plist) != format_ok)
 	    exit (-1);
     }
     else
-	for (p = files.head(); p; p = p->next())
+	for (std::list<EST_String>::const_iterator p = files.cbegin(); p != files.end(); ++p)
 	{
-	    EST_Relation s(files(p));
+	    EST_Relation s(*p);
 	    plist.append(s);
 	    plp = plist.tail();
 	    if (al.present("-itype"))
 	    {
-		if (plist(plp).load(files(p), al.val("-itype")) != format_ok)
+		if (plist(plp).load(*p, al.val("-itype")) != format_ok)
 		    exit (-1);
 	    }
-	    else if (plist(plp).load(files(p)) != format_ok)
+	    else if (plist(plp).load(*p) != format_ok)
 		exit (-1);
 	    if ((al.val("-itype", 0) == "words") && (al.present("-length")))
 		pad_ends(s, al.fval("-length"));

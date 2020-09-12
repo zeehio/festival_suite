@@ -47,7 +47,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     int order;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Option al, op;
     EST_String wordlist_file,wordlist_file2, out_file, format;
     EST_String prev_tag(""), prev_prev_tag(""), last_tag("");
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     EST_Ngrammar::representation_t representation = 
 	EST_Ngrammar::dense;
 
-    EST_StrList wordlist,wordlist2;
+    std::list<EST_String> wordlist,wordlist2;
     EST_Ngrammar ngrammar;
     bool trace=false;
     double floor=0.0;
@@ -188,13 +188,13 @@ int main(int argc, char **argv)
 	prev_prev_tag = SENTENCE_END_MARKER;
 	last_tag = SENTENCE_END_MARKER;
 
-	wordlist.append(SENTENCE_START_MARKER);
-	wordlist.append(SENTENCE_END_MARKER);
+	wordlist.push_back(SENTENCE_START_MARKER);
+	wordlist.push_back(SENTENCE_END_MARKER);
 
 	if (al.present("-p"))
 	{
-	    wordlist2.append(SENTENCE_START_MARKER);
-	    wordlist2.append(SENTENCE_END_MARKER);
+	    wordlist2.push_back(SENTENCE_START_MARKER);
+	    wordlist2.push_back(SENTENCE_END_MARKER);
 	}
     }
     

@@ -42,6 +42,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <list>
 #include "EST_String.h"
 #include "EST_simplestats.h"
 
@@ -54,7 +55,7 @@ EST_Discrete::~EST_Discrete()
     nametrie.clear(Discrete_val_delete_funct);
 }
 
-EST_Discrete::EST_Discrete(const EST_StrList &vocab)
+EST_Discrete::EST_Discrete(const std::list<EST_String> &vocab)
 {
     if(!init(vocab))
     {
@@ -79,6 +80,8 @@ void EST_Discrete::copy(const EST_Discrete &d)
     }
 }
 
+/*
+ * ZEEHIO: Replaced with std::list<EST_String>
 bool EST_Discrete::init(const EST_StrList &vocab)
 {
     // initialize a new EST_Discrete to given set of names
@@ -104,6 +107,36 @@ bool EST_Discrete::init(const EST_StrList &vocab)
 	}
 
 	nametrie.add(vocab(w),tmp);
+    }
+    return true;
+}
+*/
+
+bool EST_Discrete::init(const std::list<EST_String> &vocab)
+{
+    // initialize a new EST_Discrete to given set of names
+    std::list<EST_String>::const_iterator w;
+    int i,*tmp;
+
+    p_def_val = -1;
+    namevector.resize(vocab.size());
+    nametrie.clear(Discrete_val_delete_funct);
+
+    for (i=0,w=vocab.cbegin(); w != vocab.cend(); ++i,++w){
+	namevector[i] = *w;
+	tmp = new int;
+	*tmp = i;
+
+	// check for repeated items - just not allowed
+	if(nametrie.lookup(*w) != NULL)
+	{
+	    cerr << "EST_Discrete : found repeated item '";
+	    cerr << *w << "' in vocab list !" << endl;
+        delete tmp;
+	    return false;
+	}
+
+	nametrie.add(*w,tmp);
     }
     return true;
 }
@@ -157,7 +190,7 @@ Discretes::~Discretes()
     delete[] discretes;
 }
 
-int Discretes::def(const EST_StrList &vocab)
+int Discretes::def(const std::list<EST_String> &vocab)
 {
     //  Define discrete, increasing the size of the table if need be
     int i,pos;

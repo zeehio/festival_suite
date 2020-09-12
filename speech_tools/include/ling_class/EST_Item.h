@@ -230,25 +230,29 @@ protected:
 
     /** TRUE if feature is present, FALSE otherwise */
     int f_present(const EST_String &name) const
-       {return features().present(name); }
+    {
+        if (p_contents)
+            return features().present(name);
+        else
+            return FALSE; }
 
     // Number of items (including this) until no next item.
     int length() const;
     ///@}
 
     // get contents from item
-    EST_Item_Content *contents() const { return (this == 0) ? 0 : p_contents;}
+    EST_Item_Content *contents() const { return p_contents;}
     // used by tree manipulation functions
     void set_contents(EST_Item_Content *li);
 
     // These should be deleted.
     // The item's name 
     const EST_String name() const
-    { return (this == 0) ? EST_String::Empty : f("name",0).string(); }
+    { return f("name",0).string(); }
 
     // Set item's name
     void set_name(const EST_String &name) const
-    { if (this != 0) p_contents->set_name(name); }
+    { p_contents->set_name(name); }
 
     // Shouldn't normally be needed, except for iteration
     EST_Features &features() const { return p_contents->f; }
@@ -256,45 +260,18 @@ protected:
     const EST_Val f(const EST_String &name) const
     { 
 	EST_Val v;
-	if (this == 0)
-        {
-	    EST_error("item is null so has no %s feature",(const char *)name);
-        }
-        else
-        {
-	    for (v=p_contents->f.val_path(name);
-		 v.type() == val_type_featfunc && featfunc(v) != NULL;
-		 v=(featfunc(v))((EST_Item *)(void *)this));
-	    if (v.type() == val_type_featfunc)
-		EST_error("NULL %s function",(const char *)name);
-	}
+
+	for (v=p_contents->f.val_path(name);
+	     v.type() == val_type_featfunc && featfunc(v) != NULL;
+	     v=(featfunc(v))((EST_Item *)(void *)this));
+	if (v.type() == val_type_featfunc)
+	    EST_error("NULL %s function",(const char *)name);
+
 	return v;
     }
 
-#if 0
-    const EST_Val &f(const EST_String &name, const EST_Val &def) const
-    { 
-	if (this == 0) 
-	    return def;
-        else
-        {
-	    const EST_Val *v; 
-	    for (v=&(p_contents->f.val_path(name, def));
-		 v->type() == val_type_featfunc && featfunc(*v) != NULL;
-		 v=&(featfunc(*v))((EST_Item *)(void *)this));
-	    if (v->type() == val_type_featfunc)
-		v = &def;
-	    return *v;
-	}
-    }
-#endif
-
     const EST_Val f(const EST_String &name, const EST_Val &def) const
     { 
-	if (this == 0) 
-	    return def;
-        else
-        {
 	    EST_Val v; 
 	    for (v=p_contents->f.val_path(name, def);
 		 v.type() == val_type_featfunc && featfunc(v) != NULL;
@@ -302,7 +279,7 @@ protected:
 	    if (v.type() == val_type_featfunc)
 		v = def;
 	    return v;
-	}
+
     }
 
     /**@name Cross relational access */
@@ -310,11 +287,11 @@ protected:
 
     /// View item from another relation (const char *) method
     EST_Item *as_relation(const char *relname) const
-    { return (this == 0) ? 0 : p_contents->Relation(relname); }
+    { return p_contents->Relation(relname); }
 
     /// TRUE if this item is in named relation
     int in_relation(const EST_String &relname) const
-    { return (this == 0) ? 0 : p_contents->in_relation(relname); }
+    { return p_contents->in_relation(relname); }
 
     /// Access to the relation links
     EST_TKVL<EST_String, EST_Val> &relations() {return p_contents->relations;}
@@ -324,7 +301,7 @@ protected:
 
     /// The relation of this particular item
     EST_Relation *relation(void) const
-       { return (this == 0) ? 0 : p_relation; }
+       { return p_relation; }
 
     /// True if li is the same item ignoring its relation viewpoint
       int same_item(const EST_Item *li) const
@@ -413,7 +390,8 @@ inline int i_same_item(const EST_Item *l1,const EST_Item *l2)
 
 
 inline EST_Item *as(const EST_Item *n,const char *relname)
-     { return n->as_relation(relname); }
+{  if (n != 0) return n->as_relation(relname);
+    return 0;}
 
 // Relation structure functions
 #include "ling_class/EST_Relation_list.h"

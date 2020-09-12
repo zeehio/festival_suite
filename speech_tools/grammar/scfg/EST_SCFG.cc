@@ -92,7 +92,7 @@ EST_SCFG::~EST_SCFG(void)
 
 }
 
-void EST_SCFG::find_terms_nonterms(EST_StrList &nt, EST_StrList &t,LISP rs)
+void EST_SCFG::find_terms_nonterms(std::list<EST_String> &nt, std::list<EST_String> &t,LISP rs)
 {
     // Cummulate the nonterminals and terminals
     LISP r;
@@ -101,21 +101,21 @@ void EST_SCFG::find_terms_nonterms(EST_StrList &nt, EST_StrList &t,LISP rs)
     {
 	LISP p = car(cdr(car(r)));
 	if (!strlist_member(nt,get_c_string(p)))
-	    nt.append(get_c_string(p));
+	    nt.push_back(get_c_string(p));
 	if (siod_llength(car(r)) == 3)   // unary rule
 	{
 	    LISP d = car(cdr(cdr(car(r))));
 	    if (!strlist_member(t,get_c_string(d)))
-		t.append(get_c_string(d));
+		t.push_back(get_c_string(d));
 	}
 	else                            // binary rules
 	{
 	    LISP d1 = car(cdr(cdr(car(r))));
 	    LISP d2 = car(cdr(cdr(cdr(car(r)))));
 	    if (!strlist_member(nt,get_c_string(d1)))
-		nt.append(get_c_string(d1));
+		nt.push_back(get_c_string(d1));
 	    if (!strlist_member(nt,get_c_string(d2)))
-		nt.append(get_c_string(d2));
+		nt.push_back(get_c_string(d2));
 	}
     }
 
@@ -125,7 +125,7 @@ void EST_SCFG::set_rules(LISP lrules)
 {
     // Initialise rule base from Lisp form
     LISP r;
-    EST_StrList nt_list, term_list;
+    std::list<EST_String> nt_list, term_list;
 
     rules.clear();
     delete_rule_prob_cache();

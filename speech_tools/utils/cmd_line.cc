@@ -44,13 +44,13 @@
 #include "EST_io_aux.h"
 #include "EST_Token.h"
 #include "EST_cutils.h"
-#include "EST_TList.h"
 #include "EST_string_aux.h"
 #include "EST_cmd_line.h"
 #include "EST_Pathname.h"
 #include "EST_Features.h"
 
 #include <iostream>
+#include <list>
 using namespace std;
 
 // This is reset by the command line options functions to argv[0]
@@ -101,7 +101,7 @@ int init_lib_ops(EST_Option &al, EST_Option &op)
 int parse_command_line(int argc, 
 		       char *argv[],
 		       const EST_String &usage,
-		       EST_StrList &files,
+		       std::list<EST_String> &files,
 		       EST_Option &al, int make_stdio)
 {
     // Parse the command line arguments returning them in a normalised
@@ -122,9 +122,9 @@ int parse_command_line(int argc,
     for (i=1; i < argc; i++)
     {
 	if (!EST_String(argv[i]).contains("-",0))  // its a filename
-	    files.append(argv[i]);
+	    files.push_back(argv[i]);
 	else if (streq(argv[i],"-"))   // single "-" denotes stdin/out
-	    files.append("-");
+	    files.push_back("-");
 	else if (!valid_option(options,argv[i],arg))   
 	{
 	    arg_error(argv[0],
@@ -213,8 +213,8 @@ int parse_command_line(int argc,
 	}
     }
 
-    if (files.length() == 0)
-	files.append("-");
+    if (files.empty())
+	files.push_back("-");
 
     return 0;
 }

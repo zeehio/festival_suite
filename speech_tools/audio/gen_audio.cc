@@ -181,7 +181,7 @@ static int play_aucomm_wave(EST_Wave &inwave, EST_Option &al)
     // Play wave by specified command 
     EST_String usrcommand, otype, finalcommand;
     char tmpfile[2048];
-    char pref[2048];
+    char pref[4096];
     int system_result;
 
     if (al.present("-command"))

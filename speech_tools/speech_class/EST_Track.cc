@@ -239,16 +239,15 @@ void EST_Track::resize(int new_num_frames, int new_num_channels, bool set)
 
 }
 
-static void map_to_channels(EST_StrList &channel_map, 
+static void map_to_channels(const std::list<EST_String> &channel_map, 
 		     EST_StrList &channel_names)
 {
-    EST_Litem *p;
     EST_String b, type, first, last;
     int n_f, n_l;
 
-    for (p = channel_map.head(); p; p = p->next())
+    for (std::list<EST_String>::const_iterator p = channel_map.cbegin(); p != channel_map.cend(); ++p)
     {
-	b = channel_map(p);
+	b = *p;
 	if (b.matches("$", 0))
 	{
 	    // do this backwards as types may have "_" in them
@@ -282,7 +281,7 @@ static void map_to_channels(EST_StrList &channel_map,
     }
 }
 
-void EST_Track::resize(int new_num_frames, EST_StrList &new_channels, bool set)
+void EST_Track::resize(int new_num_frames, const std::list<EST_String> &new_channels, bool set)
 {
     EST_StrList x;
     map_to_channels(new_channels, x);

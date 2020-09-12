@@ -65,8 +65,6 @@ int EST_Item_Content::unref_relation(const EST_String &relname)
 {
     // Unreference this item from this relation.  Returns TRUE
     // if no one else is referencing it, FALSE otherwise
-    if (this != 0)
-    {
 	if ((relname == "") && (relations.length() == 1))
 	{   // sigh, something to with isolated EST_Items and
 	    // SunCC causes a problems in exit(), so hit it with
@@ -83,7 +81,6 @@ int EST_Item_Content::unref_relation(const EST_String &relname)
 		   f.F("end",0.0));
 	if (relations.length() == 0)
 	    return TRUE;
-    }
     return FALSE;
 }
 

@@ -40,6 +40,7 @@
 #ifndef __EST_SCFG_H__
 #define __EST_SCFG_H__
 
+#include <list>
 #include "EST_simplestats.h"
 #include "EST_rw_status.h"
 #include "EST_TList.h"
@@ -213,7 +214,7 @@ class EST_SCFG {
     /** Find the terminals and nonterminals in the given grammar, adding
         them to the appropriate given string lists.
     */
-    void find_terms_nonterms(EST_StrList &nt, EST_StrList &t,LISP rules);
+    void find_terms_nonterms(std::list<EST_String> &nt, std::list<EST_String> &t,LISP rules);
     /// Convert nonterminal index to string form
     EST_String nonterminal(int p) const { return nonterminals.name(p); }
     /// Convert terminal index to string form

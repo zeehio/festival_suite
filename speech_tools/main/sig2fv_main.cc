@@ -70,7 +70,7 @@ using namespace std;
 void calculate_orders(EST_StrList &clist, EST_IList &olist,
 		      EST_Option &op);
 
-void add_channels_to_map(EST_StrList &map, EST_StrList &types, 
+void add_channels_to_map(std::list<EST_String> &map, EST_StrList &types, 
 			 EST_Features &op, int order);
 
 void set_options(EST_Features &op, EST_Option &al);
@@ -95,12 +95,13 @@ EST_String sigpr_options_supported(void)
 int main(int argc, char *argv[])
 {
     EST_String out_file("-");
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Option al;
     EST_Features op;
     EST_Wave sig;
     EST_Track full;
-    EST_StrList coef_list, delta_list, acc_list, tlist, map;
+    EST_StrList coef_list, delta_list, acc_list, tlist;
+    std::list<EST_String> map;
     EST_IList olist;
 
     parse_command_line
@@ -163,7 +164,7 @@ int main(int argc, char *argv[])
     StringtoStrList(al.val("-order"), tlist);
     StrListtoIList(tlist, olist);
     
-    if (read_wave(sig, files.first(), al) != read_ok)
+    if (read_wave(sig, files.front(), al) != read_ok)
 	exit(-1);
 
     // allocate and fill time axis

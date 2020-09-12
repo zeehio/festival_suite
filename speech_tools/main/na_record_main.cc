@@ -36,6 +36,7 @@
 /*                     General recording program                         */
 /*                                                                       */
 /*=======================================================================*/
+#include <list>
 #include "EST.h"
 #include "EST_audio.h"
 #include "EST_cmd_line_options.h"
@@ -55,7 +56,7 @@ int main (int argc, char *argv[])
 {
     EST_Wave wave;
     EST_String out_file("-");
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_Option al;
 
     parse_command_line

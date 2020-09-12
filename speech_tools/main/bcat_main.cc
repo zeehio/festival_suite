@@ -41,6 +41,7 @@
 
 
 #include <cstdio>
+#include <list>
 #include "EST.h"
 #include "EST_String.h"
 #include "EST_error.h"
@@ -51,7 +52,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) 
 { 
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_Option settings, cmd_line;
 
     parse_command_line
@@ -75,14 +76,12 @@ int main(int argc, char *argv[])
       return -1;
     }
 
-    EST_Litem *item;
-
-    for(item=files.head(); item; item = item->next())
+    for(std::list<EST_String>::const_iterator item=files.cbegin(); item != files.cend(); ++item)
       {
 	FILE *src;
 
-	if ((src=fopen(files(item), "rb"))==NULL) {
-	  EST_sys_error("can't read '%s'", (const char *)files(item));
+	if ((src=fopen(*item, "rb"))==NULL) {
+	  EST_sys_error("can't read '%s'", (const char *)(*item));
       return -1;
   }
 

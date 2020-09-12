@@ -107,7 +107,7 @@ EST_String distance_measure = "simple"; // could be "matrix"
 
 int main(int argc, char **argv)
 {
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Option al;
     EST_String out_file;
     //int i;
@@ -194,14 +194,14 @@ int main(int argc, char **argv)
     if(al.present("-show_cost"))
 	show_cost=TRUE;
 
-    if(files.length() != 2)
+    if(files.size() != 2)
     {
 	cerr << "Must give 2 patterns !" << endl;
 	exit(-1);
     }
 
-    StringtoStrList(files(files.head()),pattern1_l," ");
-    StringtoStrList(files(files.head()->next()),pattern2_l," ");
+    StringtoStrList(files.front(),pattern1_l," ");
+    StringtoStrList(*std::next(files.begin()),pattern2_l," ");
 
     EST_Utterance utt;
     path1 = utt.create_relation("Lexical");

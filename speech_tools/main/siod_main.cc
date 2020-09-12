@@ -38,6 +38,7 @@
 /*                                                                       */
 /*=======================================================================*/
 #include <cstdlib>
+#include <list>
 #include "EST_cmd_line.h"
 #include "EST_cutils.h"
 #include "EST_Pathname.h"
@@ -51,8 +52,7 @@ static void siod_load_default_files(void);
 int main(int argc, char **argv)
 {
     EST_Option al;
-    EST_StrList files;
-    EST_Litem *p;
+    std::list<EST_String> files;
     int stdin_input,interactive;
     int heap_size = DEFAULT_HEAP_SIZE;
 
@@ -114,18 +114,18 @@ int main(int argc, char **argv)
      if (interactive)
 	siod_load_default_files();
 
-    for (p=files.head(); p != 0; p=p->next())
+    for (std::list<EST_String>::const_iterator p=files.cbegin(); p != files.cend(); ++p)
     {
-	if (files(p) == "-")
+	if (*p == "-")
 	    continue;
-	else if (files(p).matches(make_regex("^(.*")))
+	else if (p->matches(make_regex("^(.*")))
 	{
 	    LISP l;
-	    l = read_from_string(files(p));
+	    l = read_from_string(*p);
 	    leval(l,NIL);
 	}
 	else
-	    vload(files(p),0);
+	    vload(*p,0);
 
     }
 

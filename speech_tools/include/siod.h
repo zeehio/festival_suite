@@ -116,6 +116,11 @@ LISP errswitch(void);
 
 void siod_list_to_strlist(LISP l, EST_StrList &a);
 LISP siod_strlist_to_list(EST_StrList &a);
+void siod_list_to_strlist(LISP l, std::list<EST_String> &a);
+LISP siod_strlist_to_list(const std::list<EST_String> &a);
+
+
+
 void siod_tidy_up();
 LISP siod_quit(void);
 const char *siod_version(void);

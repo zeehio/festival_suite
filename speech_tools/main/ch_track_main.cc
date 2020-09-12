@@ -37,6 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
+#include <list>
 #include "EST.h"
 #include "EST_cmd_line_options.h"
 
@@ -50,7 +51,7 @@ void extract_channel(EST_Track &orig, EST_Track &nt, EST_IList &ch_list);
 EST_write_status save_snns_pat(const EST_String filename, 
 			       EST_TrackList &inpat, EST_TrackList &outpat);
 
-EST_read_status read_TrackList(EST_TrackList &tlist, EST_StrList &files, 
+EST_read_status read_TrackList(EST_TrackList &tlist, const std::list<EST_String> &files, 
 			       EST_Option &al);
 
 void extract(EST_Track &tr, EST_Option &al);
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
     EST_String in_file("-"), out_file("-");
     EST_Option al, settings;
     EST_String fname, ftmp;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Track tr;
     EST_TrackList trlist;
     EST_Litem *p;
@@ -125,7 +126,7 @@ int main(int argc, char *argv[])
     if (read_TrackList(trlist, files, al) != read_ok)
 	exit(0);
 
-    if (files.length() == 0)
+    if (files.empty())
     {
 	cerr << argv[0] << ": no input files specified\n";
 	exit(-1);
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
 
     if (al.present("-track_names"))
     {
-	EST_StrList new_names;
+	std::list<EST_String> new_names;
 	if(load_StrList(al.val("-track_names"),new_names) != format_ok)
 	{
 	    cerr << "Failed to load new track names file." << endl;

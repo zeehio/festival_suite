@@ -40,6 +40,7 @@
  /*                                                                       */
  /*************************************************************************/
 
+#include <list>
 #include "EST_TList.h"
 
 template<class T> EST_TItem<T> *EST_TItem<T>::make(const T &val)

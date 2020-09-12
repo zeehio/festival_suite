@@ -37,6 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
+#include <list>
 #include "EST_cmd_line.h"
 #include "EST_tilt.h"
 #include "EST_Track.h"
@@ -54,7 +55,8 @@ int main (int argc, char *argv[])
     EST_Relation ev;
     EST_Option al, op;
     EST_String out_file("-"), ev_format, pstring;
-    EST_StrList files, event_list;
+    std::list<EST_String> files;
+    EST_StrList event_list;
     EST_Item *e;
 
     float shift;
@@ -78,7 +80,7 @@ int main (int argc, char *argv[])
     out_file = al.present("-o") ? al.val("-o") : (EST_String)"-";
     init_lib_ops(al, op);
 
-    ev.load(files.first());
+    ev.load(files.front());
 
     // temporary fix until status of start and end is finalised
     float prev_end = 0.0;

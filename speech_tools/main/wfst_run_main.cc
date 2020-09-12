@@ -63,8 +63,7 @@ static int wfst_run_main(int argc, char **argv)
 {
     // recognize/transduce
     EST_Option al;
-    EST_StrList files;
-    EST_Litem *f;
+    std::list<EST_String>  files;
     EST_String wfstfile;
     FILE *ofd;
     int r;
@@ -116,14 +115,14 @@ static int wfst_run_main(int argc, char **argv)
     if (al.present("-cumulate_into"))
 	wfst.start_cumulate();
 
-    for (f=files.head(); f != 0; f=f->next())
+    for (std::list<EST_String>::const_iterator f=files.cbegin(); f != files.cend(); ++f)
     {
-	if (files(f) == "-")
+	if (*f == "-")
 	    ts.open(stdin,FALSE);
 	else
-	    if (ts.open(files(f)) != 0)
+	    if (ts.open(*f) != 0)
 		EST_error("failed to read WFST data file from \"%s\"",
-			  (const char *)files(f));
+			  (const char *)(*f));
 	    
 	// Not the best way to input things but will do the the present
 	while(!ts.eof())

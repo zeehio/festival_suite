@@ -75,7 +75,7 @@ static int wfst_build_main(int argc, char **argv)
 {
     // Top level function generates a WFST from rules
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_String outfile;
 
     parse_command_line
@@ -108,37 +108,37 @@ static int wfst_build_main(int argc, char **argv)
 
     if (al.val("-type") == "kk")
     {
-	ruleset = car(vload(files(files.head()),1));
+	ruleset = car(vload(files.front(),1));
 	kkcompile(ruleset,*wfst);
     }
     else if (al.val("-type") == "lts")
     {
-	ruleset = car(vload(files(files.head()),1));
+	ruleset = car(vload(files.front(),1));
 	ltscompile(ruleset,*wfst);
     }
     else if (al.val("-type") == "rg")
     {
-	ruleset = car(vload(files(files.head()),1));
+	ruleset = car(vload(files.front(),1));
 	rgcompile(ruleset,*wfst);
     }
     else if (al.val("-type") == "tl")
     {
-	ruleset = car(vload(files(files.head()),1));
+	ruleset = car(vload(files.front(),1));
 	tlcompile(ruleset,*wfst);
     }
     else if (al.val("-type") == "asis")
     {
-	if (wfst->load(files.nth(0)) != format_ok) exit(-1);
+	if (wfst->load(files.front()) != format_ok) exit(-1);
     }
     else if (al.val("-type") == "compose")
     {
 	EST_WFST a,b;
 	
-	if (files.length() != 2)
+	if (files.size() != 2)
 	    EST_error("compose requires two WFSTs to combine");
 
-	if (a.load(files.nth(0)) != format_ok) exit(-1);
-	if (b.load(files.nth(1)) != format_ok) exit(-1);
+	if (a.load(files.front()) != format_ok) exit(-1);
+	if (b.load(*std::next(files.cbegin())) != format_ok) exit(-1);
 	
 	wfst->compose(a,b);
     }
@@ -146,11 +146,11 @@ static int wfst_build_main(int argc, char **argv)
     {
 	EST_WFST a,b;
 
-	if (files.length() != 2)
+	if (files.size() != 2)
 	    EST_error("union requires two WFSTs to combine");
 	
-	if (a.load(files.nth(0)) != format_ok) exit(-1);
-	if (b.load(files.nth(1)) != format_ok) exit(-1);
+	if (a.load(files.front()) != format_ok) exit(-1);
+	if (b.load(*std::next(files.cbegin())) != format_ok) exit(-1);
 	
 	wfst->uunion(a,b);
     }
@@ -158,10 +158,10 @@ static int wfst_build_main(int argc, char **argv)
     {
 	EST_WFST a,b;
 	
-	if (files.length() != 2)
+	if (files.size() != 2)
 	    EST_error("intersect requires two WFSTs to combine");
-	if (a.load(files.nth(0)) != format_ok) exit(-1);
-	if (b.load(files.nth(1)) != format_ok) exit(-1);
+	if (a.load(files.front()) != format_ok) exit(-1);
+	if (b.load(*std::next(files.cbegin())) != format_ok) exit(-1);
 	
 	wfst->intersection(a,b);
     }
@@ -169,10 +169,10 @@ static int wfst_build_main(int argc, char **argv)
     {
 	EST_WFST a,b;
 	
-	if (files.length() != 2)
+	if (files.size() != 2)
 	    EST_error("concat requires two WFSTs to combine");
-	if (a.load(files.nth(0)) != format_ok) exit(-1);
-	if (b.load(files.nth(1)) != format_ok) exit(-1);
+	if (a.load(files.front()) != format_ok) exit(-1);
+	if (b.load(*std::next(files.cbegin())) != format_ok) exit(-1);
 	
  	wfst->concat(a,b);
     }
@@ -180,16 +180,16 @@ static int wfst_build_main(int argc, char **argv)
     {
 	EST_WFST a,b;
 	
-	if (files.length() != 2)
+	if (files.size() != 2)
 	    EST_error("difference requires two WFSTs to combine");
-	if (a.load(files.nth(0)) != format_ok) exit(-1);
-	if (b.load(files.nth(1)) != format_ok) exit(-1);
+	if (a.load(files.front()) != format_ok) exit(-1);
+	if (b.load(*std::next(files.cbegin())) != format_ok) exit(-1);
 	
 	wfst->difference(a,b);
     }
     else if (al.val("-type") == "regex")
     {
-	ruleset = car(vload(files(files.head()),1));
+	ruleset = car(vload(files.front(),1));
 	inalpha = siod_nth(0,ruleset);
 	outalpha = siod_nth(1,ruleset);
 	wfst->build_from_regex(inalpha,outalpha,car(cdr(cdr(ruleset))));

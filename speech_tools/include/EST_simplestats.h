@@ -40,6 +40,7 @@
 #ifndef __EST_SIMPLESTATS_H__
 #define __EST_SIMPLESTATS_H__
 
+#include <list>
 #include "EST_String.h"
 #include "EST_Token.h"
 #include "EST_StringTrie.h"
@@ -72,13 +73,14 @@ public:
     ///
     EST_Discrete(const EST_Discrete &d) { copy(d); }
     /// Initialise discrete class from given list of strings
-    EST_Discrete(const EST_StrList &vocab);
+    EST_Discrete(const std::list<EST_String> &vocab);
     ///
     ~EST_Discrete();
     /// 
     void copy(const EST_Discrete &d);
     /// (re-)initialise
-    bool init(const EST_StrList &vocab);
+    //ZEEHIO bool init(const EST_StrList &vocab);
+    bool init(const std::list<EST_String> &vocab);
 
     /// The number of members in the discrete
     int length(void) const { return namevector.length(); }
@@ -119,7 +121,7 @@ class Discretes {
   public:
     Discretes() {max=50;next_free=0;discretes=new EST_Discrete*[max];}
     ~Discretes();
-    int def(const EST_StrList &members);
+    int def(const std::list<EST_String> &members);
     EST_Discrete &discrete(const int t) const {return *discretes[t-10];}
     EST_Discrete &operator [] (const int t) const {return *discretes[t-10];}
 };
@@ -222,7 +224,7 @@ public:
     /// Create with copying from an existing distribution.
     EST_DiscreteProbDistribution(const EST_DiscreteProbDistribution &b);
     /// Create with given vocabulary
-    EST_DiscreteProbDistribution(const EST_TList<EST_String> &vocab)
+    EST_DiscreteProbDistribution(const std::list<EST_String> &vocab)
           {init(); (void)init(vocab);}
     /// Create using given \ref EST_Discrete  class as the vocabulary
     EST_DiscreteProbDistribution(const EST_Discrete *d) {init(); init(d);}
@@ -241,7 +243,7 @@ public:
     /// Reset, clearing all counts and vocabulary
     void clear(void);
     /// Initialise using given vocabulary
-    bool init(const EST_StrList &vocab);
+    bool init(const std::list<EST_String> &vocab);
     /// Initialise using given \ref EST_Discrete  as vocabulary
     void init(const EST_Discrete *d);
     /// Initialise

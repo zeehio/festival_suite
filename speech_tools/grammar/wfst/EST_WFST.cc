@@ -161,22 +161,22 @@ void EST_WFST::init(int init_num_states)
 
 void EST_WFST::init(LISP in_alphabet,LISP out_alphabet)
 {
-    EST_StrList in,out;
+    std::list<EST_String> in,out;
     LISP iin,oout;
 
-    in.append("__epsilon__");
-    in.append("=");
+    in.push_back("__epsilon__");
+    in.push_back("=");
     for (iin=in_alphabet; iin != NIL; iin=cdr(iin))
 	if ((!streq(get_c_string(car(iin)),"__epsilon__")) &&
 	    (!streq(get_c_string(car(iin)),"=")))
-	    in.append(get_c_string(car(iin)));
+	    in.push_back(get_c_string(car(iin)));
 
-    out.append("__epsilon__");
-    out.append("=");
+    out.push_back("__epsilon__");
+    out.push_back("=");
     for (oout=out_alphabet; oout != NIL; oout=cdr(oout))
 	if ((!streq(get_c_string(car(oout)),"__epsilon__")) &&
 	    (!streq(get_c_string(car(oout)),"=")))
-	    out.append(get_c_string(car(oout)));
+	    out.push_back(get_c_string(car(oout)));
 
     p_in_symbols.init(in);
     p_out_symbols.init(out);

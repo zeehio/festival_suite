@@ -47,9 +47,8 @@ int main (int argc, char *argv[])
 {
     EST_Wave sig;
     EST_String in_file("-"), out_file("-");
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Option al;
-    EST_Litem *p;
 
     parse_command_line
 	(argc,argv,
@@ -84,12 +83,12 @@ int main (int argc, char *argv[])
     if (al.present("-server"))
 	al.add_item("-display", al.val("-server"));
 
-    for (p = files.head(); p; )
+    for (std::list<EST_String>::const_iterator p = files.cbegin(); p != files.cend(); )
     {
 	if (al.present("-v"))
-	    cout << "playing " << files(p) << endl;
+	    cout << "playing " << *p << endl;
 
-	if (read_wave(sig, files(p), al) != format_ok)
+	if (read_wave(sig, *p, al) != format_ok)
 	    exit(-1);
 
 	EST_Wave tmp, *toplay=&sig;
@@ -116,12 +115,12 @@ int main (int argc, char *argv[])
 	play_wave(*toplay, al);
 
 	// pause for a keystroke between each file
-	if (al.present("-wait") && p->next())
+	if (al.present("-wait") && std::next(p) != files.cend())
 	{
 	    if (getc(stdin) == 'a')
 		continue;
 	}
-	p = p->next();
+	++p;
     }
     return 0;
 }

@@ -41,6 +41,7 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <list>
 #include <cstring>
 #include "EST.h"
 #include "EST_SCFG.h"
@@ -67,7 +68,7 @@ static int scfg_parse_main(int argc, char **argv)
 {
     // Top level function generates a probabilistic grammar
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_SCFG_Chart chart;
     LISP rules,s,parse;
     FILE *corpus,*output;

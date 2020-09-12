@@ -25,13 +25,14 @@ This will create a Makefile and a .cc file called
       this:
 
 ~~~~~~~~~~~~~~~{.cc}
+#include <list>
 #include "EST.h"
 #include "EST_types.h"
 #include "EST_error.h"
 
 int main(int argc, char *argv[]) 
 { 
-    EST_StrList files; // the list of input files will go here
+    std::list<EST_String>  files; // the list of input files will go here
     EST_Option cmd_line; // the parsed list of command line arguments
 	                 // will go here.
 

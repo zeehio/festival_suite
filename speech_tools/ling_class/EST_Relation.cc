@@ -90,12 +90,7 @@ EST_Item *EST_Relation::append(EST_Item *si)
 
     EST_Item *nn;
 
-    if (this == 0)
-    {
-      EST_warning("EST_Relation: no relation to append to");
-      return 0;
-    }
-    else if (p_tail == 0)
+    if (p_tail == 0)
     {
 	nn = new EST_Item(this, si);
 	p_head = nn;
@@ -112,7 +107,7 @@ EST_Item *EST_Relation::append(EST_Item *si)
 
 EST_Item *EST_Relation::append()
 {
-    return append(0);
+    return append(nullptr);
 }
 
 EST_Item *EST_Relation::prepend()
@@ -124,12 +119,7 @@ EST_Item *EST_Relation::prepend(EST_Item *si)
 {
     EST_Item *nn;
 
-    if (this == 0)
-    {
-      EST_warning("EST_Relation: no relation to prepend to");
-	return 0;
-    }
-    else if (p_head == 0)
+    if (p_head == 0)
     {
 	nn = new EST_Item(this,si);
 	p_tail = nn;
@@ -151,8 +141,6 @@ int EST_Relation::length() const
     EST_Item *node;
     int i;
 
-    if (this == 0)
-	return 0;
     for (i=0,node=p_head; node; node=node->next())
 	i++;
     return i;
@@ -537,8 +525,9 @@ EST_read_status EST_Relation::load_items(EST_TokenStream &ts,
     {
 	if (node != 0) // at least one node
 	    p_head = get_item_from_name(nodenames,1);
-	p_tail = p_head->last();
-	if (!p_head->verify())
+        if (p_head)
+            p_tail = p_head->last();
+	if (p_head && !p_head->verify())
 	{
 	    cerr << "load_nodes: " << ts.pos_description() <<
 		" nodes do not form consistent graph" << endl;

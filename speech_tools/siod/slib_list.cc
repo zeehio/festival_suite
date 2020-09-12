@@ -75,11 +75,20 @@ static LISP eq(LISP x,LISP y)
 {if EQ(x,y) return(truth); else return(NIL);}
 
 LISP eql(LISP x,LISP y)
-{if EQ(x,y) return(truth); else 
- if NFLONUMP(x) return(NIL); else
- if NFLONUMP(y) return(NIL); else
- if (FLONM(x) == FLONM(y)) return(truth);
- return(NIL);}
+{
+  if EQ(x,y)
+    return(truth);
+  else 
+    if NFLONUMP(x)
+      return(NIL);
+    else
+      if NFLONUMP(y)
+        return(NIL);
+      else
+        if (FLONM(x) == FLONM(y))
+          return(truth);
+  return(NIL);
+}
 
 static LISP nullp(LISP x)
 {if EQ(x,NIL) return(truth); else return(NIL);}

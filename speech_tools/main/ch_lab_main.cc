@@ -45,12 +45,12 @@
 
 using namespace std;
 
-int check_vocab(EST_Relation &a, EST_StrList &vocab);
+int check_vocab(EST_Relation &a, std::list<EST_String> &vocab);
 
 int main(int argc, char *argv[])
 {
     EST_String out_file, ext;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Option al, op;
     EST_Relation lab, key;
     EST_RelationList mlf;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     
     if (al.present("-verify"))
     {
-	EST_StrList vocab;
+	std::list<EST_String> vocab;
 	if (load_StrList(al.val("-vocab"), vocab) != format_ok)
 	{
 	    cerr << "Couldn't read vocab file " << al.val("-vocab") 
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	exit(0);
     }
     
-    if (files.length() == 1)	// special case of only one input file
+    if (files.size() == 1)	// special case of only one input file
 	lab = mlf.first();
 
     if (al.present("-extract")) // extract a single relation

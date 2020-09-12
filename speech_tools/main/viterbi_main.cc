@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
+#include <list>
 #include "EST.h"
 
 using namespace std;
@@ -109,7 +110,7 @@ int num_obs = 1;
 
 int main(int argc, char **argv)
 {
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Option al;
     EST_Relation wstream;
     double floor; // a temporary
@@ -149,7 +150,7 @@ int main(int argc, char **argv)
 
     out_file = al.present("-o") ? al.val("-o") : (EST_String)"-";
 
-    if (files.length() != 1)
+    if (files.size() != 1)
       {
 	cerr << argv[0];
 	cerr << ": you must give exactly one observations file on the command line";
@@ -174,7 +175,7 @@ int main(int argc, char **argv)
 	exit(-1);
       }
 
-    load_wstream(files.first(),al.val("-vocab"),wstream,observations);
+    load_wstream(files.front(),al.val("-vocab"),wstream,observations);
     if (al.present("-observes2"))
     {
 	load_wstream(al.val("-observes2"),al.val("-vocab"),wstream,observations2);

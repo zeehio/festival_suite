@@ -132,9 +132,9 @@ int main(void)
     //@ endcode
 
     //@ code
-    EST_StrList map;
-    map.append("F0");
-    map.append("energy");
+    std::list<EST_String> map;
+    map.push_back("F0");
+    map.push_back("energy");
 
     tr.resize(500, map); // this makes a 2 channel track and sets the names to F0 and energy
     //@ endcode
@@ -142,18 +142,18 @@ int main(void)
     //@ code
 
     map.clear();
-    map.append("F0");
-    map.append("energy");
+    map.push_back("F0");
+    map.push_back("energy");
 
-    map.append("cep_0");
-    map.append("cep_1");
-    map.append("cep_2");
-    map.append("cep_3");
-    map.append("cep_4");
-    map.append("cep_5");
-    map.append("cep_6");
-    map.append("cep_7");
-    map.append("cep_N");
+    map.push_back("cep_0");
+    map.push_back("cep_1");
+    map.push_back("cep_2");
+    map.push_back("cep_3");
+    map.push_back("cep_4");
+    map.push_back("cep_5");
+    map.push_back("cep_6");
+    map.push_back("cep_7");
+    map.push_back("cep_N");
 
     tr.resize(500, map); // makes a 11 channel track and sets the names
     //@ endcode
@@ -161,10 +161,10 @@ int main(void)
 
     //@ code
     map.clear();
-    map.append("F0");
-    map.append("energy");
+    map.push_back("F0");
+    map.push_back("energy");
 
-    map.append("$cep-0+8");
+    map.push_back("$cep-0+8");
 
     tr.resize(500, map); // does exactly as above
     //@ endcode

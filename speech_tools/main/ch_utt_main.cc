@@ -39,6 +39,7 @@
 
 
 #include <cstdlib>
+#include <list>
 #include "EST_error.h"
 #include "EST_ling_class.h"
 #include "EST_cmd_line.h"
@@ -48,7 +49,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     EST_String out_file, ext;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_Option al;
 
     parse_command_line(argc, argv, 
@@ -73,24 +74,25 @@ int main(int argc, char *argv[])
       utterance_xml_register_id("^\\([^/]*\\)",
 			 al.sval("-sysdir") + "/\\1");
 
-    rstat=utt.load(files.first());
+    rstat=utt.load(files.front());
 
     if (rstat == read_format_error)
-      EST_error("Bad format in %s", (const char *)files.first());
+      EST_error("Bad format in %s", (const char *)files.front());
     else if (rstat != read_ok)
-      EST_sys_error("Error reading %s", (const char *)files.first());
+      EST_sys_error("Error reading %s", (const char *)files.front());
 
     EST_Utterance u;
 
-    EST_Litem *fp = files.head()->next();
-    for(; fp != NULL; fp=fp->next())
+    std::list<EST_String>::const_iterator fp = files.cbegin();
+    ++fp;
+    for(; fp != files.cend(); ++fp)
       {
-	rstat = u.load(files(fp));
+	rstat = u.load(*fp);
 
 	if (rstat == read_format_error)
-	  EST_error("Bad format in %s", (const char *)files(fp));
+	  EST_error("Bad format in %s", (const char *)(*fp));
 	else if (rstat != read_ok)
-	  EST_sys_error("Error reading %s", (const char *)files(fp));
+	  EST_sys_error("Error reading %s", (const char *)(*fp));
     
 	utterance_merge(utt, u, feat);
       }

@@ -77,7 +77,8 @@ int main(int argc, char *argv[])
     EST_Relation ev;
     EST_Option al;
     EST_Features op;
-    EST_StrList files, event_list, sil_list;
+    std::list<EST_String>  files;
+    EST_StrList event_list, sil_list;
     EST_String out_file, pstring;
     EST_Track speech, raw_fz;
     EST_Relation sil_lab;
@@ -131,7 +132,7 @@ int main(int argc, char *argv[])
 
     out_file = al.present("-o") ? al.val("-o") : (EST_String)"-";
 
-    if (read_track(nfz, files.first(), al) == -1)
+    if (read_track(nfz, files.front(), al) == -1)
 	    exit(-1);
     // REORG - extract proper f0 channel here
     nfz.copy_sub_track(fz, 0, EST_ALL, 0, 1);

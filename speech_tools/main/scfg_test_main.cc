@@ -69,7 +69,7 @@ static int scfg_test_main(int argc, char **argv)
 {
     // Top level function generates a probabilistic grammar
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String>  files;
 
     parse_command_line
 	(argc, argv,

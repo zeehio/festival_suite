@@ -59,8 +59,7 @@ int main (int argc, char *argv[])
     EST_Wave sig, sigload;
     EST_String in_file("-"), out_file("-"), op_file(""), test;
     EST_Option al;
-    EST_StrList files;
-    EST_Litem *p;
+    std::list<EST_String>  files;
 
 
     parse_command_line
@@ -139,17 +138,17 @@ int main (int argc, char *argv[])
 
     // There will always be at least one (or stdin)
     // The first is dealt specially in case its *way* big
-    if (read_wave(sig, files.first(), al) != format_ok)
+    if (read_wave(sig, files.front(), al) != format_ok)
 	exit(-1);
     if (al.present("-info")) 
 	wave_info(sig);
     // concat or parallelize remaining input files
 
-    if (files.length() > 1)
+    if (files.size() > 1)
     {
-	for (p= files.head()->next(); p != 0; p=p->next())
+	for (std::list<EST_String>::const_iterator p=++files.begin(); p != files.end(); ++p)
 	{
-	    if (read_wave(sigload, files(p), al) != format_ok)
+	    if (read_wave(sigload, *p, al) != format_ok)
 		exit(-1);
 	    if (al.present("-info")) 
 		wave_info(sigload);
@@ -228,7 +227,7 @@ int main (int argc, char *argv[])
 
         if (wave_divide(wl, sig, key, al.val("-ext", 0)) == -1)
 	    exit(0);
-	for (p = wl.head(); p; p = p->next())
+	for (EST_Litem *p = wl.head(); p; p = p->next())
 	    wl(p).save(wl(p).name(), al.val("-otype", 0));
 	exit(0);
     }

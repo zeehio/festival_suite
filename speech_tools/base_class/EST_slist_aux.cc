@@ -125,7 +125,7 @@ void StrListtoString(EST_StrList &l, EST_String &s, EST_String sep)
 	s += l(p) + sep;
 }
     
-EST_read_status load_StrList(EST_String filename, EST_StrList &l)
+EST_read_status load_StrList(EST_String filename, std::list<EST_String> &l)
 {
     EST_TokenStream ts;
     EST_String s;
@@ -139,7 +139,7 @@ EST_read_status load_StrList(EST_String filename, EST_StrList &l)
     ts.set_PunctuationSymbols("");
     
     while (!ts.eof())
-	l.append(ts.get().string());
+	l.push_back(ts.get().string());
     
     ts.close();
     return format_ok;
@@ -188,6 +188,15 @@ int strlist_member(const EST_StrList &l,const EST_String &s)
     EST_Litem *p;
     for (p = l.head(); p != 0; p = p->next())
 	if (l.item(p) == s)
+	    return TRUE;
+
+    return FALSE;
+}
+
+int strlist_member(const std::list<EST_String> &l,const EST_String &s)
+{
+    for (std::list<EST_String>::const_iterator p = l.cbegin(); p != l.cend(); ++p)
+	if (*p == s)
 	    return TRUE;
 
     return FALSE;

@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <list>
 #include <cstring>
 #include "EST_Wagon.h"
 #include "EST_cutils.h"
@@ -65,7 +66,7 @@ static int ols_test_main(int argc, char **argv)
 {
     // Top level function sets up data and creates a tree
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_FMatrix X,Y,coeffs;
     WDataSet dataset;
     EST_String outfile;

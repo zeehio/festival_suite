@@ -59,7 +59,7 @@ int main (int argc, char *argv[])
     EST_Option al;
     EST_Features op;
     EST_String out_file("-");
-    EST_StrList files;
+    std::list<EST_String>  files;
     
     parse_command_line
 	(argc, argv, 
@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
     default_pda_options(op);
     set_parameters(op, al);
 
-    if (read_wave(sig, files.first(), al) != format_ok)
+    if (read_wave(sig, files.front(), al) != format_ok)
 	exit(-1);
 
     out_file = al.present("-o") ? al.val("-o") : (EST_String)"-";

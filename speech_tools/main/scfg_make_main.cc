@@ -44,6 +44,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <list>
 #include "EST.h"
 #include "EST_SCFG.h"
 #include "siod.h"
@@ -56,12 +57,12 @@ EST_String values = "equal";
 
 static int scfg_make_main(int argc, char **argv);
 
-static void load_symbols(EST_StrList &syms,const EST_String &filename);
-static void make_symbols(EST_StrList &syms,int n,const EST_String &prefix);
+static void load_symbols(std::list<EST_String> &syms,const EST_String &filename);
+static void make_symbols(std::list<EST_String> &syms,int n,const EST_String &prefix);
 static LISP assign_probs(LISP rules, const EST_String &domain, 
 			 const EST_String &values);
-static LISP make_all_rules(const EST_StrList &NonTerminals,
-			   const EST_StrList &Terminals);
+static LISP make_all_rules(const std::list<EST_String> &NonTerminals,
+			   const std::list<EST_String> &Terminals);
 static void generate_probs(double *probs,int num);
 
 
@@ -80,8 +81,8 @@ static int scfg_make_main(int argc, char **argv)
 {
     // Top level function generates a probabilistic grammar
     EST_Option al;
-    EST_StrList files;
-    EST_StrList NonTerminals, Terminals;
+    std::list<EST_String>  files;
+    std::list<EST_String> NonTerminals, Terminals;
     LISP rules,r;
     FILE *fd;
 
@@ -186,32 +187,31 @@ static int scfg_make_main(int argc, char **argv)
     return 0;
 }
 
-static LISP make_all_rules(const EST_StrList &NonTerminals,
-			   const EST_StrList &Terminals)
+static LISP make_all_rules(const std::list<EST_String> &NonTerminals,
+			   const std::list<EST_String> &Terminals)
 {
     // Build all possibly rules (CNF)
     //  NT -> NT NT and NT -> T
-    EST_Litem *p,*q,*r;
     LISP rules = NIL;
 	
-    for (p=NonTerminals.head(); p != 0; p=p->next())
+    for (std::list<EST_String>::const_iterator p=NonTerminals.cbegin(); p != NonTerminals.cend(); ++p)
     {
-	int num_rules_nt = (NonTerminals.length()*NonTerminals.length())+
-	    Terminals.length();
+	int num_rules_nt = (NonTerminals.size()*NonTerminals.size())+
+	    Terminals.size();
 	double *probs = new double[num_rules_nt];
 	generate_probs(probs,num_rules_nt);
 	int i=0;
-	for (q=NonTerminals.head(); q != 0; q=q->next())
-	    for (r=NonTerminals.head(); r != 0; r=r->next(),i++)
+	for (std::list<EST_String>::const_iterator q=NonTerminals.cbegin(); q != NonTerminals.cend(); ++q)
+	    for (std::list<EST_String>::const_iterator r=NonTerminals.cbegin(); r != NonTerminals.cend(); ++r,i++)
 		rules = cons(cons(flocons(probs[i]),
-				  cons(rintern(NonTerminals(p)),
-				  cons(rintern(NonTerminals(q)),
-				  cons(rintern(NonTerminals(r)),NIL)))),
+				  cons(rintern(*p),
+				  cons(rintern(*q),
+				  cons(rintern(*r),NIL)))),
 			     rules);
-	for (q=Terminals.head(); q != 0; q=q->next(),i++)
+	for (std::list<EST_String>::const_iterator q=Terminals.cbegin(); q != Terminals.cend(); ++q,i++)
 	    rules = cons(cons(flocons(probs[i]),
-			      cons(rintern(NonTerminals(p)),
-				   cons(rintern(Terminals(q)),NIL))),
+			      cons(rintern(*p),
+				   cons(rintern(*q),NIL))),
 			 rules);
 	delete [] probs;
     }
@@ -271,7 +271,7 @@ static LISP assign_probs(LISP rules, const EST_String &domain,
     return rules;
 }
 
-static void make_symbols(EST_StrList &syms,int n,const EST_String &prefix)
+static void make_symbols(std::list<EST_String> &syms,int n,const EST_String &prefix)
 {
     //  Generate n symbols with given prefix
     int i;
@@ -287,7 +287,7 @@ static void make_symbols(EST_StrList &syms,int n,const EST_String &prefix)
     for (i=0; i < n; i++)
     {
 	sprintf(name,skel,i);
-	syms.append(name);
+	syms.push_back(name);
     }
 
     wfree(name);
@@ -296,7 +296,7 @@ static void make_symbols(EST_StrList &syms,int n,const EST_String &prefix)
 }	
 
 
-static void load_symbols(EST_StrList &syms,const EST_String &filename)
+static void load_symbols(std::list<EST_String> &syms,const EST_String &filename)
 {
     //  Load symbol list for file
 

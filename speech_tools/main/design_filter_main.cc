@@ -39,6 +39,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <list>
 #include <cmath>
 #include "EST_Wave.h"
 #include "EST_cmd_line.h"
@@ -52,7 +53,7 @@ int main (int argc, char *argv[])
     EST_FVector fresponse, filter;
     EST_String in_file("-"), out_file("-"), op_file(""), test;
     EST_Option al;
-    EST_TList<EST_String> files;
+    std::list<EST_String> files;
     int forder;
 
     parse_command_line
@@ -72,7 +73,7 @@ int main (int argc, char *argv[])
 
     out_file = al.present("-o") ? al.val("-o") : (EST_String)"-";
 
-    if (fresponse.load(files.first()) != format_ok)
+    if (fresponse.load(files.front()) != format_ok)
 	exit(-1);
 
     forder = al.present("-forder") ? al.ival("-forder") : 199;

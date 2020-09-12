@@ -73,7 +73,7 @@ static void parse_op_settings(EST_Features &op, EST_WindowFunc *&wf, float &f)
 	: DEFAULT_FRAME_FACTOR;
 }
 
-void add_channels_to_map(EST_StrList &map, EST_StrList &types, 
+void add_channels_to_map(std::list<EST_String> &map, EST_StrList &types, 
 			 EST_Features &op, int delta_order)
 {
     EST_String t;
@@ -126,12 +126,12 @@ void add_channels_to_map(EST_StrList &map, EST_StrList &types,
 	    }
 
 	  if(actual_order == 1)
-	    map.append(t + dos);
+	    map.push_back(t + dos);
 	  else
-	    map.append("$" + t + dos + "-"+itoString(lowest_coef)+"+"+itoString(highest_coef));
+	    map.push_back("$" + t + dos + "-"+itoString(lowest_coef)+"+"+itoString(highest_coef));
 	}
       else
-	map.append(t + dos);
+	map.push_back(t + dos);
     }
 }
 
@@ -229,7 +229,8 @@ void sigpr_delta(EST_Wave &sig, EST_Track &fv, EST_Features &op,
     else // otherwise make them in temporary track
     {
 //	cout << "making tmp cpoefs\n";
-	EST_StrList tmp_base, tmp_map;
+	EST_StrList tmp_base;
+        std::list<EST_String> tmp_map;
 	tmp_base.append(k);
 	add_channels_to_map(tmp_map, tmp_base, op, 0);
 	base.resize(fv.num_frames(), tmp_map);
@@ -275,7 +276,8 @@ void sigpr_acc(EST_Wave &sig, EST_Track &fv, EST_Features &op,
 	fv.sub_track(base, 0, EST_ALL, k + "_d_" + start_channel,  k + "_d_N");
     else // otherwise make them in temporary track
     {
-	EST_StrList tmp_base, tmp_map;
+	EST_StrList tmp_base;
+        std::list<EST_String> tmp_map;
 	tmp_base.append(k);
 	add_channels_to_map(tmp_map, tmp_base, op, 1);
 	base.resize(fv.num_frames(), tmp_map);

@@ -42,6 +42,7 @@
 
 #include <cstdarg>
 #include <cstdlib>
+#include <list>
 
 #include "EST_String.h"
 #include "EST_Val.h"
@@ -282,12 +283,12 @@ protected:
     // vocabulary
     EST_Discrete *vocab;
     EST_Discrete *pred_vocab;  // may be different from state vocab
-    bool init_vocab(const EST_StrList &wordlist);
-    bool init_vocab(const EST_StrList &word_list,
-		    const EST_StrList &pred_list);
+    bool init_vocab(const std::list<EST_String> &wordlist);
+    bool init_vocab(const std::list<EST_String> &word_list,
+		    const std::list<EST_String> &pred_list);
 
     // make sure vocab matches a given wordlist
-    bool check_vocab(const EST_StrList &wordlist);
+    bool check_vocab(const std::list<EST_String> &wordlist);
 
     EST_DiscreteProbDistribution vocab_pdf;  // overall pdf
     
@@ -379,15 +380,15 @@ public:
 	}
 
     EST_Ngrammar(int o, representation_t r, 
-		 const EST_StrList &wordlist)
+		 const std::list<EST_String> &wordlist)
     { 
 	default_values(); init(o,r,wordlist); 
     }
 
     // When state trans vocab differs from prediction vocab
     EST_Ngrammar(int o, representation_t r, 
-		 const EST_StrList &wordlist,
-		 const EST_StrList &predlist)
+		 const std::list<EST_String> &wordlist,
+		 const std::list<EST_String> &predlist)
     { 
 	default_values(); init(o,r,wordlist,predlist); 
     }
@@ -401,10 +402,10 @@ public:
     void default_values();
     void clear();
     bool init(int o, representation_t r, 
-	      const EST_StrList &wordlist);
+	      const std::list<EST_String> &wordlist);
     bool init(int o, representation_t r, 
-	      const EST_StrList &wordlist,
-	      const EST_StrList &predlist);
+	      const std::list<EST_String> &wordlist,
+	      const std::list<EST_String> &predlist);
     bool init(int o, representation_t r, EST_Discrete &v);
     bool init(int o, representation_t r, 
 	      EST_Discrete &v,EST_Discrete &pv);
@@ -426,7 +427,7 @@ public:
        { return p_representation;}
     
     // build
-    bool build(const EST_StrList &filenames,
+    bool build(const std::list<EST_String> &filenames,
 	       const EST_String &prev = SENTENCE_START_MARKER,
 	       const EST_String &prev_prev = SENTENCE_END_MARKER,
 	       const EST_String &last = SENTENCE_END_MARKER,
@@ -448,7 +449,7 @@ public:
 
     // I/O functions 
     EST_read_status load(const EST_String &filename);
-    EST_read_status load(const EST_String &filename, const EST_StrList &wordlist);
+    EST_read_status load(const EST_String &filename, const std::list<EST_String> &wordlist);
     EST_write_status save(const EST_String &filename, 
 			  const EST_String type="cstr_ascii", 
 			  const bool trace=false,
@@ -539,7 +540,7 @@ public:
 						 EST_Ngrammar &n);
     friend EST_read_status load_ngram_arpa(const EST_String filename, 
 					   EST_Ngrammar &n, 
-					   const EST_StrList &vocab);
+					   const std::list<EST_String> &vocab);
     friend EST_read_status load_ngram_cstr_ascii(const EST_String filename, 
 					     EST_Ngrammar &n);
     friend EST_read_status load_ngram_cstr_bin(const EST_String filename, 

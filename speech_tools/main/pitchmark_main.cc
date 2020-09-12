@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
     EST_Option al;
     EST_Features op;
     EST_String out_file("-");
-    EST_StrList files;
+    std::list<EST_String>  files;
 
     parse_command_line
 	(argc, argv, 
@@ -128,7 +128,7 @@ int main (int argc, char *argv[])
     out_file = al.present("-o") ? al.val("-o") : (EST_String)"-";
 
     if (!al.present("-pm") || (al.present("-pm") && al.present("-wave_end")))
-	if (read_wave(lx, files.first(), al) != read_ok)
+	if (read_wave(lx, files.front(), al) != read_ok)
 	    exit(-1);
 
     if (al.present("-pm"))

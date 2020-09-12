@@ -40,10 +40,11 @@
 
 class EST_Track;
 
-#ifndef __Track_H__
-#define __Track_H__
+#ifndef Track_H__
+#define Track_H__
 
 #include <cstdlib>
+#include <list>
 #include "EST_FMatrix.h"
 #include "EST_types.h"
 #include "EST_TrackMap.h"
@@ -156,7 +157,7 @@ public:
 	are kept, up to the limits imposed by the new number of frames
 	and channels. If the new track size is bigger, new positions
 	are filled with 0 */
-    void resize(int num_frames, EST_StrList &map, bool preserve = 1);
+    void resize(int num_frames, const std::list<EST_String> &map, bool preserve = 1);
 
     /** resize the track's auxiliary channels.
      */
@@ -771,4 +772,4 @@ public:
 typedef EST_TList<EST_Track> EST_TrackList;
 
 
-#endif /* __Track_H__ */
+#endif /* Track_H__ */

@@ -42,6 +42,7 @@
 /*=======================================================================*/
 #include <cstdlib>
 #include <cstdio>
+#include <list>
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -70,7 +71,7 @@ static int scfg_train_main(int argc, char **argv)
 {
     // Top level function generates a probabilistic grammar
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String> files;
     int spread;
 
     parse_command_line

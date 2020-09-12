@@ -71,7 +71,7 @@ load_ngram_htk_binary(const EST_String filename, EST_Ngrammar &n)
 }
 
 EST_read_status
-load_ngram_arpa(const EST_String filename, EST_Ngrammar &n, const EST_StrList &vocab)
+load_ngram_arpa(const EST_String filename, EST_Ngrammar &n, const std::list<EST_String> &vocab)
 {
 
     EST_TokenStream ts;
@@ -242,14 +242,14 @@ load_ngram_cstr_ascii(const EST_String filename, EST_Ngrammar &n)
     
     order = atoi(ts.get().string());
     ts.get_upto_eoln();		// skip to next line
-    EST_StrList vocab;
-    EST_StrList pred_vocab;	// may be different
+    std::list<EST_String> vocab;
+    std::list<EST_String> pred_vocab;	// may be different
     
     while (!ts.eoln())
-	vocab.append(ts.get().string());
+	vocab.push_back(ts.get().string());
     ts.get_upto_eoln();		// skip to next line
     while (!ts.eoln())
-	pred_vocab.append(ts.get().string());
+	pred_vocab.push_back(ts.get().string());
     
     if(!n.init(order,EST_Ngrammar::dense,vocab,pred_vocab))
     {
@@ -333,14 +333,14 @@ load_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n)
 	ts.close();
 	return misc_read_error;
     }
-    EST_StrList vocab;
-    EST_StrList pred_vocab;	// may be different
+    std::list<EST_String> vocab;
+    std::list<EST_String> pred_vocab;	// may be different
     
     while ((ts.peek() != "\n") && (!ts.eof()))
-	vocab.append(ts.get().string());
+	vocab.push_back(ts.get().string());
     ts.get();			// skip newline
     while ((ts.peek() != "\n") && (!ts.eof()))
-	pred_vocab.append(ts.get().string());
+	pred_vocab.push_back(ts.get().string());
     
     // Need to get to the position one after the newline and
     // who knows what TokenStream has already read,

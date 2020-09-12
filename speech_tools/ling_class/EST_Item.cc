@@ -164,7 +164,10 @@ EST_Item::EST_Item(EST_Relation *rel, EST_Item *li)
     p_relation = rel;
     p_contents = 0;
     n=p=u=d=0;
+    if (li)
     set_contents(li->contents());
+    else
+        set_contents(0);
 
     assign_id(this);
 }
@@ -195,7 +198,7 @@ void EST_Item::unref_all()
 
 const EST_String &EST_Item::relation_name() const
 { 
-    return ((this == 0) || (p_relation == 0)) ? 
+    return (p_relation == 0) ? 
 	EST_String::Empty : p_relation->name();
 }
 
@@ -314,8 +317,6 @@ EST_Item *EST_Item::insert_parent(EST_Item *si)
 {
     // Insert new parent here, by added a new below node and moving
     // the contents down to it.
-    if (this == 0) return 0;
-
     insert_below(0);
     down()->set_contents(grab_contents());
     if (si != 0)
@@ -331,7 +332,6 @@ EST_Item *EST_Item::last() const
     // To get round the const access to this
     EST_Item *node = (EST_Item *)(void *)this;
 
-    if (this == 0) return 0;
     for (; node->n != 0; node=node->n);
     return node;
 }
@@ -341,7 +341,6 @@ EST_Item *EST_Item::first() const
     // To get round the const access to this
     EST_Item *node = (EST_Item *)(void *)this;
 
-    if (this == 0) return 0;
     for (; node->p != 0; node=node->p);
     return node;
 }
@@ -349,17 +348,13 @@ EST_Item *EST_Item::first() const
 EST_Item *EST_Item::top() const
 {
     EST_Item *node = (EST_Item *)(void *)this;
-
-    if (this == 0) return 0;
     for (; parent(node) != 0; node=parent(node));
     return node;
 }
 
 EST_Item *EST_Item::next_leaf() const
 {
-    if (this == 0)
-	return 0;
-    else if (next() != 0)
+    if (next() != 0)
 	return next()->first_leaf();
     else
 	return parent(this)->next_leaf();
@@ -368,9 +363,7 @@ EST_Item *EST_Item::next_leaf() const
 EST_Item *EST_Item::next_item() const
 {
     // For traversal through a relation, in pre-order (root then daughters)
-    if (this == 0)
-	return 0;
-    else if (down() != 0)
+    if (down() != 0)
 	return down();
     else if (next() != 0)
 	return next();
@@ -386,8 +379,6 @@ EST_Item *EST_Item::next_item() const
 EST_Item *EST_Item::first_leaf() const
 {
     // Leafs are defined as those nodes with no daughters
-    if (this == 0)
-	return 0;
     if (down() == 0)
 	return (EST_Item *)(void *)this;
     else
@@ -397,9 +388,7 @@ EST_Item *EST_Item::first_leaf() const
 EST_Item *EST_Item::last_leaf() const
 {
     // Leafs are defined as those nodes with no daughters
-    if (this == 0)
-	return 0;
-    else if (next())
+    if (next())
 	return next()->last_leaf();
     else if (down())
 	return down()->last_leaf();
@@ -409,6 +398,7 @@ EST_Item *EST_Item::last_leaf() const
 
 EST_Item *first_leaf_in_tree(const EST_Item *root)
 {
+    if (root == NULL) return NULL;
     return root->first_leaf();
 }
 
@@ -424,15 +414,15 @@ EST_Item *last_leaf_in_tree(const EST_Item *root)
 
 EST_Item *EST_Item::append_daughter(EST_Item *si)
 {
-    if (this == 0)
-	return 0;
     EST_Item *nnode;
     EST_Item *its_downs;
+    EST_Item *c = NULL;
 
     // Because we don't distinguish forests properly we need
     // to do nasty things if this si is already associated to a 
     // this relation and its "in the top list"
-    EST_Item *c = si->as_relation(relation_name());
+    if (si)
+        c = si->as_relation(relation_name());
     if (in_list(c,p_relation->head()))
     {
 	// need to save its daughters to put on the new node
@@ -463,8 +453,6 @@ EST_Item *EST_Item::append_daughter(EST_Item *si)
 
 EST_Item *EST_Item::prepend_daughter(EST_Item *si)
 {
-    if (this == 0)
-	return 0;
     EST_Item *nnode;
     EST_Item *its_downs;
 
@@ -562,8 +550,6 @@ int EST_Item::verify() const
     // properly linked
     bool verif_d = false;
     bool verif_n = false;
-    if (this == 0)
-	return TRUE;
     /* if there is no "d" it's all right */
     if (d == 0) {
       verif_d = true;

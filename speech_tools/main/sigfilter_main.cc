@@ -61,7 +61,7 @@ int main (int argc, char *argv[])
     EST_Wave sig, fsig;
     EST_String in_file("-"), out_file("-"), op_file(""), test;
     EST_Option al;
-    EST_TList<EST_String> files;
+    std::list<EST_String>  files;
     EST_Track filter;
 
     parse_command_line
@@ -103,7 +103,7 @@ int main (int argc, char *argv[])
 
     out_file = al.present("-o") ? al.val("-o") : (EST_String)"-";
 
-    if (read_wave(sig, files.first(), al) != format_ok)
+    if (read_wave(sig, files.front(), al) != format_ok)
 	exit(-1);
 
     if (al.present("-s"))	// rescale

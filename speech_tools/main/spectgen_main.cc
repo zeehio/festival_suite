@@ -37,6 +37,7 @@
 /*                                                                       */
 /*=======================================================================*/
 
+#include <list>
 #include "EST.h"
 #include "EST_cmd_line_options.h"
 #include "sigpr/EST_spectrogram.h"
@@ -55,7 +56,7 @@ void set_options(EST_Features &op, EST_Option &al);
 int main(int argc, char *argv[])
 {
     EST_String out_file;
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_Option al;
     EST_Features op;
 
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
     out_file = al.present("-o") ? al.val("-o") : (EST_String)"-";
     set_options(op, al);
 
-    if (read_wave(sig, files.first(), al) != format_ok)
+    if (read_wave(sig, files.front(), al) != format_ok)
 	exit(-1);
 
     make_spectrogram(sig, spec, op);

@@ -117,7 +117,7 @@ void EST_DiscreteProbDistribution::init(void)
     discrete = 0;
 }
 
-bool EST_DiscreteProbDistribution::init(const EST_StrList &vocab)
+bool EST_DiscreteProbDistribution::init(const std::list<EST_String> &vocab)
 {
     int i;
     clear();
@@ -125,7 +125,7 @@ bool EST_DiscreteProbDistribution::init(const EST_StrList &vocab)
     num_samples = 0;
     discrete = new EST_Discrete(vocab);
 
-    icounts.resize(vocab.length());
+    icounts.resize(vocab.size());
     for (i=0; i<icounts.length(); i++)
 	icounts.a_no_check(i) = 0;
 

@@ -40,6 +40,7 @@
 #ifndef __EST_STRING_AUX_H__
 #define __EST_STRING_AUX_H__
 
+#include <list>
 #include "EST_TList.h"
 #include "EST_String.h"
 #include "EST_types.h"
@@ -61,8 +62,8 @@
  *  
  *  \fn void BracketStringtoStrList(EST_String s, EST_StrList &l, EST_String sep="")
  *  \brief Convert a EST_String enclosed in a single set of brackets to a EST_StrList by separating tokens in s delimited by the separator sep. By default, the string is assumed to be delimited by whitespace.
- *  \fn EST_read_status load_StrList(EST_String filename, EST_StrList &l)
- *  \brief Load tokens from a file and return them in a EST_StrList
+ *  \fn EST_read_status load_StrList(EST_String filename, std::list<EST_String> &l)
+ *  \brief Load tokens from a file and return them in a std::list<EST_String>
  *  \fn EST_write_status save_StrList(EST_String filename, EST_StrList &l, EST_String style="words")
  *  \brief Save tokens from a EST_StrList. If style is set to "lines" each item is stored on a separate line, otherwise each item is separated by a single space.
  *  \fn void strip_quotes(EST_String &s, const EST_String quote_char="\"")
@@ -96,7 +97,7 @@ void StringtoStrList(EST_String s, EST_StrList &l, EST_String sep="");
 
 void BracketStringtoStrList(EST_String s, EST_StrList &l, EST_String sep="");
 
-EST_read_status load_StrList(EST_String filename, EST_StrList &l);
+EST_read_status load_StrList(EST_String filename, std::list<EST_String> &l);
 EST_write_status save_StrList(EST_String filename, EST_StrList &l, 
 			      EST_String style="words");
 
@@ -115,6 +116,8 @@ int StrListtoFList(EST_StrList &s, EST_FList &il);
 void StrList_to_StrVector(EST_StrList &l, EST_StrVector &v);
 void StrVector_to_StrList(EST_StrVector &v,EST_StrList &l);
 int  StrVector_index(const EST_StrVector &v,const EST_String &s);
+
+int strlist_member(const std::list<EST_String> &l,const EST_String &s);
 
 int strlist_member(const EST_StrList &l,const EST_String &s);
 int strlist_index(const EST_StrList &l,const EST_String &s);

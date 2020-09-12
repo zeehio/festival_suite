@@ -65,7 +65,7 @@ static int wfst_train_main(int argc, char **argv)
 {
     // Train a WFST from data building new states
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_String wfstfile;
 
     parse_command_line

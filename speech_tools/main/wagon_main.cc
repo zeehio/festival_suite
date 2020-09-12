@@ -119,7 +119,7 @@ static int wagon_main(int argc, char **argv)
 {
     // Top level function sets up data and creates a tree
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_String wgn_oname;
     ostream *wgn_coutput = 0;
     float stepwise_limit = 0;

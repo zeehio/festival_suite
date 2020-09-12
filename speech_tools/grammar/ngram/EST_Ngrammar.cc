@@ -507,14 +507,14 @@ void EST_Ngrammar::clear()
 }
 
 bool EST_Ngrammar::init(int o, EST_Ngrammar::representation_t r, 
-			const EST_StrList &wordlist)
+			const std::list<EST_String> &wordlist)
 {
     return (bool)(init_vocab(wordlist) && p_init(o,r));
 }
 
 bool EST_Ngrammar::init(int o, EST_Ngrammar::representation_t r, 
-			const EST_StrList &wordlist,
-			const EST_StrList &predlist)
+			const std::list<EST_String> &wordlist,
+			const std::list<EST_String> &predlist)
 {
     return (bool)(init_vocab(wordlist,predlist) && p_init(o,r));
 }
@@ -649,7 +649,7 @@ const EST_StrVector &EST_Ngrammar::make_ngram_from_index(const int index) const
 
 
 
-bool EST_Ngrammar::init_vocab(const EST_StrList &word_list)
+bool EST_Ngrammar::init_vocab(const std::list<EST_String> &word_list)
 {
     vocab = new EST_Discrete();
     if(!vocab->init(word_list))
@@ -661,8 +661,8 @@ bool EST_Ngrammar::init_vocab(const EST_StrList &word_list)
     return true;
 }
 
-bool EST_Ngrammar::init_vocab(const EST_StrList &word_list,
-			      const EST_StrList &pred_list)
+bool EST_Ngrammar::init_vocab(const std::list<EST_String> &word_list,
+			      const std::list<EST_String> &pred_list)
 {
     vocab = new EST_Discrete();
     if(!vocab->init(word_list))
@@ -675,7 +675,7 @@ bool EST_Ngrammar::init_vocab(const EST_StrList &word_list,
     return true;
 }
 
-bool EST_Ngrammar::check_vocab(const EST_StrList &word_list)
+bool EST_Ngrammar::check_vocab(const std::list<EST_String> &word_list)
 {
     EST_Discrete *comp_vocab = new EST_Discrete();
     
@@ -757,7 +757,7 @@ int EST_Ngrammar::wordlist_index(const EST_String &word, const bool report) cons
     return -1;
 }
 
-bool EST_Ngrammar::build(const EST_StrList &filenames,
+bool EST_Ngrammar::build(const std::list<EST_String> &filenames,
 			 const EST_String &prev,
 			 const EST_String &prev_prev,
 			 const EST_String &last,
@@ -803,31 +803,30 @@ bool EST_Ngrammar::build(const EST_StrList &filenames,
 
     bool skip_this;
     EST_String new_filename;
-    EST_Litem *p;
-    for (p = filenames.head(); p; p = p->next())
+    for (std::list<EST_String>::const_iterator p = filenames.cbegin(); p != filenames.cend(); ++p)
     {
-	cerr << "Building from " << filenames(p) << endl;
+	cerr << "Building from " << *p << endl;
 
 	skip_this=false;
 	if( ((oov_mode == "skip_sentence") &&
 	     (input_format == "sentence_per_file")) ||
 	   (oov_mode == "skip_file")  )
-	    skip_this = oov_preprocess(filenames(p),new_filename,
+	    skip_this = oov_preprocess(*p,new_filename,
 				       "skip if found");
 
 	else if( ((oov_mode == "skip_sentence") &&
 		  (input_format == "sentence_per_line")) ||
 		((oov_mode == "skip_ngram") &&
 		 (input_format == "ngram_per_line"))  )
-	    oov_preprocess(filenames(p),new_filename,"eliminate lines");
+	    oov_preprocess(*p,new_filename,"eliminate lines");
 
 	else
-	    new_filename = filenames(p);
+	    new_filename = *p;
 
 
 	if(skip_this)
 	{
-	    cerr << "Skipping " << filenames(p) 
+	    cerr << "Skipping " << *p 
 		<< " (out of vocabulary words found)" << endl;
 	}
 	else
@@ -866,7 +865,7 @@ bool EST_Ngrammar::build(const EST_StrList &filenames,
 	}
 	}
 
-	if((new_filename != filenames(p)) && 
+	if((new_filename != *p) && 
 	   (new_filename != "") &&
 	   !delete_file(new_filename)  )
 	{
@@ -2148,7 +2147,7 @@ EST_Ngrammar::load(const EST_String &filename)
 }
 
 EST_read_status
-EST_Ngrammar::load(const EST_String &filename, const EST_StrList &wordlist)
+EST_Ngrammar::load(const EST_String &filename, const std::list<EST_String> &wordlist)
 {
     
     // for backed off grammars

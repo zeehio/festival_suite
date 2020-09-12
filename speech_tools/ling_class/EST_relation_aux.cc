@@ -40,6 +40,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <list>
 #include "EST_types.h"
 #include "ling_class/EST_Relation.h"
 #include "ling_class/EST_relation_aux.h"
@@ -51,6 +52,7 @@
 using namespace std;
 
 static int is_in_class(const EST_String &name, EST_StrList &s);
+static int is_in_class(const EST_String &name, std::list<EST_String> &s);
 
 bool dp_match(const EST_Relation &lexical,
 	      const EST_Relation &surface,
@@ -199,7 +201,15 @@ static int is_in_class(const EST_String &name, EST_StrList &s)
     return FALSE;
 }
 
-int check_vocab(EST_Relation &a, EST_StrList &vocab)
+static int is_in_class(const EST_String &name, std::list<EST_String> &s)
+{
+    for (std::list<EST_String>::const_iterator p = s.cbegin(); p != s.cend(); ++p)
+	if (name == *p)
+	    return TRUE;
+    return FALSE;
+}
+
+int check_vocab(EST_Relation &a, std::list<EST_String> &vocab)
 {
     EST_Item *s;
     for (s = a.head(); s; s = s->next())

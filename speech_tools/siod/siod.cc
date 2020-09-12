@@ -541,3 +541,25 @@ LISP siod_strlist_to_list(EST_StrList &a)
     return reverse(b);
 }
 
+void siod_list_to_strlist(LISP l, std::list<EST_String> &a)
+{
+    // copy l into a
+    LISP b;
+
+    a.clear();
+
+    for (b=l; b != NIL; b=cdr(b))
+	a.push_back(get_c_string(car(b)));
+
+}
+
+LISP siod_strlist_to_list(const std::list<EST_String> &a)
+{
+    // copy a into l
+    LISP b=NIL;;
+
+    for (std::list<EST_String>::const_iterator p=a.cbegin(); p != a.cend(); ++p)
+	b = cons(rintern(*p),b);
+
+    return reverse(b);
+}

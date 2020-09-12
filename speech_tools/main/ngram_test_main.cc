@@ -44,15 +44,13 @@ using namespace std;
 int main(int argc, char **argv)
 {
     //int order;
-    EST_StrList files,script;
+    std::list<EST_String> files, script,wordlist;
     EST_Option al, op;
     EST_String wordlist_file, script_file, in_file, format;
     EST_String prev_tag, prev_prev_tag, last_tag;
-    EST_Litem *p;
     //EST_Ngrammar::representation_t representation = 
     //EST_Ngrammar::dense;
 
-    EST_StrList wordlist;
     EST_Ngrammar ngrammar;
     bool per_file_stats=false;
     bool raw_stats=false;
@@ -171,14 +169,14 @@ int main(int argc, char **argv)
 
     // plus any files on command line
     // except file "-" unless there is no script
-    if(script.head()==NULL)
-	script += files;
+    if(script.empty())
+	script = files;
     else
-	for(p=files.head();p!=0;p=p->next())
-	    if(files(p) != "-")
-		script.append(files(p));
+	for(std::list<EST_String>::const_iterator p=files.cbegin();p!=files.cend();++p)
+	    if(*p != "-")
+		script.push_back(*p);
 
-    if(script.head() == NULL)
+    if(script.empty())
     {
 	cerr << "test_ngram: No test files given" << endl;
 	exit(1);
@@ -216,11 +214,11 @@ int main(int argc, char **argv)
 	cout << "==================" << endl;
     }
 
-    for (p = script.head(); p; p = p->next())
+    for (std::list<EST_String>::const_iterator p = script.cbegin(); p != script.cend(); ++p)
     {
 	// test each file
 	if (test_stats(ngrammar,
-		       script(p),
+		       *p,
 		       raw_entropy,count,
 		       entropy,perplexity,
 		       input_format,
@@ -233,9 +231,9 @@ int main(int argc, char **argv)
 	    if(per_file_stats)
 	    {
 		if (brief)
-		    cout << basename(script(p)) << " \t";
+		    cout << basename(*p) << " \t";
 		else
-		    cout << script(p) << endl;
+		    cout << *p << endl;
 
 		if(raw_stats)
 		{
@@ -259,7 +257,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-	    cerr << "test_ngram: WARNING : file '" << script(p)
+	    cerr << "test_ngram: WARNING : file '" << *p
 		<< "' could not be processed" << endl;
 	}
 	

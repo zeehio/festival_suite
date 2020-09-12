@@ -46,7 +46,6 @@ Declare_TList(EST_String)
 Declare_TSortable(EST_String)
 
 #if defined(INSTANTIATE_TEMPLATES)
-
 #include "../base_class/EST_TList.cc"
 #include "../base_class/EST_TSortable.cc"
 

@@ -79,7 +79,7 @@ static int align_main(int argc, char **argv)
 {
     // Top level function generates a WFST from rules
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String>  files;
     EST_String outfile;
     EST_String format;
 

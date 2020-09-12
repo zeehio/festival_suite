@@ -41,6 +41,7 @@
 #ifndef __EST_RELATION_AUX_H__
 #define __EST_RELATION_AUX_H__
 
+#include <list>
 #include "EST_String.h"
 #include "EST_Track.h"
 #include "ling_class/EST_Utterance.h"
@@ -124,7 +125,7 @@ EST_write_status save_SentenceList(EST_String filename,
 
 
 EST_read_status read_RelationList(EST_RelationList &mlf, 
-				EST_StrList &files, EST_Option &al);
+				  const std::list<EST_String> &files, EST_Option &al);
 
 float start(EST_Item *n);
 float duration(EST_Item *n);

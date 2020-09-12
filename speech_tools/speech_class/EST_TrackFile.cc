@@ -36,11 +36,12 @@
 /*                   File I/O functions for EST_Track class              */
 /*                                                                       */
 /*=======================================================================*/
-#include <fstream>
-#include <iostream>
 #include <cstdlib>
 #include <cmath>
-#include <time.h>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+#include <list>
 #include "EST_unix.h"
 #include "EST_types.h"
 #include "EST_Track.h"
@@ -302,13 +303,15 @@ EST_read_status EST_TrackFile::load_xmg(const EST_String filename, EST_Track &tr
     {
         k = ts.get().string();
         v = ts.get().string();
-        if (k == "Freq") {
-            /*sr = v.Int() * 1000;*/
-        } else if (k == "YMin") {
+#if 0
+        /* Tracks don't represent these explicitly */
+	if (k == "Freq")
+	    sr = v.Int() * 1000;
+	else if (k == "YMin")
 	        /* tr.amin = atof(v) */;
-	    } else if (k == "YMax") {
+	else if (k == "YMax")
 	        /*tr.amax = atof(v) */;
-        }
+#endif
     }
 
     if (ts.eof())
@@ -375,16 +378,13 @@ EST_read_status EST_TrackFile::load_est(const EST_String filename,
 	return r;
 }
 
-static float get_float(EST_TokenStream &ts,int swap)
+static EST_read_status get_float(EST_TokenStream &ts,int swap, float *f)
 {
-    float f;
-    if (ts.fread(&f,4,1) != 1)
-    {
-        cerr << "Could not get_float" << endl;
-        return 0.0;
+    if (ts.fread(f,4,1) != 1) {
+      return misc_read_error;
     }
-    if (swap) swapfloat(&f);
-    return f;
+    if (swap) swapfloat(f);
+    return format_ok;
 }
 
 EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
@@ -417,7 +417,6 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
 
     num_frames = hinfo.I("NumFrames");
     num_channels = hinfo.I("NumChannels");
-    /*num_aux_channels = hinfo.I("NumAuxChannels", 0);*/
     tr.resize(num_frames, num_channels);
 
     hinfo.remove("NumFrames");
@@ -425,8 +424,6 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
     hinfo.remove("NumChannels");
     hinfo.remove("BreaksPresent");
     hinfo.remove("DataType");
-    if (hinfo.present("NumAuxChannels"))
-      hinfo.remove("NumAuxChannels");
 
     EST_String strn, cname;
     
@@ -437,12 +434,7 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
       {
 	c = p++;
 
-	if (c->k.contains("Aux_Channel_"))
-	{
-	      ch_map.append(c->v.String());
-	      hinfo.remove(c->k);
-	}
-	else if (c->k.contains("Channel_"))
+	if (c->k.contains("Channel_"))
 	  {
 	    tr.set_channel_name(c->v.String(),
 				c->k.after("Channel_").Int());
@@ -493,7 +485,12 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
 	      	return misc_read_error;
 	}
 	else
-	    tr.t(i) = get_float(ts,swap);
+	{
+		EST_read_status err;
+		err = get_float(ts, swap, &(tr.t(i)));
+		if (err != format_ok)
+			return err;
+	}
 
 	// Read Breaks
 	if (breaks)
@@ -508,7 +505,12 @@ EST_read_status EST_TrackFile::load_est_ts(EST_TokenStream &ts,
 	    }
 	    else
 	    {
-		if (get_float(ts,swap) == 0.0)
+		EST_read_status err;
+		float tmp;
+		err = get_float(ts, swap, &tmp);
+		if (err != format_ok)
+			return err;
+		if (tmp == 0.0)
 		    tr.set_break(i);
 		else
 		    tr.set_value(i);
@@ -866,6 +868,9 @@ EST_write_status EST_TrackFile::save_est_binary_ts(FILE *fp, EST_Track& tr)
 
 EST_write_status EST_TrackFile::save_ascii(const EST_String filename, EST_Track& tr)
 {
+    /* We want to print these "nice" but not lose precision for
+       various precisioned numbers.  so we're going to use %g to do this */
+    char fbuf[100];
     
     if (tr.equal_space() == TRUE)
 	tr.change_type(0.0, FALSE);
@@ -886,7 +891,10 @@ EST_write_status EST_TrackFile::save_ascii(const EST_String filename, EST_Track&
     for (int i = 0; i < tr.num_frames(); ++i)
     {
 	for (int j = 0; j < tr.num_channels(); ++j)
-	    *outf << tr.a(i, j) << " ";
+        {
+            snprintf(fbuf,sizeof(fbuf),"%g",tr.a(i, j));
+	    *outf << fbuf << " ";
+        }
 	*outf << endl;
     }
     
@@ -2052,20 +2060,20 @@ EST_write_status save_ind_TrackList(EST_TrackList &tlist, EST_String &otype)
     return write_ok;
 }    
 
-EST_read_status read_TrackList(EST_TrackList &tlist, EST_StrList &files, 
+EST_read_status read_TrackList(EST_TrackList &tlist, const std::list<EST_String> &files, 
 			       EST_Option &al)
 {
     EST_Track s;
-    EST_Litem *p, *plp;
+    EST_Litem *plp;
     
-    for (p = files.head(); p; p = p->next())
+    for (std::list<EST_String>::const_iterator p = files.cbegin(); p != files.cend(); ++p)
     {
 	tlist.append(s);
 	plp = tlist.tail();
-	if (read_track(tlist(plp), files(p), al) != format_ok)
+	if (read_track(tlist(plp), *p, al) != format_ok)
 	    exit (-1);
 
-	tlist(plp).set_name(files(p));
+	tlist(plp).set_name(*p);
     }
     
     return format_ok;

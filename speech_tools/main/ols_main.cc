@@ -40,6 +40,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <list>
 #include "EST_Wagon.h"
 #include "EST_multistats.h"
 #include "EST_cmd_line.h"
@@ -58,7 +59,7 @@ static int ols_main(int argc, char **argv)
 {
     // Top level function loads in sample data and finds coefficients
     EST_Option al;
-    EST_StrList files;
+    std::list<EST_String> files;
     EST_String ofile = "-";
     WDataSet dataset,test_dataset;
     EST_FMatrix coeffs;

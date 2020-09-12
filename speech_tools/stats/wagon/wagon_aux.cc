@@ -225,7 +225,7 @@ void WDataSet::load_description(const EST_String &fname, LISP ignores)
 	else if (siod_llength(car(d)) > 2)
 	{
 	    LISP rest = cdr(car(d));
-	    EST_StrList sl;
+	    std::list<EST_String> sl;
 	    siod_list_to_strlist(rest,sl);
 	    p_type[i] = wgn_discretes.def(sl);
 	    if (streq(get_c_string(car(rest)),"_other_"))
