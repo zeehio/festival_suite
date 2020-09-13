@@ -25,7 +25,7 @@ if [ "$run" = "y" ]; then
    BASEDIR=`pwd`
    cd "speech_tools"
    autoconf
-   ./configure --enable-profile=gcov #--with-pulseaudio
+   ./configure PROFILE=gcov #--with-pulseaudio
    make
    make test
    cd "$BASEDIR/speech_tools/doc"
