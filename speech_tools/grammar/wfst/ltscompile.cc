@@ -58,7 +58,7 @@ static void ltsrule_compile(LISP inalpha, LISP outalpha,
 static LISP analyse_rule(LISP rule);
 static LISP expand_sets(LISP l, LISP fp, LISP sets);
 static LISP expand_set(LISP p, LISP fp, LISP sets);
-static LISP find_notMAP(LISP MAP,LISP fp);
+//static LISP find_notMAP(LISP MAP,LISP fp);
 
 void ltscompile(LISP lts_rules, EST_WFST &all_wfst)
 {
@@ -235,7 +235,7 @@ static void ltsrule_compile(LISP inalpha, LISP outalpha,
 {
     // Return two regexs, one matching with rewrites and another
     // that matches things this rule doesn't match.
-    LISP LC,MAP,RC,/*notMAP,*/r;
+    LISP LC,MAP,RC,r;
 
     r = analyse_rule(rule);
     LC = siod_nth(0,r);
@@ -244,7 +244,7 @@ static void ltsrule_compile(LISP inalpha, LISP outalpha,
 
     LC = expand_sets(LC,fp,sets);
     RC = expand_sets(RC,fp,sets);
-    /*notMAP = */find_notMAP(MAP,fp);
+    //    notMAP = find_notMAP(MAP,fp);
 
 
     LISP kk = cons(LC,cons(MAP,cons(RC,NIL)));
@@ -346,6 +346,7 @@ static LISP expand_set(LISP p, LISP fp, LISP sets)
     return reverse(r);
 }
 
+#if 0
 static LISP find_notMAP(LISP MAP,LISP fp)
 {
     // Returns REGEX that matches everything except MAP,  this doesn't
@@ -388,4 +389,5 @@ static LISP find_notMAP(LISP MAP,LISP fp)
 
     return reverse(notrp);
 }
+#endif
 

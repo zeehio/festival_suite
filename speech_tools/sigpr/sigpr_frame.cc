@@ -691,7 +691,7 @@ void fbank2melcep(const EST_FVector &fbank_vec,
 
     int i,j,actual_mfcc_index;
     float pi_i_over_N,const_factor;
-    /*float cos_xform_order;*/
+    //    float cos_xform_order;
     float PI_over_liftering_parameter;
 
     if(liftering_parameter != 0.0)
@@ -701,13 +701,12 @@ void fbank2melcep(const EST_FVector &fbank_vec,
 
     // if we are not including cepstral coeff 0 (c0) then we need
     // to do a cosine transform 1 longer than otherwise
-    /*cos_xform_order = include_c0 ? mfcc_vec.length() : mfcc_vec.length() + 1;*/
+    // cos_xform_order = include_c0 ? mfcc_vec.length() : mfcc_vec.length() + 1;
 
     const_factor = sqrt(2 / (float)(fbank_vec.length()));
 
     for(i=0;i<mfcc_vec.length();i++)
     {
-
 	actual_mfcc_index = include_c0 ? i : i+1;
 
 	pi_i_over_N  = 

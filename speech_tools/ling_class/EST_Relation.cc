@@ -141,14 +141,14 @@ int EST_Relation::length() const
     EST_Item *node;
     int i;
 
-    for (i=0,node=p_head; node; node=node->next())
+    for (i=0,node=p_head; node; node=inext(node))
 	i++;
     return i;
 }
 
 void EST_Relation::evaluate_item_features()
 {
-    for (EST_Item *s = head(); s; s = s->next())
+    for (EST_Item *s = head(); s; s = inext(s))
 	s->evaluate_features();
 }
 
@@ -158,7 +158,7 @@ void EST_Relation::clear()
 
     for (nn = p_head; nn != 0; nn = nnn)
     {
-	nnn = nn->next();
+	nnn = inext(nn);
 	delete nn;
     }
     p_head = p_tail = 0;
@@ -167,9 +167,9 @@ void EST_Relation::clear()
 void EST_Relation::remove_item(EST_Item *node)
 {
     if (p_head == node)
-	p_head = node->next();
+	p_head = inext(node);
     if (p_tail == node)
-	p_tail = node->prev();
+	p_tail = iprev(node);
     delete node;
 }
 
@@ -257,7 +257,7 @@ EST_write_status EST_Relation::save_items(EST_Item *node,
         {
             myname = node_count++;
             nodenames.add_item(n,myname);
-            n = n->next();
+            n = inext(n);
         }
 
         n = node;
@@ -265,14 +265,14 @@ EST_write_status EST_Relation::save_items(EST_Item *node,
         {
             // This will need to be expanded if the we make Relations
             // have more complex structures
-            save_items(n->down(),outf,cnames,nodenames,node_count);
+            save_items(idown(n),outf,cnames,nodenames,node_count);
             outf << nodenames.val(n) << " " <<
                 (n->contents() == 0 ? 0 : cnames.val(n->contents())) << " " <<
-                (n->up() == 0 ? 0 : nodenames.val(n->up())) << " " <<
-                (n->down() == 0 ? 0 : nodenames.val(n->down())) << " " <<
-                (n->next() == 0 ? 0 : nodenames.val(n->next())) << " " <<
-                (n->prev() == 0 ? 0 : nodenames.val(n->prev())) << endl;
-            n = n->next();
+                (iup(n) == 0 ? 0 : nodenames.val(iup(n))) << " " <<
+                (idown(n) == 0 ? 0 : nodenames.val(idown(n))) << " " <<
+                (inext(n) == 0 ? 0 : nodenames.val(inext(n))) << " " <<
+                (iprev(n) == 0 ? 0 : nodenames.val(iprev(n))) << endl;
+            n = inext(n);
         }
     }
     return write_ok;
@@ -430,7 +430,7 @@ EST_read_status EST_Relation::load_items(EST_TokenStream &ts,
 	if (node != 0) // at least one node
 	  {
 	    p_head = get_item_from_name(nodenames,1);
-	    p_tail = p_head->last();
+	    p_tail = last(p_head);
 	    if (!p_head->verify())
 	      {
 		cerr << "load_nodes: " << ts.pos_description() <<
@@ -526,7 +526,7 @@ EST_read_status EST_Relation::load_items(EST_TokenStream &ts,
 	if (node != 0) // at least one node
 	    p_head = get_item_from_name(nodenames,1);
         if (p_head)
-            p_tail = p_head->last();
+            p_tail = last(p_head);
 	if (p_head && !p_head->verify())
 	{
 	    cerr << "load_nodes: " << ts.pos_description() <<
@@ -644,19 +644,9 @@ int num_leaves(const EST_Item *h)
     int count = 0;
     EST_Item *n;
 
-    for (n = h->first_leaf(); n != 0; n=n->next_leaf())
+    for (n = first_leaf(h); n != 0; n=next_leaf(n))
 	count++;
     return count;
-}
-
-EST_Item *EST_Relation::first_leaf() const 
-{ 
-    return head()->first_leaf();
-}
-
-EST_Item *EST_Relation::last_leaf() const 
-{ 
-    return head()->last_leaf();
 }
 
 EST_Utterance *get_utt(EST_Item *s)
@@ -684,7 +674,7 @@ ostream& operator << (ostream &s, const EST_Relation &a)
 {
     s << a.f << endl;
 
-    for (EST_Item *p = a.head(); p; p = p->next())
+    for (EST_Item *p = a.head(); p; p = inext(p))
 	s << *p << endl;
 
     return s;

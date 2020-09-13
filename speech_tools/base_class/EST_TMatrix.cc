@@ -188,7 +188,7 @@ template<class T>
 EST_TMatrix<T> &EST_TMatrix<T>::add_columns(const EST_TMatrix<T> &in)
 {
   if (in.num_rows() != num_rows())
-    EST_error("Can't add columns with differnet number of rows (%d vs %d)",
+    EST_error("Can't add columns with different number of rows (%d vs %d)",
 	      in.num_rows(),
 	      num_rows()
 	      );

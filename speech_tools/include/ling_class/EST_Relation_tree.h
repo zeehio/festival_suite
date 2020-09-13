@@ -50,28 +50,28 @@
 ///@{
 
 /// \brief return parent of `n`
-inline EST_Item *parent(const EST_Item *n) { return n->first()->up(); }
+inline EST_Item *parent(const EST_Item *n) { return iup(first(n)); }
 
 /// \brief return first daughter of `n`
-inline EST_Item *daughter1(const EST_Item *n) { return n->down(); }
+inline EST_Item *daughter1(const EST_Item *n) { return idown(n); }
 
 /// \brief return second daughter of `n`
-inline EST_Item *daughter2(const EST_Item *n) { return n->down()->next(); }
+inline EST_Item *daughter2(const EST_Item *n) { return inext(idown(n)); }
 
 /// \brief return nth daughter of `n`
 EST_Item *daughtern(const EST_Item *n, int nth);
 
 /// \brief return last daughter of `n`
-inline EST_Item *daughtern(const EST_Item *n) { return n->down()->last(); }
+inline EST_Item *daughtern(const EST_Item *n) { return last(idown(n)); }
 
 /// \brief return next sibling (sister) of `n`
-inline EST_Item *next_sibling(const EST_Item *n) { return n->next(); }
+inline EST_Item *next_sibling(const EST_Item *n) { return inext(n); }
 
 /// \brief return previous sibling (sister) of `n`
-inline EST_Item *prev_sibling(const EST_Item *n) { return n->prev(); }
+inline EST_Item *prev_sibling(const EST_Item *n) { return iprev(n); }
 
 /// \brief return root node of treeprevious sibling (sister) of `n`
-inline EST_Item *root(const EST_Item *n) { return n->top(); }
+inline EST_Item *root(const EST_Item *n) { return top(n); }
 
 /** \brief return parent of `n` as seen from relation `relname` */
 inline EST_Item *parent(const EST_Item *n,const char *relname)
@@ -115,29 +115,6 @@ EST_Item *first_leaf_in_tree(const EST_Item *root);
 
 // should be deleted.
 EST_Item *last_leaf_in_tree(const EST_Item *root);
-
-/** \brief  return the first leaf (terminal node) which is dominated by
- `n`. Note that this is different from daughter1 etc
-as this descends the tree to find the leftmost terminal node (it
-is like the transitive closure of daughter1).
-*/
-inline EST_Item *first_leaf(const EST_Item *n) {return first_leaf_in_tree(n);}
-
-/** return the last leaf (terminal node) which is dominated by
- `n`. Note that this is different from daughter1 etc
-as this descends the tree to find the right terminal node (it is
-like the transitive closure of daughtern).
-*/
-inline EST_Item *last_leaf(const EST_Item *n) { return last_leaf_in_tree(n); }
-
-/** Return next leaf in tree given `n`.  If
-`n` is a terminal node, next_leaf() will return
-the next leaf in the tree. If `n` is not
-terminal, this will return the leftmost terminal node dominated by
-`n`. This will return 0 only when the last leaf in
-the relation has been passed.
-*/
-inline EST_Item *next_leaf(const EST_Item *n) { return n->next_leaf(); }
 
 /** Return number of leaves (terminal nodes) under `n`
  */

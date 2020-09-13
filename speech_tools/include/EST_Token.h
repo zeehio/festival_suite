@@ -119,7 +119,7 @@ class EST_Token {
     ///@{
     const EST_String &string() const { return String(); }
     /// Access token as a string
-    const EST_String &S() const { return S(); }
+    const EST_String &S() const { return String(); }
     /// Access token as a string
     const EST_String &String() const { return pname; }
     /// For automatic coercion to \ref EST_String 

@@ -49,8 +49,8 @@ using namespace std;
 
 EST_Val ff_duration(EST_Item *s)
 {
-    if (s->prev())
-        return s->F("end")-s->prev()->F("end");
+    if (iprev(s))
+        return s->F("end")-iprev(s)->F("end");
     else
         return s->F("end");
 }
@@ -60,7 +60,7 @@ EST_Val ff_start(EST_Item *s)
     /* Changed by awb 12/07/05, to make this actually a generic function */
     /* no longer changes relation view to Segment -- may affect tilt and */
     /* other pault things                                                */
-    return  (s->prev() == 0) ? 0.0 : s->prev()->F("end");
+    return  (iprev(s) == 0) ? 0.0 : iprev(s)->F("end");
 }
 
 EST_Val ff_tilt_phrase_position(EST_Item *s)

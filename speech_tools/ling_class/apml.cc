@@ -302,7 +302,7 @@ void Apml_Parser_Class::element_close(XML_Parser_Class &c,
     {
       state->depth--;
       state->pending = NULL;
-      state->parent=state->parent->up();
+      state->parent=iup(state->parent);
     }
 }
 

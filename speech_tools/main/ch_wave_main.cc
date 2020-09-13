@@ -128,6 +128,8 @@ int main (int argc, char *argv[])
 		       
 	 "-ext <string>    File extension for divided waveforms\n\n"
 		       
+         "-compress <float> Apply Dynamic Range Compression by factor specified \n" 		       
+
 	 "-extract <string> Used in conjunction with -key to extract a \n"
 	 "    single section of waveform from the input \n"
 	 "    waveform. The argument is the name of a file given \n"
@@ -196,12 +198,20 @@ int main (int argc, char *argv[])
     if (al.present("-F"))	// resample
 	sig.resample(al.ival("-F"));
     
+    if (al.present("-compress")) // Dynamic Range Compression
+    {
+        float mu = al.fval("-compress" , 0);
+        float lim = 30000.0;
+
+        sig.compress(mu, lim);
+    } 
+
     if (al.present("-scale"))	// rescale
     {
 	float scale = al.fval("-scale", 0);
 	sig.rescale(scale);
     }
-    else if (al.present("-scaleN"))	// rescale
+    if (al.present("-scaleN"))	// rescale
     {
 	float scale = al.fval("-scaleN", 0);
 	if ((scale < 0) || (scale > 1.0))

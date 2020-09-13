@@ -47,6 +47,14 @@
 #include "EST_simplestats.h"  /* For EST_SuffStats class */
 #include "EST_Track.h"
 #include "siod.h"
+
+//  When set to one wagon supports using multiple threads if
+//  --omp_nthreads X is used (works for most gccs)
+// #define OMP_WAGON 1
+#ifdef OMP_WAGON
+#include "omp.h"
+#endif
+
 #define wagon_error(WMESS) (std::cerr << WMESS << std::endl,exit(-1))
 
 // I get floating point exceptions of Alphas when I do any comparisons
@@ -269,7 +277,11 @@ void wgn_find_split(WQuestion &q,WVectorVector &ds,
 float summary_results(WNode &tree,ostream *output);
 
 extern int wgn_min_cluster_size;
+extern int wgn_max_questions;
 extern int wgn_held_out;
+extern float wgn_dropout_feats;
+extern float wgn_dropout_samples;
+extern int wgn_cos;
 extern int wgn_prune;
 extern int wgn_quiet;
 extern int wgn_verbose;

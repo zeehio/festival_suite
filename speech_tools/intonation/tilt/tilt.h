@@ -83,4 +83,4 @@ inline float dur(EST_Item &e)
 }
 */
 
-#endif /* INTONATION_ */
+#endif /* INTONATION_TILT_H */

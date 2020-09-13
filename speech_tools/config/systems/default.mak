@@ -61,13 +61,6 @@ NAS_INCLUDE = /usr/X11R6/include
 NAS_LIB = /usr/X11R6/lib
 
 ###########################################################################
-## Where to find PulseAudio
-
-PULSE_INCLUDE = /usr/include
-PULSE_LIB = /usr/lib
-
-
-###########################################################################
 ## Where to find X11
 
 X11_INCLUDE = /usr/X11R6/include
@@ -105,7 +98,7 @@ MAKE_DEPEND_C = makedepend $(INCLUDES) $(TEMPLATES) $(TEMPLATE_SPECIFIC)
 MAKE_DEPEND_CXX = makedepend $(INCLUDES) $(TEMPLATES) $(TEMPLATE_SPECIFIC)
 
 ## Generic library building
-BUILD_LIB =$(AR) cruv
+BUILD_LIB =$(AR) crv
 
 ## generic library indexing
 INDEX_LIB = $(RANLIB)
@@ -132,6 +125,8 @@ GNUTEST = gnutest
 
 ## Avoid clever RMs people may have on their path
 RM = /bin/rm
+
+###########################################################################
 
 
 COMPILER_VERSION_COMMAND=true

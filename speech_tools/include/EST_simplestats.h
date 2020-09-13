@@ -79,7 +79,6 @@ public:
     /// 
     void copy(const EST_Discrete &d);
     /// (re-)initialise
-    //ZEEHIO bool init(const EST_StrList &vocab);
     bool init(const std::list<EST_String> &vocab);
 
     /// The number of members in the discrete

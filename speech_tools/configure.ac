@@ -35,12 +35,12 @@ AC_PREREQ([2.68])
 AC_INIT([speech-tools], [2.4-release], [festival-talk@festvox.org])
 AC_CONFIG_SRCDIR([include/EST.h])
 
-# Checks for programs.
-AC_PROG_AWK
+AC_CANONICAL_TARGET
 AC_PROG_CXX
 AC_PROG_CC
+# Checks for programs.
+AC_PROG_AWK
 AC_PROG_LN_S
-AC_CANONICAL_TARGET
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_RANLIB
@@ -48,28 +48,82 @@ AC_CHECK_TOOL(AR, ar)
 
 AC_C_BIGENDIAN
 
-
-AC_ARG_WITH([compiler],
-            [AS_HELP_STRING([--with-compiler],
-              [select a compiler])],
-            [ if   test "x$withval" = "x"; then
-                COMPILER=`basename $CC`
-              else
-                COMPILER=$withval
-              fi
-            ],
-            [COMPILER=`basename $CC`])
-if ! test -f "config/compilers/$COMPILER.mak"; then
-   COMPILER="custom"
-fi
-AC_SUBST(COMPILER)
-
-# Checks for libraries.
 AC_CHECK_LIB(ncurses, tputs, [TERMCAPLIB=-lncurses], [TERMCAPLIB=-lcurses])
 dnl if test "$TERMCAPLIB" != "-ltermcap"; then
 dnl    AC_CHECK_LIB(termcap, tputs, [TERMCAPLIB=-ltermcap], [TERMCAPLIB=-lncurses])
 dnl 
 AC_SUBST(TERMCAPLIB)
+
+dnl Which compiler do we have here
+AC_ARG_VAR(COMPILERTYPE, [compiler profile to use from config/compilers. This
+           is used to set compiler flags on libraries and source file dependency resolution])
+dnl If the user has not set COMPILERTYPE, check for some compilers:
+if test "x${COMPILERTYPE}" = "x"; then
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int j= 
+                #if __GNUC__ == 2 && __GNUC_MINOR__ == 95
+                3;
+                #endif ]])],[COMPILERTYPE=gcc295],[])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int j= 
+                #if __GNUC__ == 3 
+                3;
+                #endif ]])],[COMPILERTYPE=gcc32],[])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[ int j=
+                #if __GNUC__ == 2 && __GNUC_MINOR__ == 96
+                3;
+                #endif ]])],[COMPILERTYPE=gcc296],[])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int j=
+                #if __GNUC__ == 2 && __GNUC_MINOR__ == 91
+                3;
+                #endif ]])],[COMPILERTYPE=egcs],[])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int j=
+                #if __GNUC__ == 2 && __GNUC_MINOR__ == 8
+                3;
+                #endif ]])],[COMPILERTYPE=gcc28],[])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int j =
+                #if defined(__GNUC__)
+                3;
+                #endif ]])],[COMPILERTYPE=gcc],[])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int j =
+                #if defined(__clang__)
+                3;
+                #endif ]])],[COMPILERTYPE=clang],[])
+fi
+dnl If the user has not set COMPILERTYPE and the checks did not deliver
+dnl results, set COMPILERTYPE to basename $CC.
+if test "x${COMPILERTYPE}" = "x"; then
+    COMPILERTYPE=`basename $CC`
+fi
+AC_SUBST(COMPILERTYPE)
+
+AC_ARG_VAR(SHARED, [SHARED=0 does not build shared libraries. SHARED=1 builds
+ static libraries. SHARED=2 builds shared libraries.])
+if test "x${SHARED}" = "x"; then
+    SHARED=0
+fi
+
+AC_ARG_VAR(DEBUG, [DEBUG=0 does not append debug flags. DEBUG=1 appends debug
+ flags. Flags can also be passed using CFLAGS])
+if test "x${DEBUG}" = "x"; then
+    DEBUG=0
+fi
+
+AC_ARG_VAR(OPTIMISE, [Choose optimization level from 0 to 4. Default 3. Level 4 disables debug. ])
+if test "x${OPTIMISE}" = "x"; then
+    OPTIMISE=3
+fi
+AC_SUBST(OPTIMISE)
+
+AC_ARG_VAR(WARN, [ Enable warning flags (WARN=1) or disable them (WARN=0) ])
+if test "x${WARN}" = "x"; then
+    WARN=1
+fi
+AC_SUBST(WARN)
+
+AC_ARG_VAR(PROFILE, [ Enable a profiled build (e.g. PROFILE=gprof, PROFILE=gcov) ])
+if test "x${PROFILE}" = "x"; then
+    PROFILE=
+fi
+AC_SUBST(PROFILE)
 
 LINUXAUDIO=none
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <alsa/version.h>]], [[int j=
@@ -86,88 +140,26 @@ AC_ARG_WITH([nas_audio],
 AC_SUBST(NAS_AUDIO)
 
 AC_ARG_WITH([pulseaudio],
-            [AS_HELP_STRING([--with-pulseaudio],
-              [enable PulseAudio sound server])],
-            [PULSE_AUDIO=PULSE_AUDIO],
-            [PULSE_AUDIO=])
+  [AS_HELP_STRING([--with-pulseaudio],
+  [Compile PulseAudio audio module @<:@default=no@:>@])],
+  [],
+  [with_pulseaudio=no])
+
+
+PULSE_AUDIO=
+AS_IF([test "x$with_pulseaudio" != xno],
+      [PULSE_AUDIO="PULSE_AUDIO"],
+      []
+)
+
 AC_SUBST(PULSE_AUDIO)
 
-AC_ARG_ENABLE([optimise],[ AS_HELP_STRING([--enable-optimise=NUM Choose optimization level from 0 to 4. Default 3. Level 4 disables debug. ])],
- [ if   test "x$enableval" = "x0"; then
-       OPTIMISE=0
-   elif test "x$enableval" = "x1"; then
-       OPTIMISE=1
-   elif test "x$enableval" = "x2"; then
-       OPTIMISE=2
-   elif test "x$enableval" = "x3"; then
-       OPTIMISE=3
-   elif test "x$enableval" = "x4"; then
-       OPTIMISE=4
-   else
-       OPTIMISE=3
-   fi
-  ], [ OPTIMISE=3 ])
-AC_SUBST(OPTIMISE)
+OMP_OPTS=
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <omp.h>]], [[ int j=1;]])],[OMP_OPTS="-fopenmp"],[])
+AC_SUBST(OMP_OPTS)
+OMP_DEFS=
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <omp.h>]], [[ int j=1;]])],[OMP_DEFS="-DOMP_WAGON=1"],[])
+AC_SUBST(OMP_DEFS)
 
-
-AC_ARG_ENABLE([warn],[ AS_HELP_STRING([--disable-warn  Disable warning flags ])],
- [
-   if test "x$enableval" = "xno"; then
-       WARN=0
-   else
-       WARN=1
-   fi
- ], [ WARN=1 ])
-AC_SUBST(WARN)
-
-
-AC_ARG_ENABLE([shared],[ AS_HELP_STRING([--enable-shared=2  Enable building shared libraries])],
- [ if   test "x$enableval" = "x0"; then
-       SHARED=0
-   elif test "x$enableval" = "x1"; then
-       SHARED=1
-   elif test "x$enableval" = "x2"; then
-       SHARED=2
-   else
-       SHARED=2
-   fi
- ], [ SHARED=0 ])
-AC_SUBST(SHARED)
-
-AC_ARG_ENABLE([profile],[ AS_HELP_STRING([--enable-profile  Enable a profiled build])],
- [ if   test "x$enableval" = "xgprof"; then
-       PROFILE=gprof
-   elif test "x$enableval" = "xgcov"; then
-       PROFILE=gcov
-   else
-       PROFILE=gprof
-   fi
- ], [ PROFILE= ])
-AC_SUBST(PROFILE)
-
-AC_ARG_ENABLE([debug],[ AS_HELP_STRING([--enable-debug  Produce debugging information])],
- [ DEBUG=1 ], [ DEBUG=0 ])
-AC_SUBST(DEBUG)
-
-# Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h limits.h netdb.h netinet/in.h sgtty.h stddef.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h termios.h unistd.h])
-
-
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_C_INLINE
-AC_C_RESTRICT
-AC_TYPE_SIZE_T
-AC_TYPE_SSIZE_T
-AC_TYPE_OFF_T
-AC_CHECK_TYPES([ptrdiff_t])
-
-# Checks for library functions.
-AC_FUNC_ERROR_AT_LINE
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_FUNC_STRTOD
-AC_CHECK_FUNCS([dup2 floor getcwd gethostbyname gethostname gettimeofday inet_ntoa memmove memset pow putenv rint socket sqrt strcasecmp strchr strcspn strdup strerror strrchr strspn strstr strtol])
-
-AC_CONFIG_FILES([config/config config/user_flags.mak config/compilers/custom.mak])
+AC_CONFIG_FILES([config/config config/user_flags.mak])
 AC_OUTPUT

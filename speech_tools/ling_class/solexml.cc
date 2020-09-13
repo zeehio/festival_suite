@@ -288,7 +288,7 @@ void Sole_Parser_Class::element_open(XML_Parser_Class &c,
 	  else
 	    {
 	      state->current = state->parent;
-	      state->parent=state->parent->up();
+                state->parent=iup(state->parent);
 	    }
 	    
 
@@ -359,7 +359,7 @@ void Sole_Parser_Class::element_close(XML_Parser_Class &c,
     {
       state->depth--;
       state->current = state->parent;
-      state->parent=state->parent->up();;
+        state->parent=iup(state->parent);
     }
 }
 

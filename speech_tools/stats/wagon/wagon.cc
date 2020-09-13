@@ -64,7 +64,11 @@ EST_Track wgn_VertexFeats;
 EST_Track wgn_UnitTrack;
 
 int wgn_min_cluster_size = 50;
+int wgn_max_questions = 2000000; /* not ideal, but adequate */
 int wgn_held_out = 0;
+float wgn_dropout_feats = 0.0;
+float wgn_dropout_samples = 0.0;
+int wgn_cos = 1;
 int wgn_prune = TRUE;
 int wgn_quiet = FALSE;
 int wgn_verbose = FALSE;
@@ -653,7 +657,7 @@ static float test_tree_ols(WNode &tree,WDataSet &dataset,ostream *output)
 {
     // Test tree against data to get summary of results OLS
     EST_Litem *p;
-    /*WNode *leaf;  // unused */
+    //    WNode *leaf;
     float predict,real;
     EST_SuffStats x,y,xx,yy,xy,se,e;
     double cor,error;
@@ -661,9 +665,9 @@ static float test_tree_ols(WNode &tree,WDataSet &dataset,ostream *output)
 
     for (p=dataset.head(); p != 0; p=p->next())
     {
-	/*leaf = */tree.predict_node((*dataset(p)));
+	//leaf = tree.predict_node((*dataset(p)));
         // do ols to get predict;
-        predict = 0.0;
+        predict = 0.0;  // This is incomplete ! you need to use leaf
 	real = dataset(p)->get_flt_val(wgn_predictee);
 	if (wgn_count_field == -1)
 	    count = 1.0;
@@ -724,6 +728,9 @@ static int wagon_split(int margin, WNode &node)
     WNode *l,*r;
 
     node.set_impurity(WImpurity(node.get_data()));
+    if (wgn_max_questions < 1)
+        return FALSE;
+        
     find_best_question(node.get_data(), q);
 
 /*    printf("q.score() %f impurity %f\n",
@@ -735,7 +742,6 @@ static int wagon_split(int margin, WNode &node)
 
     if ((question_score < WGN_HUGE_VAL) && 
         (question_score < impurity_measure))
-
     {
 	// Ok its worth a split
 	l = new WNode();
@@ -750,6 +756,7 @@ static int wagon_split(int margin, WNode &node)
 		cout << " ";
 	    cout << q << endl;
 	}
+        wgn_max_questions--;
 	margin++;
 	wagon_split(margin,*l);
 	margin++;
@@ -777,8 +784,24 @@ void wgn_find_split(WQuestion &q,WVectorVector &ds,
 {
     int i, iy, in;
 
-    y.resize(q.get_yes());
-    n.resize(q.get_no());
+    if (wgn_dropout_samples > 0.0)
+    {
+        // You need to count the number of yes/no again in all ds
+        for (iy=in=i=0; i < ds.n(); i++)
+            if (q.ask(*ds(i)) == TRUE)
+                iy++;
+            else
+                in++;
+    }
+    else
+    {
+        // Current counts are corrent (as all data was used)
+        iy = q.get_yes();
+        in = q.get_no();
+    }
+
+    y.resize(iy);
+    n.resize(in);
     
     for (iy=in=i=0; i < ds.n(); i++)
 	if (q.ask(*ds(i)) == TRUE)
@@ -788,6 +811,82 @@ void wgn_find_split(WQuestion &q,WVectorVector &ds,
 
 }
 
+static float wgn_random_number(float x)
+{
+    // Returns random number between 0 and x
+    /* This is not a good approach for generating random
+     * numbers. The conversion of RAND_MAX from int to float
+     * implies a loss of precision. C++-11 has std::uniform_real_distribution
+     * that provides a cleaner solution. Consider adopting c++-11
+     */
+    return (((float)random())/(float)RAND_MAX)*x;
+}
+
+#ifdef OMP_WAGON
+static void find_best_question(WVectorVector &dset,
+                               WQuestion &best_ques)
+{
+    //  Ask all possible questions and find the best one
+    int i;
+    float bscore,tscore;
+    WQuestion test_ques;
+    WQuestion** questions=new WQuestion*[wgn_dataset.width()];
+    float* scores = new float[wgn_dataset.width()];
+    bscore = tscore = WGN_HUGE_VAL;
+    best_ques.set_score(bscore);
+#pragma omp parallel
+#pragma omp for
+    for (i=0;i < wgn_dataset.width(); i++)
+    {
+    	questions[i] = new WQuestion;
+	questions[i]->set_score(bscore);}
+#pragma omp parallel
+#pragma omp for
+    for (i=0;i < wgn_dataset.width(); i++)
+    {
+	if ((wgn_dataset.ignore(i) == TRUE) ||
+	    (i == wgn_predictee))
+	    scores[i] = WGN_HUGE_VAL;     // ignore this feature this time
+        else if (wgn_random_number(1.0) < wgn_dropout_feats)
+	    scores[i] = WGN_HUGE_VAL;     // randomly dropout feature
+	else if (wgn_dataset.ftype(i) == wndt_binary)
+	{
+	    construct_binary_ques(i,*questions[i]);
+	    scores[i] = wgn_score_question(*questions[i],dset);
+	}
+	else if (wgn_dataset.ftype(i) == wndt_float)
+	{
+	    scores[i] = construct_float_ques(i,*questions[i],dset);
+	}
+	else if (wgn_dataset.ftype(i) == wndt_ignore)
+	    scores[i] = WGN_HUGE_VAL;    // always ignore this feature
+#if 0
+	// This doesn't work reasonably 
+	else if (wgn_csubset && (wgn_dataset.ftype(i) >= wndt_class))
+	{
+	    wagon_error("subset selection temporarily deleted");
+	    tscore = construct_class_ques_subset(i,test_ques,dset);
+	}
+#endif
+	else if (wgn_dataset.ftype(i) >= wndt_class)
+	    scores[i] = construct_class_ques(i,*questions[i],dset);
+    }
+    for (i=0;i < wgn_dataset.width(); i++)
+    {
+	if (scores[i] < bscore)
+	{
+	    best_ques = *questions[i];
+	    best_ques.set_score(scores[i]);
+	    bscore = scores[i];
+	}
+        delete questions[i];
+    }
+    delete [] questions;
+    delete [] scores;
+    return;
+}
+#else
+// No OMP parallelism
 static void find_best_question(WVectorVector &dset,
                                WQuestion &best_ques)
 {
@@ -804,6 +903,8 @@ static void find_best_question(WVectorVector &dset,
 	if ((wgn_dataset.ignore(i) == TRUE) ||
 	    (i == wgn_predictee))
 	    tscore = WGN_HUGE_VAL;     // ignore this feature this time
+        else if (wgn_random_number(1.0) < wgn_dropout_feats)
+	    tscore = WGN_HUGE_VAL;     // randomly dropout feature
 	else if (wgn_dataset.ftype(i) == wndt_binary)
 	{
 	    construct_binary_ques(i,test_ques);
@@ -835,6 +936,7 @@ static void find_best_question(WVectorVector &dset,
 
     return;
 }
+#endif
 
 static float construct_class_ques(int feat,WQuestion &ques,WVectorVector &ds)
 {
@@ -1031,7 +1133,11 @@ static float score_question_set(WQuestion &q, WVectorVector &ds, int ignorenth)
     n.data = &ds;
     for (d=0; d < ds.n(); d++)
     {
-	if ((ignorenth < 2) ||
+        if (wgn_random_number(1.0) < wgn_dropout_samples)
+        {
+            continue;  // dropout this sample
+        }
+        else if ((ignorenth < 2) ||
 	    (d%ignorenth != ignorenth-1))
 	{
 	    wv = ds(d);

@@ -189,6 +189,7 @@ static EST_read_status load_all_contents(EST_TokenStream &ts,
 
 	si->relations.add_item("__READ__", est_val((EST_Item *)NULL), 1);
 
+
 	Sid = ts.get().string();
 
 	id = Sid.Int(ok);
@@ -329,8 +330,8 @@ static EST_write_status utt_save_all_contents(ostream &outf,
 	utt_save_ling_content(outf,n,sinames,si_count);
 	// As we have more complex structures this will need to
 	// be updated (i.e. we'll need a marking method for nodes)
-	utt_save_all_contents(outf,n->next(),sinames,si_count);
-	utt_save_all_contents(outf,n->down(),sinames,si_count);
+	utt_save_all_contents(outf,inext(n),sinames,si_count);
+	utt_save_all_contents(outf,idown(n),sinames,si_count);
     }
     return write_ok;
 }
@@ -373,7 +374,7 @@ EST_read_status EST_UtteranceFile::load_xlabel(EST_TokenStream &ts,
     {
       i->set("start", t);
       t = i->F("end");
-      i = i->next();
+      i = inext(i);
     }
 
   return status;
@@ -397,9 +398,9 @@ EST_write_status EST_UtteranceFile::save_xlabel(ostream &outf,
       
       while (hd)
 	{
-	  if (hd->up() || hd->down())
+            if (iup(hd) || idown(hd))
 	    break;
-	  hd=hd->next();
+            hd=inext(hd);
 	}
 
       // didn't find anything => this is linear
@@ -519,15 +520,12 @@ EST_write_status EST_UtteranceFile::save_genxml(ostream &outf,
 						const EST_Utterance &utt)
 {
   EST_write_status status=write_ok;
-
   EST_TStringHash<int> features(20);
-
   EST_Features::Entries p;
 
   for (p.begin(utt.relations); p; ++p)
     {
       EST_Relation *rel = ::relation(p->v);
-
       EST_Item * hd = rel->head();
       
       while (hd)
@@ -535,7 +533,7 @@ EST_write_status EST_UtteranceFile::save_genxml(ostream &outf,
 	  EST_Features::Entries fp;
 	  for (fp.begin(hd->features()); fp; ++fp)
 	    features.add_item(fp->k, 1);
-	  hd=hd->next();
+            hd=inext(hd);
 	}
     }
 
@@ -555,11 +553,8 @@ EST_write_status EST_UtteranceFile::save_genxml(ostream &outf,
     }
 
   outf << "\t\t>\n";
-
   outf << "\t]>\n";
-
   outf << "<utterance>\n";
-
   outf << "<language name='unknown'/>\n";
 
   for (p.begin(utt.relations); p; ++p)
@@ -571,9 +566,9 @@ EST_write_status EST_UtteranceFile::save_genxml(ostream &outf,
       
       while (hd)
 	{
-	  if (hd->up() || hd->down())
+            if (iup(hd) || idown(hd))
 	    break;
-	  hd=hd->next();
+            hd=inext(hd);
 	}
 
       // didn't find anything => this is linear
@@ -593,7 +588,7 @@ EST_write_status EST_UtteranceFile::save_genxml(ostream &outf,
 
 	      outf << "         />\n";
 	      
-	      hd=hd->next();
+                hd=inext(hd);
 	    }
 	  
 	  outf << "</relation>\n";
@@ -651,7 +646,7 @@ EST_String EST_UtteranceFile::options_supported(void)
 	      if (nm==NULL)
 		break;
 	
-	      s += EST_String::cat("        ", nm, EST_String(" ")*(12-strlen((nm))), (d?d:"NULL"), "\n");
+	      s += EST_String::cat("        ", (nm?nm:"NULL"), EST_String(" ")*(12-strlen((nm?nm:"NULL"))), (d?d:"NULL"), "\n");
 	    }
 	}
     }

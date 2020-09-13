@@ -82,8 +82,12 @@ extern "C" {
 
 /* Linux (and presumably Hurd too as Linux is GNU libc based) */
 /* Sorry I haven't confirmed this cpp symbol yet              */
-#if defined(linux)
+#if defined(linux) && defined(__GLIBC__)
 #define isnanf(X) __isnanf(X)
+#endif
+
+#ifndef isnanf
+#define isnanf std::isnan
 #endif
 
 /* OS/2 with gcc EMX */

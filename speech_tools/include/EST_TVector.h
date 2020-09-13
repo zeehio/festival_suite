@@ -325,8 +325,11 @@ public:
 };
 
 /// assignment operator: fill track with values in list `s`.
-template<class T>
-extern EST_TVector<T> &set(EST_TVector<T> &v, const EST_TList<T> &s);
+
+// This appears unuset and potentially causes a namespace clashes with std::set
+// is sparrowhawk is used. 
+//   template<class T>
+//     extern EST_TVector<T> &set(EST_TVector<T> &v, const EST_TList<T> &s);
 
 #undef A_CHECK
 #endif

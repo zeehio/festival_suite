@@ -38,9 +38,6 @@
  ##                                                                       ##
  ###########################################################################
 
-CC=icc
-CXX=icpc
-
 COMPILER_DESC=Intel 8.0
 COMPILER_VERSION_COMMAND=$(CXX) -v 2>&1 | tail -1 | sed -e 's/^Version.//'
 

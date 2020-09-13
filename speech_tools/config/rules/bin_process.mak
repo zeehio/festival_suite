@@ -59,7 +59,6 @@ endif
 		Makefile ) : ;; \
 		VCLocalRules ) : ;; \
 		RCS|CVS ) : ;; \
-		SCCS|BitKeeper ) : ;; \
 		* ) $(ECHO_N) " $$i"; $(RM) -f "$$i";; \
 	    esac \
 	done

@@ -32,9 +32,6 @@
 /*  THIS SOFTWARE.                                                       */
 /*                                                                       */
 /*************************************************************************/
-/*                Author :  Michal Schmidt                               */
-/*                Date   :  November 2008                                */
-/*-----------------------------------------------------------------------*/
 /*  Optional support for PulseAudio                                      */
 /*=======================================================================*/
 
@@ -44,100 +41,73 @@
 
 using namespace std;
 
-#ifdef SUPPORT_PULSE
+#ifdef SUPPORT_PULSEAUDIO
+
+#include <pulse/simple.h>
+int pulse_supported = TRUE;
 
 #define AUDIOBUFFSIZE 256
 // #define AUDIOBUFFSIZE 20480
 
-
-#include <pulse/simple.h>
-#include <pulse/error.h>
-
-int pulse_supported = TRUE;
-const static char *err_prefix = "Pulseaudio: ";
-
-static int transfer_pulse_wave(EST_Wave &inwave, EST_Option &al, int record)
-{
-    (void) al;
-    short *waveform;
-    int num_samples;
-    int err, pa_ret;
-    int ret = -1;
-    pa_simple *s = NULL;
-    pa_sample_spec ss;
-
-    ss.format   = PA_SAMPLE_S16NE;
-    ss.channels = 1;
-    ss.rate     = inwave.sample_rate();
-
-    waveform    = inwave.values().memory();
-    num_samples = inwave.num_samples();
-
-    /* In case num_samples == 0, don't play. Pulseaudio returns "invalid
-     * argument" if num_samples == 0, so it's better to check now.
-     * I don't expect num_samples < 0, but as we have to check anyway
-     * it doesn't hurt to check.
-     */
-    if (num_samples <= 0) {
-		ret=1;
-		goto finish;
-	}
-
-    s = pa_simple_new(NULL,           // Use the default server.
-	"Festival",                   // Our application's name.
-	record ? PA_STREAM_RECORD : PA_STREAM_PLAYBACK,
-	NULL,                         // Use the default device.
-	record ? "Record" : "Speech", // Description of our stream.
-	&ss,                // Our sample format.
-	NULL,               // Use default channel map
-	NULL,               // Use default buffering attributes.
-	&err);
-
-    if (!s) {
-	cerr << err_prefix << pa_strerror(err) << endl;
-	goto finish;
-    }
-
-    if (record) {
-        pa_ret = pa_simple_read (s, waveform, num_samples*sizeof(short), &err);
-    } else {
-        pa_ret = pa_simple_write(s, waveform, num_samples*sizeof(short), &err);
-    }
-    if (pa_ret < 0) {
-	cerr << err_prefix << pa_strerror(err) << endl;
-	goto finish;
-    }
-
-    if (!record && pa_simple_drain(s, &err) < 0) {
-	cerr << err_prefix << pa_strerror(err) << endl;
-	goto finish;
-    }
-
-    ret = 1;
-finish:
-    if (s)
-	pa_simple_free(s);
-    return ret;
-}
-
 int play_pulse_wave(EST_Wave &inwave, EST_Option &al)
 {
-	return transfer_pulse_wave(inwave, al, 0);
+    pa_sample_spec *ss;
+    pa_simple *s;
+    short *waveform;
+    int num_samples;
+    int err=0, i;
+
+    ss = walloc(pa_sample_spec,1);
+    ss->rate = inwave.sample_rate();
+    ss->channels = inwave.num_channels();
+
+    ss->format = PA_SAMPLE_S16NE;
+    
+    s = pa_simple_new(
+                    NULL,      /* use default server */
+                    "festival",
+                    PA_STREAM_PLAYBACK,
+                    NULL,      /* use default device */
+                    "Speech",
+                    ss,
+                    NULL,      /* default channel map */
+                    NULL,      /* default buffering attributes */
+                    &err);
+    if (err < 0)
+        return 0;
+
+    waveform = inwave.values().memory();
+    num_samples = inwave.num_samples();
+
+    for (i=0; i < num_samples; i += AUDIOBUFFSIZE/2)
+    {
+        if (i + AUDIOBUFFSIZE/2 < num_samples)
+            pa_simple_write(s,&waveform[i],(size_t)AUDIOBUFFSIZE,&err);
+        else
+            pa_simple_write(s,&waveform[i],(size_t)(num_samples-i)*2,&err);
+    }
+
+    pa_simple_drain(s,&err);
+    pa_simple_free(s);
+    wfree(ss);
+
+    return 1;
 }
 
 int record_pulse_wave(EST_Wave &inwave, EST_Option &al)
 {
-	return transfer_pulse_wave(inwave, al, 1);
+    return -1;
 }
 
-#else
+#else /* SUPPORT_PULSEAUDIO */
+
 int pulse_supported = FALSE;
 
 int play_pulse_wave(EST_Wave &inwave, EST_Option &al)
 {
     (void)inwave;
     (void)al;
-    cerr << "Audio: pulse not compiled in this version" << endl;
+    cerr << "Audio: pulseaudio not compiled in this version" << endl;
     return -1;
 }
 
@@ -145,8 +115,9 @@ int record_pulse_wave(EST_Wave &inwave, EST_Option &al)
 {
     (void)inwave;
     (void)al;
-    cerr << "Audio: pulse not compiled in this version" << endl;
+    cerr << "Audio: pulseaudio not compiled in this version" << endl;
     return -1;
 }
 
-#endif
+
+#endif /* SUPPORT_PULSEAUDIO */

@@ -79,7 +79,7 @@ instead. However, the code in this function closely matches the
 classic FORTRAN version given in many text books, so is at least easy
 to follow for new users.
 
-The length of real and imag must be the same, and must be 
+The length of `real` and `imag` must be the same, and must be 
 a power of 2 (e.g. 128).
 
 @see slowIFFT

@@ -190,7 +190,7 @@ public:
   // recursive delete of contents and children
   void zap();
 
-  const EST_BackoffNgrammarState * get_state(const EST_StrVector &words) const;
+  const EST_BackoffNgrammarState *const get_state(const EST_StrVector &words) const;
 
   bool ngram_exists(const EST_StrVector &words,
 		    const double threshold) const;
@@ -204,15 +204,6 @@ public:
 friend ostream&  operator<<(ostream& s, const EST_BackoffNgrammarState &a);
   
 };
-
-class EST_Ngrammar;
-EST_write_status save_ngram_htk_ascii(const EST_String filename, EST_Ngrammar &n, double floor=0.0);
-EST_write_status save_ngram_cstr_ascii(const EST_String filename, EST_Ngrammar &n, const bool trace=false, double floor=0.0);
-EST_write_status save_ngram_cstr_bin(const EST_String filename, EST_Ngrammar &n, const bool trace=false, double floor=0.0);
-void frequency_of_frequencies(EST_DVector &ff, EST_Ngrammar &n,int this_order=0);
-void map_frequencies(EST_Ngrammar &n, const EST_DVector &map, const int this_order=0);
-bool Good_Turing_smooth(EST_Ngrammar &n, int maxcount, int mincount=0);
-void Good_Turing_discount(EST_Ngrammar &ngrammar, const int maxcount, const double default_discount=0.5);
 
 class EST_Ngrammar {
     

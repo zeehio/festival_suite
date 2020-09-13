@@ -93,7 +93,7 @@ void function_match(EST_II_KVL &u, EST_Relation &a, EST_Relation &b)
     EST_Litem *i_ptr;
     int i;
 
-    for (i = 0, a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next(), ++i)
+    for (i = 0, a_ptr = a.head(); a_ptr != 0; a_ptr = inext(a_ptr), ++i)
     {
 	if (a_ptr->f("pos")==1)
 	{
@@ -110,9 +110,9 @@ void relation_match(EST_Relation &a, EST_Relation &b)
 {
     EST_Item *a_ptr, *b_ptr;
 
-    for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
+    for (a_ptr = a.head(); a_ptr != 0; a_ptr = inext(a_ptr))
 	if (a_ptr->f("pos")==1)
-	    for (b_ptr = b.head(); b_ptr != 0; b_ptr = b_ptr->next())
+	    for (b_ptr = b.head(); b_ptr != 0; b_ptr = inext(b_ptr))
 		{
 		    if ((b_ptr->f("pos")==1)
 			&&(close_enough(*a_ptr, *b_ptr)))
@@ -175,7 +175,7 @@ EST_Item *nthpos(EST_Relation &a, int n)
 {
     EST_Item *a_ptr;
     int i = 0;
-    for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
+    for (a_ptr = a.head(); a_ptr != 0; a_ptr = inext(a_ptr))
 	if (a_ptr->f("pos") == 1)
 	{
 	    if (n == i)
@@ -359,7 +359,7 @@ void threshold_labels(EST_Relation &reflab, float t)
     float score=0.0;
     int a;
 
-    for (r_ptr = reflab.head(); r_ptr != 0; r_ptr = r_ptr->next())
+    for (r_ptr = reflab.head(); r_ptr != 0; r_ptr = inext(r_ptr))
 	if (r_ptr->f("pos")==1)
 	{
 	    // REORG - temp comment
@@ -394,7 +394,7 @@ void multiple_labels(EST_Relation &reflab)
     float *score;
     score = new float[reflab.length()];
 
-    for (r_ptr = reflab.head(); r_ptr != 0; r_ptr = r_ptr->next())
+    for (r_ptr = reflab.head(); r_ptr != 0; r_ptr = inext(r_ptr))
 	if (r_ptr->f("pos")==1)
 	{
 	    la.clear(); // clear list and add address of current ref label
@@ -404,7 +404,7 @@ void multiple_labels(EST_Relation &reflab)
 
 	    // check remainer of ref labels and add any that have same
 	    // relations address as r_ptr.
-	    for (s_ptr = r_ptr->next(); s_ptr != 0; s_ptr = s_ptr->next())
+	    for (s_ptr = inext(r_ptr); s_ptr != 0; s_ptr = inext(s_ptr))
 		if (s_ptr->f("pos")==1)
 		    if (s_ptr->rlink("test").first() == a)
 			la.append(s_ptr->addr());
@@ -457,11 +457,11 @@ EST_FMatrix matrix_compare(EST_Relation &reflab, EST_Relation &testlab, int meth
     num_ref = num_test = 0;
 
     // calculate size of matrix, based on *significant* labels
-    for (r_ptr = testlab.head(); r_ptr != 0; r_ptr = r_ptr->next())
+    for (r_ptr = testlab.head(); r_ptr != 0; r_ptr = inext(r_ptr))
 	if (r_ptr->f("pos")==1)
 	    ++num_test;
 
-    for (r_ptr = reflab.head(); r_ptr != 0; r_ptr = r_ptr->next())
+    for (r_ptr = reflab.head(); r_ptr != 0; r_ptr = inext(r_ptr))
 	if (r_ptr->f("pos")==1)
 	    ++num_ref;
 
@@ -473,10 +473,10 @@ EST_FMatrix matrix_compare(EST_Relation &reflab, EST_Relation &testlab, int meth
     // fill matrix values by comparing each test with each reference
     // reference is columns, test is rows
 
-    for (i = 0, t_ptr = testlab.head(); t_ptr != 0; t_ptr = t_ptr->next())
+    for (i = 0, t_ptr = testlab.head(); t_ptr != 0; t_ptr = inext(t_ptr))
 	if (t_ptr->f("pos")==1)
 	{
-	    for (j = 0, r_ptr = reflab.head(); r_ptr != 0; r_ptr = r_ptr->next())
+	    for (j = 0, r_ptr = reflab.head(); r_ptr != 0; r_ptr = inext(r_ptr))
 		if (r_ptr->f("pos")==1)
 		{
 		    if (method == 1)
@@ -484,7 +484,7 @@ EST_FMatrix matrix_compare(EST_Relation &reflab, EST_Relation &testlab, int meth
 		    else if (method == 2)
 			m(i, j) = label_distance2(*r_ptr, *t_ptr);
 		    else
-			cerr << "Unknown comparision method" << method << endl;
+			cerr << "Unknown comparison method" << method << endl;
 		    ++j;
 		}
 	    ++i;
@@ -495,9 +495,11 @@ EST_FMatrix matrix_compare(EST_Relation &reflab, EST_Relation &testlab, int meth
     minimise_matrix_by_column(m);
     minimise_matrix_by_row(m);
     matrix_ceiling(m, t);
-    /* This loop had the r_ptr->set_field_name already commented, so it is useless:
+
+#if 0
+    /* This doesn't do anything */
     // for each ref label, find closest matching test label.
-    for (j = 0, r_ptr = reflab.head(); r_ptr != 0; r_ptr = r_ptr->next())
+    for (j = 0, r_ptr = reflab.head(); r_ptr != 0; r_ptr = inext(r_ptr))
     {
 	if (r_ptr->f("pos")==1)
 	{
@@ -506,7 +508,8 @@ EST_FMatrix matrix_compare(EST_Relation &reflab, EST_Relation &testlab, int meth
 //	    r_ptr->set_field_names(r_ptr->fields() +ftoString(m(pos, j)));
 	    ++j;
 	}
-    }*/
+    }
+#endif
     return m;
 }
 
@@ -596,7 +599,7 @@ void error_location(EST_Relation &e, EST_FMatrix &m, int ref)
     // reference
     if (ref)
     {
-	for (i = 0, s = e.head(); s; s = s->next())
+	for (i = 0, s = e.head(); s; s = inext(s))
 	    if ((int)s->f("pos"))
 	    {
 		if (column_hit(m, i) >= 0)
@@ -607,7 +610,7 @@ void error_location(EST_Relation &e, EST_FMatrix &m, int ref)
 	    }
     }
     else
-	for (i = 0, s = e.head(); s; s = s->next())
+	for (i = 0, s = e.head(); s; s = inext(s))
 	    if ((int)s->f("pos"))
 	    {
 		if (row_hit(m, i) >= 0)
@@ -667,13 +670,13 @@ void reassign_links(EST_Relation &a, EST_Relation &b, EST_II_KVL &ua, EST_II_KVL
 #if 0    
     EST_Item *a_ptr, *b_ptr;
 
-    for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
+    for (a_ptr = a.head(); a_ptr != 0; a_ptr = inext(a_ptr))
     {
 	a_ptr->link(b.stream_name())->clear();
 	if ((a_ptr->f("pos")==1) && (ua.val(a_ptr->addr()) != -1))
 	    a_ptr->make_link(b.stream_name(), ua.val(a_ptr->addr()));
     }
-    for (b_ptr = b.head(); b_ptr != 0; b_ptr = b_ptr->next())
+    for (b_ptr = b.head(); b_ptr != 0; b_ptr = inext(b_ptr))
     {
 	b_ptr->link(a.stream_name())->clear();
 	if ((b_ptr->f("pos")==1) && (ub.val(b_ptr->addr()) != -1))
@@ -690,7 +693,7 @@ void reassign_links(EST_Relation &a, EST_II_KVL &u, EST_String stream_type)
 #if 0    
     EST_Item *a_ptr;
 
-    for (a_ptr = a.head(); a_ptr != 0; a_ptr = a_ptr->next())
+    for (a_ptr = a.head(); a_ptr != 0; a_ptr = inext(a_ptr))
     {
 	a_ptr->link(stream_type)->clear();
 	if ((a_ptr->f("pos")==1) && (u.val(a_ptr->addr()) != -1))
@@ -782,7 +785,7 @@ void test_labels(EST_Utterance &ref, EST_Utterance &test, EST_Option &op)
     int correct, n_ev, n_syl;
     
     correct = n_ev = n_syl = 0;
-    for (a_ptr = ref.stream("Event").head(); a_ptr != 0; a_ptr = a_ptr->next())
+    for (a_ptr = ref.stream("Event").head(); a_ptr != 0; a_ptr = inext(a_ptr))
 	if (a_ptr->f("pos")==1)
 	{
 	    ++n_ev;
@@ -790,7 +793,7 @@ void test_labels(EST_Utterance &ref, EST_Utterance &test, EST_Option &op)
 		== commutate(a_ptr, f1, f2, lref, ltest))
 		++correct;
 	}
-    for (a_ptr = ref.stream("Syllable").head();a_ptr != 0; a_ptr = a_ptr->next())
+    for (a_ptr = ref.stream("Syllable").head();a_ptr != 0; a_ptr = inext(a_ptr))
 	if (a_ptr->f("pos")==1)
 	    ++n_syl;
     
@@ -804,7 +807,7 @@ void test_labels(EST_Utterance &ref, EST_Utterance &test, EST_Option &op)
     
     if (op.present("print_derivation"))
     {
-	for (a_ptr = ref.stream("Event").head();a_ptr!= 0; a_ptr = a_ptr->next())
+	for (a_ptr = ref.stream("Event").head();a_ptr!= 0; a_ptr = inext(a_ptr))
 	{
 	    if (a_ptr->f("pos")==1)
 	    {
@@ -828,7 +831,7 @@ void test_labels(EST_Utterance &ref, EST_Utterance &test, EST_Option &op)
 
 void print_i_d_scores(EST_FMatrix &m)
 {
-	std::ios_base::fmtflags oldsetf = cout.setf(ios::fixed, ios::adjustfield);
+	std::ios_base::fmtflags oldsetf = cout.setf(ios::left, ios::adjustfield);
     cout << "Total: ";
 	std::streamsize oldwidth = cout.width(10);
     cout << m.num_columns();
@@ -849,7 +852,7 @@ void print_matrix_scores(EST_Relation &ref, EST_Relation &test, EST_FMatrix &a)
     EST_Item *r_ptr, *t_ptr;
     
     cout << "      ";
-    for (r_ptr = ref.head(); r_ptr != 0; r_ptr = r_ptr->next())
+    for (r_ptr = ref.head(); r_ptr != 0; r_ptr = inext(r_ptr))
     {	
 	if (r_ptr->f("pos")==1)
 	{
@@ -863,7 +866,7 @@ void print_matrix_scores(EST_Relation &ref, EST_Relation &test, EST_FMatrix &a)
     }
     cout << endl;
     
-    for (t_ptr = test.head(), i = 0; i < a.num_rows(); t_ptr = t_ptr->next())
+    for (t_ptr = test.head(), i = 0; i < a.num_rows(); t_ptr = inext(t_ptr))
     {
 	if (t_ptr->f("pos")==1)
 	{
@@ -943,7 +946,7 @@ void make_hit_and_miss(EST_Relation &a)
 {
     EST_Item *s;
     
-    for (s = a.head(); s; s = s->next())
+    for (s = a.head(); s; s = inext(s))
     {
 	if (s->f("pos") == 0)
 	    s->set_name(".");
@@ -961,7 +964,7 @@ void pos_only(EST_Relation &lab)
     
     for (a = lab.head(); a; a = n)
     {
-	n = a->next();
+	n = inext(a);
 	if (!a->f_present("pos"))
 	    lab.remove_item(a);
     }

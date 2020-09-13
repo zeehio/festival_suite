@@ -38,14 +38,12 @@
  ##                                                                       ##
  ###########################################################################
 
-CC=gcc
-CXX=g++
 
 COMPILER_DESC=FSF gcc
 COMPILER_VERSION_COMMAND=$(CXX) -v 2>&1 | tail -1 | sed -e 's/^....//'
 
 CFLAGS  = $(GCC_SYSTEM_OPTIONS) $(CC_OTHER_FLAGS)
-CXXFLAGS  =  $(GCC_SYSTEM_OPTIONS) $(CC_OTHER_FLAGS) -std=c++11
+CXXFLAGS  =  $(GCC_SYSTEM_OPTIONS) $(CC_OTHER_FLAGS) -std=c++11  $(OMP_OPTS) $(OMP_DEFS)
 
 DEBUG_CCFLAGS   = -g
 DEBUG_CXXFLAGS  = -g
@@ -82,7 +80,7 @@ SHARED_CXXFLAGS  = -fPIC
 SHARED_LINKFLAGS = 
 
 ifndef GCC_MAKE_SHARED_LIB
-    MAKE_SHARED_LIB = $(CXX) -shared -fno-shared-data -o XXX
+    MAKE_SHARED_LIB = $(CXX) -shared -o XXX -Wl,-soname -Wl,YYY $(USER_LINKFLAGS)
 else
     MAKE_SHARED_LIB = $(GCC_MAKE_SHARED_LIB)
 endif
@@ -96,16 +94,13 @@ STATIC_LINKFLAGS = -static
 TEMPLATE_SPECIFIC = -DINSTANTIATE_TEMPLATES
 TEMPLATE_ARGS = 
 
-## The -lgcc here is redundant - gcc does this anyway - but it
-## helps java know what needs to be loaded.
-
-COMPILERLIBS= $(COMPILER_LIBS_DIR:%=-L%) -lstdc++
+COMPILERLIBS= $(COMPILER_LIBS_DIR:%=-L%) $(OMP_OPTS)
 
 ## special ways of doing things, blank means default
 
 MAKE_DEPEND_C = $(CC) -MM $(INCLUDES) $(TEMPLATES) $(TEMPLATE_SPECIFIC)
-MAKE_DEPEND_CXX = $(CC) -MM $(INCLUDES) $(TEMPLATES) $(TEMPLATE_SPECIFIC)
-BUILD_LIB   = $(AR) cruv
+MAKE_DEPEND_CXX = $(CXX) -MM $(INCLUDES) $(TEMPLATES) $(TEMPLATE_SPECIFIC)
+BUILD_LIB   = $(AR) crv
 INDEX_LIB   = $(RANLIB)
 
 

@@ -184,6 +184,7 @@ load_ngram_arpa(const EST_String filename, EST_Ngrammar &n, const std::list<EST_
 	    cerr << "ooooooooops" << endl;
 	    return wrong_format;
         /* BEGIN COMMENT: This code is unreachable
+	    occur = atof(ts.get().string());
 	    //n.accumulate(window,occur);
 
 	    // backoff weight ?

@@ -344,7 +344,7 @@ bool EST_BackoffNgrammarState::ngram_exists(const EST_StrVector &words,
       return false;
 }
 
-const EST_BackoffNgrammarState *
+const EST_BackoffNgrammarState *const
 EST_BackoffNgrammarState::get_state(const EST_StrVector &words) const
 {
     EST_BackoffNgrammarState *s;
@@ -1683,8 +1683,15 @@ int EST_Ngrammar::find_dense_state_index(const EST_IVector &words,
 					 int index) const
 {
     int i,ind=0;
+    int vl,wa;
     for(i=0;i<p_order-1;i++)
-	ind = ind*vocab->length() + words.a_no_check(i+index);
+    {
+        vl = vocab->length();
+        wa = words.a_no_check(i+index);
+        if (wa < 0) wa = 0;
+        //        printf("awb_debug ngrammar i %d ind %d v.length() %d words.a_no_check() %d\n",i,ind,vl,wa);
+	ind = ind*vl + wa;
+    }
 	
     return ind;
 }
@@ -2144,6 +2151,9 @@ EST_Ngrammar::load(const EST_String &filename)
     }
     else
 	return misc_read_error;
+    
+    cerr << "EST_Ngrammar::load can't determine ngrammar file type for input file " << filename << endl;
+    return wrong_format;
 }
 
 EST_read_status

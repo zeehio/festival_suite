@@ -49,7 +49,6 @@
 class EST_UItem {
 public:
     void init() { n = NULL; p = NULL;}
-    virtual ~ EST_UItem() {;}
     EST_UItem *n;
     EST_UItem *p;
     EST_UItem *next() { return n; }
@@ -67,7 +66,7 @@ protected:
 
 public:
     EST_UList() { init(); };
-    virtual ~ EST_UList() { clear_and_free(NULL); }
+    ~ EST_UList() { clear_and_free(NULL); }
 
     EST_UItem *nth_pointer(int n) const;
 

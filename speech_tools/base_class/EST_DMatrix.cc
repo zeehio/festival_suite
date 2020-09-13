@@ -421,32 +421,32 @@ EST_write_status EST_DMatrix::est_save(const EST_String &filename,
 EST_read_status EST_DMatrix::est_load(const EST_String &filename)
 {
 
-  // ascii/binary load with short header for byte swap and sizes
-  int i,j,k;
-  int rows, cols, swap;
-  EST_TokenStream ts;
-  EST_read_status r;
-  EST_EstFileType t;
-  EST_Option hinfo;
-  bool ascii;
+    // ascii/binary load with short header for byte swap and sizes
+    int i,j,k;
+    int rows, cols, swap;
+    EST_TokenStream ts;
+    EST_read_status r;
+    EST_EstFileType t;
+    EST_Option hinfo;
+    bool ascii;
     
-  if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
+    if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
     {
-      cerr << "DMatrix: can't open DMatrix input file " 
-	   << filename << endl;
-      return misc_read_error;
+        cerr << "DMatrix: can't open DMatrix input file " 
+	     << filename << endl;
+        return misc_read_error;
     }
-  if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
-    return r;
+    if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
+        return r;
     if (t != est_file_dmatrix)
-      return misc_read_error;
+        return misc_read_error;
     if (hinfo.ival("version") != 1)
-      {
+    {
 	cerr << "DMatrix load: " << ts.pos_description() <<
 	  " wrong version of DMatrix format expected 1 but found " <<
 	  hinfo.ival("version") << endl;
 	return misc_read_error;
-      }
+    }
     rows = hinfo.ival("rows");
     cols = hinfo.ival("columns");
     resize(rows,cols);
@@ -569,7 +569,7 @@ EST_read_status EST_DVector::est_load(const EST_String &filename)
     }
   if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
     return r;
-    if (t != est_file_dvector)
+  if (t != est_file_dvector)
       return misc_read_error;
     if (hinfo.ival("version") != 1)
       {
@@ -631,10 +631,10 @@ EST_read_status EST_DVector::load(const EST_String &filename)
       i = 0;
       
       if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
-	{
+      {
 	  cerr << "can't open vector input file " << filename << endl;
 	  return misc_read_error;
-	}
+      }
       ts.set_SingleCharSymbols(";");
       
       while (!ts.eof())

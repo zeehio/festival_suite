@@ -50,7 +50,6 @@
 
 typedef EST_Val (*EST_Item_featfunc)(EST_Item *s);
 extern val_type val_type_featfunc;
-/*const  (EST_Item_featfunc is int or long... so no const needed)*/
 EST_Item_featfunc featfunc(const EST_Val &v);
 EST_Val est_val(const EST_Item_featfunc f);
 
@@ -260,13 +259,11 @@ protected:
     const EST_Val f(const EST_String &name) const
     { 
 	EST_Val v;
-
 	for (v=p_contents->f.val_path(name);
 	     v.type() == val_type_featfunc && featfunc(v) != NULL;
 	     v=(featfunc(v))((EST_Item *)(void *)this));
 	if (v.type() == val_type_featfunc)
 	    EST_error("NULL %s function",(const char *)name);
-
 	return v;
     }
 
@@ -279,7 +276,6 @@ protected:
 	    if (v.type() == val_type_featfunc)
 		v = def;
 	    return v;
-
     }
 
     /**@name Cross relational access */
@@ -316,32 +312,14 @@ protected:
     static void splice(EST_Item *a, EST_Item *b)
 	{ if(a !=NULL) a->n = b; if (b != NULL) b->p=a; }
 
-    // Internal traversal - nnot recommended - use relation traversal functions
-    //
-    EST_Item *next() const { return this == 0 ? 0 : n; }
-    //
-    EST_Item *prev() const { return this == 0 ? 0 : p; }
-    //
-    EST_Item *down() const { return this == 0 ? 0 : d; }
-    //
-    EST_Item *up() const   { return this == 0 ? 0 : u; }
-    // Last item (most next) at this level
-    EST_Item *last() const;
-    // First item (most prev) at this level
-    EST_Item *first() const;
-    // Highest (most up)
-    EST_Item *top() const;
-    // Lowest (most down)
-    EST_Item *bottom() const;
-    // First item which has no down, within the descendants of this item
-    EST_Item *first_leaf() const;
-    // Next item which has no down, following above this item if necessary
-    EST_Item *next_leaf() const;
-    // Last item which has no down, following above this item if necessary
-    EST_Item *last_leaf() const;
-    // Next item in pre order (root, daughters, siblings)
-    EST_Item *next_item() const;
-
+    // Internal traversal - not recommended - use relation traversal functions
+    // As these functions must be safe to NULL arguments they now (gcc6)
+    // cannot refer to this, so alway require an explicit pointer to the object
+    // These four are the only ones that require access to private fields
+    friend EST_Item *inext(const EST_Item *i);
+    friend EST_Item *iprev(const EST_Item *i);
+    friend EST_Item *idown(const EST_Item *i);
+    friend EST_Item *iup(const EST_Item *i);
 
     // Insert a new item after this, with li's contents
     EST_Item *insert_after(EST_Item *li=0);
@@ -393,13 +371,25 @@ inline EST_Item *as(const EST_Item *n,const char *relname)
 {  if (n != 0) return n->as_relation(relname);
     return 0;}
 
+EST_Item *inext(const EST_Item *i);
+EST_Item *iprev(const EST_Item *i);
+EST_Item *idown(const EST_Item *i);
+EST_Item *iup(const EST_Item *i);
+
+EST_Item *last(const EST_Item *x);
+EST_Item *first(const EST_Item *x);
+EST_Item *top(const EST_Item *x);
+EST_Item *bottom(const EST_Item *x);
+
+EST_Item *next_item(const EST_Item *node);
+EST_Item *first_leaf(const EST_Item *node);
+EST_Item *next_leaf(const EST_Item *node);
+EST_Item *last_leaf(const EST_Item *node);
+
 // Relation structure functions
 #include "ling_class/EST_Relation_list.h"
 #include "ling_class/EST_Relation_tree.h"
 #include "ling_class/EST_Relation_mls.h"
-
-inline EST_Item *next_item(const EST_Item *node) 
-    { return node->next_item(); }
 
 void remove_item(EST_Item *l, const char *relname);
 
@@ -407,7 +397,6 @@ void copy_node_tree(EST_Item *from, EST_Item *to);
 void copy_node_tree_contents(EST_Item *from, EST_Item *to);
 
 void evaluate(EST_Item *a,EST_Features &f);
-
 
 #include "ling_class/EST_FeatureFunctionPackage.h"
 

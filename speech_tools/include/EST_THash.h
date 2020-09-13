@@ -292,6 +292,7 @@ public:
 
 };
 
+
 /** \class EST_TStringHash
   * \brief A specialised hash table for when the key is an EST_String.
   *

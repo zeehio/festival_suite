@@ -90,6 +90,7 @@ public:
 	    { init();};
 };
 
+
 // pretty name
 
 /** \typedef EST_Litem

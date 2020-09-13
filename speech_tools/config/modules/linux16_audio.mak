@@ -46,6 +46,8 @@ MOD_DESC_LINUX16_AUDIO=Native audio module for Linux systems
 ifeq ($(LINUXAUDIO),alsa)
    AUDIO_DEFINES += -DSUPPORT_ALSALINUX
    MODULE_LIBS += -lasound
+
+   PROJECT_LIBRARY_SYSLIBS_estbase += -lasound
 endif
 
 ifeq ($(LINUXAUDIO),none)
@@ -55,6 +57,7 @@ endif
 ifdef INCLUDE_JAVA_CPP
     AUDIO_DEFINES += -DTHREAD_SAFETY
     MODULE_LIBS += -lpthread
+    PROJECT_LIBRARY_SYSLIBS_estbase += -lpthread
 endif
 
 

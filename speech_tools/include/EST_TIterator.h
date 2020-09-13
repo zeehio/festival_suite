@@ -205,13 +205,13 @@ class EST_TStructIterator
 {
 public:  
 
-  typedef EST_TIterator<Container, IPointer, Entry> Iter;
+  typedef EST_TStructIterator<Container, IPointer, Entry> Iter;
 
   /// Create an iterator not associated with any specific container.
   EST_TStructIterator() {this->cont=NULL;}
 
   /// Copy an iterator by assignment
-  Iter &operator = (const Iter &orig)
+  Iter &operator = (const EST_TIterator<Container, IPointer, Entry> &orig)
     { this->cont=orig.cont; this->pos=orig.pos; this->pointer=orig.pointer; return *this;}
 
   /// Create an iterator ready to run over the given container.
@@ -241,7 +241,7 @@ public:
   EST_TRwIterator() {this->cont=NULL;}
 
   /// Copy an iterator by assignment
-  Iter &operator = (const Iter &orig)
+  Iter &operator = (const EST_TIterator<Container, IPointer, Entry> &orig)
     { this->cont=orig.cont; this->pos=orig.pos; this->pointer=orig.pointer; return *this;}
 
   /// Create an iterator ready to run over the given container.
@@ -291,7 +291,7 @@ public:
   EST_TRwStructIterator() {this->cont=NULL;}
 
   /// Copy an iterator by assignment
-  Iter &operator = (const Iter &orig)
+  Iter &operator = (const EST_TIterator<Container, IPointer, Entry> &orig)
     { this->cont=orig.cont; this->pos=orig.pos; this->pointer=orig.pointer; return *this;}
 
   /// Create an iterator ready to run over the given container.

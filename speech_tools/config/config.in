@@ -41,7 +41,7 @@ SYSTEM_TYPE=$(MACHINETYPE)_$(OSTYPE)$(OSREV)
 ## The definitions are in compilers/$(COMPILER).mak
 ## Examples: gcc clang suncc
 
-COMPILER=@COMPILER@
+COMPILER=@COMPILERTYPE@
 
 ###########################################################################
 ## Java system to use if you include the Java interface.
@@ -60,21 +60,19 @@ CONFIGURATION =
 ###########################################################################
 ## Compilation options.
 ##
-## 
+## OPTIMISE=4 will turn off DEBUG
 
 # enable with OPTIMISE=3 (or any other optimization level)
 # OPTIMISE=4 will turn off DEBUG
 OPTIMISE=@OPTIMISE@
-# enable with WARN=1       
+# enable with WARN=1
 WARN=@WARN@
-# enable with VERBOSE=1 
+# enable with VERBOSE=1
 VERBOSE=0
-# enable with DEBUG=1
-DEBUG=@DEBUG@
+DEBUG=@DEBUG@ # either 0 or 1. See ./configure --help
 # enable with PROFILE=gprof
 PROFILE=@PROFILE@
-# enable with SHARED=2
-SHARED=@SHARED@
+SHARED=@SHARED@ # either 0 or 1 or 2. See ./configure --help
 
 ## Directory specific selections which override the above
 
@@ -115,6 +113,9 @@ TERMCAPLIB = @TERMCAPLIB@
 # speech recognition
 #INCLUDE_MODULES += ASR
 
+## Support for OpenMP for multithreading, works for most gcc implementations
+OMP_OPTS=@OMP_OPTS@
+OMP_DEFS=@OMP_DEFS@
 
 ## Scheme
 
@@ -164,7 +165,7 @@ INCLUDE_MODULES += RXP
 ###################################################################
 ## Documentation required tools
 ## xsltproc (used for extracting a description of the parameters
-##           of the speech tools programs
+##           of the speech tools programs)
 XSLTPROC = xsltproc
 
 ## Doxygen:
@@ -197,7 +198,7 @@ DOXYGEN = doxygen
 CONFIG_WRAPPER_LANGUAGES = PYTHON 
 
 # Language specific includes should be set to correct site paths
-CONFIG_PYTHON_INCLUDES= -I/usr/include/python2.2/
+CONFIG_PYTHON_INCLUDES= -I/usr/include/python2.7/
 ##
 ###################################################################
 

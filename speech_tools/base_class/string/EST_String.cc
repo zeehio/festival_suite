@@ -329,6 +329,7 @@ int EST_String::gsub_internal (const char *os, int olength, const char *s, int l
 	  p += length;
 	  at=end;
 	}
+      if (p != from+at)
       memcpy(p, from+at, size-at);
 
       p += size-at;
@@ -914,25 +915,6 @@ EST_String &EST_String::operator = (const char *str)
       else if (len)
 	memory = chunk_allocate(len+1, str, len);
       size=len;
-      return *this;
-}
-
-EST_String &EST_String::operator = (const char c)
-{
-      memory = chunk_allocate(2, &c, 1);
-      size=1;
-      return *this;
-}
-
-EST_String &EST_String::operator = (const EST_String &s) 
-{
-#if 1
-/*  static EST_ChunkPtr hack = s.memory;  */
-  memory = NON_CONST_CHUNKPTR(s.memory);
-  size = s.size;
-#else
-      *(struct EST_dumb_string *)this = *(struct EST_dumb_string *)(&s);
-#endif
       return *this;
 }
     

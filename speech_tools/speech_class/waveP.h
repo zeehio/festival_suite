@@ -44,7 +44,7 @@
 #include "EST_wave_utils.h"
 
 /* The following three (raw, alaw and ulaw) cannot be in the table as they cannot */
-/* identify themselves from files (both are unheadered)                */
+/* identify themselves from files (all three are unheadered)                */
 enum EST_read_status load_wave_raw(EST_TokenStream &ts, short **data, int
 	 *num_samples, int *num_channels, int *word_size, int
 	 *sample_rate,  enum EST_sample_type_t *sample_type, int *bo, int

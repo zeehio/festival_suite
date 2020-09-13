@@ -1,5 +1,6 @@
-  		  EDINBURGH SPEECH TOOLS LIBRARY
-                     VERSION 2.4 December 2014
+speech_tools
+                   EDINBURGH SPEECH TOOLS LIBRARY
+                     VERSION 2.5.1 July 2020
 
 Principal authors: Alan W Black, Paul Taylor, Richard Caley, 
                    Simon King, Rob Clark and Korin Richmond
@@ -10,6 +11,7 @@ Informatics Forum
 10 Crichton Street 
 Edinburgh EH8 9AB, UK
 http://www.cstr.ed.ac.uk/projects/speech_tools
+https://github.com/festvox/speech_tools/
 
 Although this is a considered stable release, there are still a number
 of known parts are missing or incomplete.
@@ -26,10 +28,10 @@ basic signal processing software.
 ========================================================================
 
 
-            Edinburgh Speech Tools Library version 2.4
+            Edinburgh Speech Tools Library version 2.5.1
               Centre for Speech Technology Research                
                    University of Edinburgh, UK                     
-                    Copyright (c) 1994-2014
+                    Copyright (c) 1994-2020
                       All Rights Reserved.                         
                                                                    
 Permission is hereby granted, free of charge, to use and distribute  
@@ -232,9 +234,8 @@ we would appreciate greatly any code which will add to the usefulness
 of the system. Signal processing routines are particularly welcome.
 
 
-======================================================================
 ADDITIONAL SOFTWARE
-======================================================================
+------------------------------------------------------------------------
 
 CSTR supplies a number of different speech technology systems
 including speech synthesis systems and (in the future) a recognition

@@ -80,38 +80,6 @@ void EST_Discrete::copy(const EST_Discrete &d)
     }
 }
 
-/*
- * ZEEHIO: Replaced with std::list<EST_String>
-bool EST_Discrete::init(const EST_StrList &vocab)
-{
-    // initialize a new EST_Discrete to given set of names
-    EST_Litem *w;
-    int i,*tmp;
-
-    p_def_val = -1;
-    namevector.resize(vocab.length());
-    nametrie.clear(Discrete_val_delete_funct);
-
-    for (i=0,w=vocab.head(); w != 0; i++,w=w->next()){
-	namevector[i] = vocab(w);
-	tmp = new int;
-	*tmp = i;
-
-	// check for repeated items - just not allowed
-	if(nametrie.lookup(vocab(w)) != NULL)
-	{
-	    cerr << "EST_Discrete : found repeated item '";
-	    cerr << vocab(w) << "' in vocab list !" << endl;
-        delete tmp;
-	    return false;
-	}
-
-	nametrie.add(vocab(w),tmp);
-    }
-    return true;
-}
-*/
-
 bool EST_Discrete::init(const std::list<EST_String> &vocab)
 {
     // initialize a new EST_Discrete to given set of names

@@ -618,32 +618,32 @@ EST_FVector& EST_FVector::operator/=(const float f)
 
 EST_read_status EST_FVector::est_load(const EST_String &filename)
 {    
-  // ascii/binary load with short header for byte swap and sizes
-  int i,k;
-  int l, swap;
-  EST_TokenStream ts;
-  EST_read_status r;
-  EST_EstFileType t;
-  EST_Option hinfo;
-  bool ascii;
+    // ascii/binary load with short header for byte swap and sizes
+    int i,k;
+    int l, swap;
+    EST_TokenStream ts;
+    EST_read_status r;
+    EST_EstFileType t;
+    EST_Option hinfo;
+    bool ascii;
     
-  if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
+    if (((filename == "-") ? ts.open(cin) : ts.open(filename)) != 0)
     {
-      cerr << "FVector: can't open FVector input file " 
-	   << filename << endl;
-      return misc_read_error;
+        cerr << "FVector: can't open FVector input file " 
+	     << filename << endl;
+        return misc_read_error;
     }
-  if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
-    return r;
+    if ((r = read_est_header(ts, hinfo, ascii, t)) != format_ok)
+        return r;
     if (t != est_file_fvector)
-      return misc_read_error;
+        return misc_read_error;
     if (hinfo.ival("version") != 1)
-      {
+    {
 	cerr << "FVector load: " << ts.pos_description() <<
-	  " wrong version of FVector format expected 1 but found " <<
-	  hinfo.ival("version") << endl;
+	    " wrong version of FVector format expected 1 but found " <<
+	    hinfo.ival("version") << endl;
 	return misc_read_error;
-      }
+    }
     l = hinfo.ival("length");
     resize(l);
     

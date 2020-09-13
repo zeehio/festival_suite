@@ -50,6 +50,38 @@ using namespace std;
 
 #define BUFFER_SIZE (1024)
 
+
+/** @name <command>bcat</command> <emphasis>Binary safe version of cat</emphasis>
+    @id bcat-manual
+  * @toc
+ */
+
+//@{
+
+
+/**@name Synopsis
+  */
+//@{
+
+//@synopsis
+
+/**
+bcat is a trivial file concatenation program. It exists to allow testing
+of various file splitting operations under the cygwin environment on Windows
+where the distinction between binary and text data is important.
+ */
+
+//@}
+
+/**@name OPTIONS
+  */
+//@{
+
+//@options
+
+//@}
+
+
 int main(int argc, char *argv[]) 
 { 
     std::list<EST_String> files;
@@ -59,7 +91,7 @@ int main(int argc, char *argv[])
 	(argc, argv, 
 	 EST_String("-o [ofile] [files...]\n")+
 	 "Summary; concatenate files in binary mode\n"+
-	 "-o <ofile>       Ouptut file of binary data\n",
+	 "-o <ofile>       Output file of binary data\n",
 	 files, cmd_line);
 
     EST_String out_file;

@@ -39,13 +39,5 @@
  ###########################################################################
 
 include $(EST)/config/compilers/gcc_defaults.mak
-
-CC=clang
-CXX=clang++
 COMPILER_DESC_clang= clang compiler
-
-WARN_CCFLAGS   = -Wall -Wextra
-WARN_CXXFLAGS  = -Wall -Wextra
-WARN_LINKFLAGS = -Wall -Wextra
-
 

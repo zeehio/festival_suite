@@ -59,7 +59,7 @@ float start(const EST_Item &item)
 
     if (v<0.0)
       {
-	if ((pp = item.prev()) != NULL)
+          if ((pp = iprev(&item)) != NULL)
 	  v = getFloat(*pp, "end", -1.0, status);
       }
 
@@ -103,7 +103,7 @@ float end(const EST_Item &item)
   
   if (v < 0.0)
     {
-      if ((nn = item.next()) != NULL)
+        if ((nn = inext(&item)) != NULL)
 	v = getFloat(*nn, "start", -1.0, status);
     }
   

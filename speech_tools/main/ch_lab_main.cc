@@ -44,8 +44,8 @@
 #include "EST_string_aux.h"
 
 using namespace std;
-
 int check_vocab(EST_Relation &a, std::list<EST_String> &vocab);
+
 
 int main(int argc, char *argv[])
 {

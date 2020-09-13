@@ -45,8 +45,8 @@ LISP siod_send_lisp_to_client(LISP x)
 #else
 	check_write = write(siod_server_socket,"LP\n",3);
 #endif
-    if (check_write != 3)
-        cerr << "Could not send LP to socket" << endl;
+	if (check_write != 3)
+		cerr << "Could not send LP to socket" << endl;
 	socket_send_file(siod_server_socket,tmpfile);
 	unlink(tmpfile);
     }

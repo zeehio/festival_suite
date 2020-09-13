@@ -362,7 +362,7 @@ EST_write_status save_est(const EST_FeatureData &f, const EST_String &filename)
 	return write_fail;
     
     outf->precision(5);
-    outf->setf(ios::fixed, ios::floatfield);
+    outf->setf(ios::scientific, ios::floatfield);
     outf->width(8);
     
     *outf << "EST_File feature_data\n"; // EST header identifier
@@ -466,7 +466,7 @@ EST_read_status EST_FeatureData::load(const EST_String &filename)
     for (i = 0; i < ns; ++i)
       {
 	EST_Features::Entries p;
-	for (p.begin(info), j = 0; j < nf; ++j, ++p)
+	for (p.begin(info), j = 0; p && j < nf; ++j, ++p)
 	{
 	    if (p->k == "<FLOAT>")
 	      a(i, j) = atof(ts.get().string());

@@ -218,39 +218,31 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
        speech file and reads in the answer by calling this function.
        It would be nice to have a simple library routine which did the
        unshortening.
+       removed Jun 14th 2016 by awb , security risk, and only works in CSTR 
        */
     
     if (streq(sample_coding,"pcm,embedded-shorten-v1.1"))
     {
+#if 0
 	char *tmpfile, *cmdstr;
 	enum EST_read_status rval;
+#endif
 
+	fprintf(stderr,"WAVE read: nist type is shorten\n");
+	fprintf(stderr,"WAVE read: no support for shorten -- you need to use some external program to unshorten the data\n");
+	return misc_read_error;
+
+#if 0
 	tmpfile = cmake_tmp_filename();
 	cmdstr = walloc(char,strlen(tmpfile)+200);
+        /* This doesn't work, unless you have cstrshorten, and */
+        /* doesn't work if your file name is interesting */
 	sprintf(cmdstr,"cstrshorten %s %s",
 		(const char*)ts.filename(),tmpfile);
 	printf("Command: %s\n", cmdstr);
-	system_return = system(cmdstr);
-    if (system_return != 0)
-    {
-        fprintf(stderr, "Command failed. Could not read nist file\n");
-        fprintf(stderr, "To read embedded-shorten-v1.1 nist files, \n");
-        fprintf(stderr, "shorten utility from Tony Robinson is required\n");
-        wfree(sample_coding);
-        wfree(byte_order);
-        wfree(tmpfile);
-        wfree(cmdstr);
-        return misc_read_error;
-    }
+	system(cmdstr);
 	EST_TokenStream tt;
-	if (tt.open(tmpfile) < 0) {
-		fprintf(stderr, "Could not open %s\n", tmpfile);
-        wfree(sample_coding);
-        wfree(byte_order);
-        wfree(tmpfile);
-        wfree(cmdstr);
-		return misc_read_error;
-	}
+	tt.open(tmpfile);
 	
 	rval = load_wave_nist(tt, data, num_samples,
 			      num_channels, word_size, sample_rate,
@@ -259,9 +251,8 @@ enum EST_read_status load_wave_nist(EST_TokenStream &ts, short **data, int
 	wfree(tmpfile);
 	wfree(cmdstr);
 	tt.close();
-	wfree(byte_order);
-	wfree(sample_coding);
 	return rval;
+#endif
     }
 
     if (length == 0)
