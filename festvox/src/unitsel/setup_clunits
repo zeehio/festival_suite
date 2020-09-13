@@ -65,6 +65,7 @@ then
     echo "LANG is the language, e.g. us, fr etc"
     echo "SPEAKER is speaker/style identifier e.g kal, awb, golem"
     echo "DATASET (optional) the name of a prompt list e.g. uniphone, timit"
+    echo "Arguments must match \"^[A-Za-z][A-Za-z0-9_]*\$\""
     exit 1
 fi
 
@@ -89,12 +90,32 @@ FV_INST=$1
 FV_LANG=$2
 FV_VOX=$3
 
+check=`echo $FV_INST | grep "^[A-Za-z][A-Za-z0-9_]*$"`
+if [ "$check" = "" ]
+then
+    echo "Invalid INST name, not matching \"^[A-Za-z][A-Za-z0-9_]*\$\""
+    exit 1
+fi
+check=`echo $FV_LANG | grep "^[A-Za-z][A-Za-z0-9_]*$"`
+if [ "$check" = "" ]
+then
+    echo "Invalid LANG name, not matching \"^[A-Za-z][A-Za-z0-9_]*\$\""
+    exit 1
+fi
+check=`echo $FV_VOX | grep "^[A-Za-z][A-Za-z0-9_]*$"`
+if [ "$check" = "" ]
+then
+    echo "Invalid VOX name, not matching \"^[A-Za-z][A-Za-z0-9_]*\$\""
+    exit 1
+fi
+
 echo Making directories
 $FESTVOXDIR/src/general/make_dirs
 CURRENTDIR=`pwd | sed 's/ /\\ /g'`
 
 echo Copying relevant script files
 cp -p $FESTVOXDIR/src/unitsel/make_mcep bin
+cp -p $FESTVOXDIR/src/unitsel/build_clunits_voice bin
 
 # General utilities
 cp -p $FESTVOXDIR/src/general/make_labs bin
@@ -130,9 +151,11 @@ cp -p $FESTVOXDIR/src/general/find_db_duration bin
 cp -p $FESTVOXDIR/src/general/prune_silence bin
 cp -p $FESTVOXDIR/src/general/prune_middle_silences bin
 cp -p $FESTVOXDIR/src/general/add_noise bin
-cp -p $FESTVOXDIR/src/st/sphinxtrain bin
-cp -p $FESTVOXDIR/src/st/sphinx_lab bin
-cp -p $FESTVOXDIR/src/st/build_st.scm festvox
+
+# We don't use sphinxtrain anymore for labeling
+#cp -p $FESTVOXDIR/src/st/sphinxtrain bin
+#cp -p $FESTVOXDIR/src/st/sphinx_lab bin
+#cp -p $FESTVOXDIR/src/st/build_st.scm festvox
 
 if [ "$FESTVOXTEMPLATEDIR" = "" ]
 then

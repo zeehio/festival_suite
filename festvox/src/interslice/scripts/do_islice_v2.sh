@@ -37,6 +37,34 @@
 ##                                                                       ##
 ###########################################################################
 
+LANG=C; export LANG
+
+if [ ! "$ESTDIR" ]
+then
+   echo "environment variable ESTDIR is unset"
+   echo "set it to your local speech tools directory e.g."
+   echo '   bash$ export ESTDIR=/home/awb/projects/speech_tools/'
+   echo or
+   echo '   csh% setenv ESTDIR /home/awb/projects/speech_tools/'
+   exit 1
+fi
+
+if [ ! "$FESTVOXDIR" ]
+then
+   echo "environment variable FESTVOXDIR is unset"
+   echo "set it to your local festvox directory e.g."
+   echo '   bash$ export FESTVOXDIR=/home/awb/projects/festvox/'
+   echo or
+   echo '   csh% setenv FESTVOXDIR /home/awb/projects/festvox/'
+   exit 1
+fi
+
+if [ "$SIODHEAPSIZE" = "" ]
+then
+   SIODHEAPSIZE=20000000
+   export SIODHEAPSIZE
+fi
+HEAPSIZE=$SIODHEAPSIZE
 
 islicedir=$FESTVOXDIR/src/interslice
 rawF=etc/raw.done.data
@@ -52,7 +80,7 @@ then
   echo 'Splits long files with long text into utterance sized waveforms with'
   echo 'the appropriate words ready for further phoneme alignment'
   echo '   $FESTVOXDIR/src/interslice/scripts/do_islice_v2.sh setup'
-  echo '  ./bin/do_islice_v2 islice BIGFILE.txt BIGFILE.wav'
+  echo '  ./bin/do_islice_v2.sh islice BIGFILE.txt BIGFILE.wav'
   echo 'Will generate BIGFILE.data and wav/*.wav split waveforms.'
   echo '  Manual copy'
   echo '  copy / link large audio file to bwav/bwav.wav'
@@ -73,16 +101,25 @@ then
    mkdir bwav
    mkdir twav
 
-   cp -p $FESTVOXDIR/src/interslice/model/ph_list.int etc/
-   cp -p $FESTVOXDIR/src/interslice/model/model101.txt etc/
-   cp -p $FESTVOXDIR/src/interslice/model/global_mn_vr.txt etc/
+   model=model
+   www=""
+   if [ $# = 2 ]
+   then
+       model=ml_model
+       www="with $model"
+   fi
+
+   # Default English models or ml_models
+   cp -p $FESTVOXDIR/src/interslice/$model/ph_list.int etc/
+   cp -p $FESTVOXDIR/src/interslice/$model/model101.txt etc/
+   cp -p $FESTVOXDIR/src/interslice/$model/global_mn_vr.txt etc/
 
    cp -r $islicedir/bin ./
    cp -p $islicedir/scripts/do_islice_v2.sh ./bin/do_islice_v2.sh
    cp -p $FESTVOXDIR/src/ehmm/bin/FeatureExtraction bin/FeatureExtraction.exe
    cp -r $islicedir/scripts ./
 
-   echo Ready to slice ... use
+   echo Ready to slice $www ... use
    echo "   ./bin/do_islice_v2 islice BIGFILE.txt BIGFILE.wav"
 
   exit 
@@ -115,11 +152,62 @@ then
    exit
 fi
 
-if [ $1 = "phseq" ]
+if [ $1 = "getprompts_lang" ]
 then
-   perl scripts/phseq.pl $prompF $phseqF
+    echo getprompts_lang ../etc/txt.done.data data ..
+   lang_dir=$5
+
+   cp -pr $2 $lang_dir/prompts_txtfile.$$
+   ( cd $lang_dir;
+     . ./etc/voice.defs;
+     $FESTVOXDIR/src/promptselect/text2utts -all \
+     -eval festvox/${FV_VOICENAME}_cg.scm \
+     -eval '(voice_'${FV_VOICENAME}'_cg)' \
+     prompts_txtfile.$$ \
+     -dbname $3 -o prompts_data.$$ )
+
+   mv $lang_dir/prompts_data.$$ $4
+   rm -f $lang_dir/prompts_txtfile.$$
+
    exit
 fi
+
+if [ $1 = "phseq" ]
+then
+   # Output phone sequence (with ssil) for alignment
+   # Simplified and changed to allow different base voice/language
+   $ESTDIR/../festival/bin/festival -b scripts/phseq.scm '(gen_phone_seq "'$prompF'" "'$phseqF'")'
+   exit
+fi
+
+
+if [ $1 = "phseq_lang" ]
+then
+   # Generate phone sequence (with ssil) based on give voice/lang
+   lang_dir=$2
+
+   cp -pr $prompF $lang_dir/prompts_islice.$$
+   # may be parallel threads so have a thread specific phseq.scm file
+   cp -pr scripts/phseq.scm $lang_dir/phseq.scm.$$
+
+   (cd $lang_dir;
+      # Output phone sequence (with ssil) for alignment
+      # Simplified and changed to allow different base voice/language
+      . ./etc/voice.defs
+      $ESTDIR/../festival/bin/festival -b phseq.scm.$$ \
+          festvox/${FV_VOICENAME}_cg.scm \
+          '(set! '${FV_VOICENAME}'::clunits_prompting_stage t)' \
+          '(voice_'${FV_VOICENAME}'_cg)' \
+          '(gen_phone_seq "'prompts_islice.$$'" "'phseq_islice.$$'")'
+   )
+ 
+   cp -pr $lang_dir/phseq_islice.$$ $phseqF
+
+   rm -f $lang_dir/prompts_islice.$$ $lang_dir/phseq.scm.$$ $lang_dir/phseq_islice.$$
+   
+   exit
+fi
+
 
 if [ $1 = "phseqint" ]
 then

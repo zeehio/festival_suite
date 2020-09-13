@@ -11,6 +11,7 @@ p.p.lisp_has_punc
 n.lisp.has_punc
 n.n.lisp_has_punc
 ;; Number of Syllables
+content_words_in
 lisp_ww_num_syls
 p.lisp_ww_num_syls
 p.p.lisp_ww_num_syls

@@ -294,9 +294,10 @@
   (let ((token (utt.relation.first utt 'Token)))
     (if (not raw)
 	(format ofd "( %s \"" uttname))
+    (format t "utt %l\n" uttname)
     (set! whitespace "")
     (while token
-;	 (format t ">%s<\n" (item.name token))
+	 (format t ">%s<\n" (item.name token))
        (let ((punc (item.feat token "punc"))
 	     (prepunctuation (item.feat token "prepunctuation")))
 	 (set! name (item.name token))

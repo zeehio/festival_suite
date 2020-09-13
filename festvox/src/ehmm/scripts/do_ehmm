@@ -63,6 +63,7 @@ then
 	filenames=$(awk '{print $2}' $PROMPTFILE)
 	for fname in $filenames
 	do
+                echo $fname
 		if [ ! -f wav/$fname.wav ]
 		then
 			wav_exist=0
@@ -288,6 +289,13 @@ then
       mv lab/$x.sl lab/$x.slehmm
       awk -f etc/mapstatenames.awk lab/$x.slehmm >lab/$x.sl
    done
+   exit 0
+fi
+
+if [ "$1" = "align_no_ssil" ]
+then
+   # Remove silences short that Nms (defauly 80)
+
    exit 0
 fi
 

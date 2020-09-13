@@ -281,6 +281,9 @@ pps
 to
 wp
 punc
+tag001 tag002 tag003 tag004 tag005 tag006 tag007 tag008 tag009 tag010
+tag011 tag012 tag013 tag014 tag015 tag016 tag017 tag018 tag019 tag020
+tag021 tag022 tag023 tag024 tag025 tag026 tag027 tag028 tag029 tag030
 )
 ( R:mcep_link.parent.R:segstate.parent.R:SylStructure.parent.parent.R:Word.p.gpos
 0
@@ -294,6 +297,9 @@ pps
 to
 wp
 punc
+tag001 tag002 tag003 tag004 tag005 tag006 tag007 tag008 tag009 tag010
+tag011 tag012 tag013 tag014 tag015 tag016 tag017 tag018 tag019 tag020
+tag021 tag022 tag023 tag024 tag025 tag026 tag027 tag028 tag029 tag030
 )
 ( R:mcep_link.parent.R:segstate.parent.R:SylStructure.parent.parent.R:Word.n.gpos
 0
@@ -307,5 +313,9 @@ pps
 to
 wp
 punc
+tag001 tag002 tag003 tag004 tag005 tag006 tag007 tag008 tag009 tag010
+tag011 tag012 tag013 tag014 tag015 tag016 tag017 tag018 tag019 tag020
+tag021 tag022 tag023 tag024 tag025 tag026 tag027 tag028 tag029 tag030
+
 )
 )

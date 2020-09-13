@@ -38,16 +38,23 @@
 
 
 ;;; Intonation
-(set! INST_LANG_accent_cart_tree
+;(set! INST_LANG_accent_cart_tree
+;  '
+;  (
+;   (R:SylStructure.parent.gpos is content)
+;    ( (stress is 1)
+;       ((Accented))
+;       ((NONE))
+;    )
+;  )
+;)
+
+;;; Sai Krishna 15 March 2017 ;;;;
+(set! cmu_indic_accent_cart_tree
   '
-  (
-   (R:SylStructure.parent.gpos is content)
-    ( (stress is 1)
-       ((Accented))
-       ((NONE))
-    )
-  )
+  ((NONE))
 )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (INST_LANG_VOX::select_intonation)
   "(INST_LANG_VOX::select_intonation)

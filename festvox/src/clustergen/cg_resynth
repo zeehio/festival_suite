@@ -62,7 +62,7 @@ awk '{print $1}' >$F0FILENAME
 # perl $CLUSTERGENDIR/a2d.pl >$NPOWFILENAME
 
 $ESTDIR/bin/ch_track -otype ascii $TRACK |
-awk '{for (i=2; i<=NF; i++)
+awk '{for (i=2; i<=26; i++)
        printf("%s\n",$i); }' |
 perl $CLUSTERGENDIR/a2d.pl >$COEFSFILENAME
 

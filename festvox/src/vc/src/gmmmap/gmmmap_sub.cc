@@ -614,11 +614,14 @@ void get_gmmmapmat_file(char *xfile,
     // memory allocation
     xv = xdvalloc(xdim);
     for (k = 0; k < dnum; k++) {
-	fread(xv->data, sizeof(double), (size_t)xdim, xfp);
+	if (fread(xv->data, sizeof(double), (size_t)xdim, xfp) != (size_t)xdim)
+            fprintf(stderr,"failed to read doubles\n");
 	// mean: E(y|x) weighted sum of mapping vectors
 	mv = xget_gmmmapvec(xv, detvec, wghtmat, xmean, xxicov, lm, ydim,
 			    dia_flag);
-	fwrite(mv->data, sizeof(double), (size_t)mv->length, mfp);
+	if (fwrite(mv->data, sizeof(double), (size_t)mv->length, mfp) !=
+            (size_t)mv->length)
+            fprintf(stderr,"failed to write doubles\n");
 	// memory free
 	xdvfree(mv);
     }
@@ -738,13 +741,17 @@ void get_gmmmap_wghtseq_file(char *xfile,
     // memory allocation
     xv = xdvalloc(xdim);
     for (k = 0; k < dnum; k++) {
-	fread(xv->data, sizeof(double), (size_t)xdim, xfp);
+	if (fread(xv->data, sizeof(double), (size_t)xdim, xfp) !=
+            (size_t)xdim)
+            fprintf(stderr,"failed to read doubles\n");
 	if (dia_flag == XTRUE)
 	    gv = xget_gaussvec_dia(xv, detvec, wghtmat, xmean, xxicov);
 	else
 	    gv = xget_gaussvec_full(xv, detvec, wghtmat, xmean, xxicov);
 	wv = xget_gammavec(gv);
-	fwrite(wv->data, sizeof(double), (size_t)wv->length, mfp);
+	if (fwrite(wv->data, sizeof(double), (size_t)wv->length, mfp) !=
+            (size_t)wv->length)
+            fprintf(stderr,"failed to write doubles\n");
 	// memory free
 	xdvfree(gv);
 	xdvfree(wv);
@@ -800,7 +807,8 @@ void get_gmmmap_wghtseq_vit_file(char *xfile,
     // memory allocation
     xv = xdvalloc(xdim);
     for (k = 0; k < dnum; k++) {
-	fread(xv->data, sizeof(double), (size_t)xdim, xfp);
+	if (fread(xv->data, sizeof(double), (size_t)xdim, xfp) != (size_t)xdim)
+            fprintf(stderr,"failed to read doubles\n");
 	if (dia_flag == XTRUE)
 	    gv = xget_gaussvec_dia(xv, detvec, wghtmat, xmean, xxicov);
 	else
@@ -917,7 +925,8 @@ void get_gmmmap_meanseq_file(char *xfile,
     // memory allocation
     xv = xdvalloc(xdim);
     for (k = 0; k < dnum; k++) {
-	fread(xv->data, sizeof(double), (size_t)xdim, xfp);
+	if (fread(xv->data, sizeof(double), (size_t)xdim, xfp) != (size_t)xdim)
+            fprintf(stderr,"failed to read doubles\n");
 	// means: E(y|x)
 	for (i = 0; i < clsnum; i++) {
 	    mv = xget_gmmmap_clsvec(xv, i, ydim, lm, dia_flag);
@@ -973,7 +982,8 @@ void get_gmmmap_meanseq_vit_file(char *xfile,
     // memory allocation
     xv = xdvalloc(xdim);
     for (k = 0; k < dnum; k++) {
-	fread(xv->data, sizeof(double), (size_t)xdim, xfp);
+	if (fread(xv->data, sizeof(double), (size_t)xdim, xfp) != (size_t)xdim)
+            fprintf(stderr,"failed to read doubles\n");
 	// means: E(y|x)
 	mv = xget_gmmmap_clsvec(xv, clsidxv->data[k], ydim, lm, dia_flag);
 	fwrite(mv->data, sizeof(double), (size_t)mv->length, mfp);

@@ -154,3 +154,28 @@
       )
     (load datafile t))
    t)
+
+(define (gen_phone_seq promptfile phseqfile)
+
+  (set! ofd (fopen phseqfile "w"))
+  ;; no need to generate a waveform here, so save some time
+  (Parameter.set 'Synth_Method 'None)
+  (mapcar
+   (lambda (x)
+     (set! utt1 (SynthText (car (cdr x))))
+     (format ofd "%s " (car x)) ;; fileid
+     (mapcar
+      (lambda (seg)
+        (format ofd "%s " (item.name seg))
+        (if (and 
+             (not (string-equal (item.name seg) "pau"))
+             (not (string-equal (item.feat seg "n.name") "pau"))
+             (null (item.relation.next seg 'SylStructure)) ;; end of syl
+             (null (item.next 
+                    (item.relation.parent seg 'SylStructure)))) ; end of word
+            (format ofd "ssil "))
+        )
+      (utt.relation.items utt1 'Segment))
+     (format ofd "\n"))
+   (load promptfile t))
+  (fclose ofd))

@@ -93,33 +93,40 @@ cat >festvox/clustergen.scm
 ./bin/do_clustergen parallel cluster etc/txt.done.data.train
 
 ## Improve the labels a bit   [ 5 hrs ] 
+## But you can skip this part if you create ml/stop before you run the
+## whole script
+if [ ! -f ml/stop ]
+then
 ./bin/do_move_label_me parallel 10
 ./bin/do_move_label_me parallel select
 ./bin/do_clustergen parallel cluster etc/txt.done.data.train
 ## Will generate a summary of each pass in ml/summary
 cat ml/summary
+fi
 
 #  Generate some test examples
 ./bin/do_clustergen parallel utt_by_utt_tts etc/txt.done.data.test tts_base
 rm -rf test/tts_base
 mv test/all test/tts_base
 
-## Biuld basic flite voice
+## Build basic flite voice
 $FLITEDIR/tools/setup_flite
 ./bin/build_flite
-cd flite
-make
-make voicedump
-$FLITEDIR/bin/flite -voice ./*.flitevox "hello world" hw.wav
+( cd flite;
+  make;
+  make voicedump;
+  $FLITEDIR/bin/flite -voice ./*.flitevox "hello world" hw.wav;
 # Should give a flitevox voice file and a generated waveform file
-ls -al *.flitevox *.wav
+  ls -al *.flitevox *.wav;
 cd ..
+)
 mv flite flite_base
 
 ## Build 20 random forests on params  [ 2 hrs ]
 mv festvox/clustergen.scm festvox/clustergen.scm.xxx
 cat festvox/clustergen.scm.xxx |
 sed 's/mcep_clustersize 50/mcep_clustersize 15/' |
+sed 's/f0_clustersize 200/f0_clustersize 150/' |
 sed 's/cg:rfs nil/cg:rfs 20/' |
 cat >festvox/clustergen.scm
 ./bin/do_clustergen parallel cluster etc/txt.done.data.train
@@ -133,6 +140,7 @@ cat >festvox/clustergen.scm
 ## but lets limit how many (param) rf_models are loaded during the
 ## duration build
 echo "01" >rf_models/mlist
+echo "01" >rf_models/mlistf0
 ./bin/build_rfs build_dur_rfs
 ## Will generate 20 models in dur_rf_models/
 
@@ -146,6 +154,11 @@ tail -6 mlist_dur.betters | head -1 >dur_rf_models/mlist
 ./bin/build_rfs minimize_rfs_mcep_3
 ## Take best 3 param models (this might not be optimal)
 tail -1 mlist.best.all | awk '{print $1,$2,$3}' >rf_models/mlist
+
+## Find best 3 trees for f0             [ 2 hrs / 10 hrs ]
+./bin/build_rfs minimize_rfs_f0_3
+## Take best 3 f0 models (this might not be optimal)
+tail -1 mlistf0.best.all | awk '{print $1,$2,$3}' >rf_models/mlistf0
 
 ## This second one (optional to above technique) does a greater search
 ## but gives the same results as the above -- but it'll give you information
@@ -171,14 +184,14 @@ mv test/all test/tts_rf3
 # Build flite rf3 voice [ 15 mins ]
 $FLITEDIR/tools/setup_flite
 ./bin/build_flite
-cd flite
-make
-make voicedump
-$FLITEDIR/bin/flite -voice ./*.flitevox "hello world" hw.wav
+( cd flite;
+  make;
+  make voicedump;
+  $FLITEDIR/bin/flite -voice ./*.flitevox "hello world" hw.wav;
 # Should give a flitevox voice file and a generated waveform file
-ls -al *.flitevox *.wav
+  ls -al *.flitevox *.wav;
 cd ..
-
+)
 # Build a distributable Festival voice
 ./bin/do_clustergen festvox_dist
 

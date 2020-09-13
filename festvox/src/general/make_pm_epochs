@@ -77,7 +77,7 @@ while read i
 do
    fname=`basename $i .wav`
    echo $i
-   $EPOCHS $i /tmp/pm_$$.$fname.epc
+   $EPOCHS wav/$i.wav /tmp/pm_$$.$fname.epc
 
    $PLAIN /tmp/pm_$$.$fname.epc |
    gawk '{if ($0==0) 
@@ -90,7 +90,7 @@ do
             printf("%f\t%s\n", count/16000.0,"p"); 
             count = count + 1
           }}' >/tmp/pm_$$.pm
-   $EFREE
+#   $EFREE
    cat /tmp/pm_$$.pm |
    gawk 'BEGIN {printf("EST_File Track\n");
                 printf("DataType ascii\n");

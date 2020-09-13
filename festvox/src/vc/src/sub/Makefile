@@ -60,5 +60,5 @@ include $(TOP)/config/common_make_rules
 	$(CXX) $(DEFS) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 ../lib/libsub.a: $(OBJS)
-	$(AR) cruv ../lib/libsub.a $(OBJS)
+	$(AR) crv ../lib/libsub.a $(OBJS)
 	$(RANLIB) ../lib/libsub.a

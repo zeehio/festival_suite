@@ -94,7 +94,7 @@ OPTIONS options_struct = {
 int main(int  argc, char *argv[])
 {
     int i, fc = 0;
-    int j, u, nts, ni, tmp;
+    int j, nts, ni, tmp;
     double data[1];
     float fdata[1];
     float *tmpfdata = NULL;
@@ -164,13 +164,21 @@ int main(int  argc, char *argv[])
 
     if (cond.float_flag == XFALSE) {
 	for(i=0;i<ni;i++){
-	    u=fread(&smpl.buff[i*nts],sizeof(double),nts,fpi);
+	    if (fread(&smpl.buff[i*nts],sizeof(double),nts,fpi) != (unsigned int)nts)
+            {
+                fprintf(stderr, "Can't read enough doubles\n");
+                exit(1);
+            }
 	    if ( feof(fpi) )   break;
 	}
     } else {
 	tmpfdata = falloc(nts);
 	for(i=0;i<ni;i++){
-	    u=fread(tmpfdata,sizeof(float),nts,fpi);
+	    if (fread(tmpfdata,sizeof(float),nts,fpi) != (unsigned int)nts)
+            {
+                fprintf(stderr, "Can't read enough floats\n");
+                exit(1);
+            }
 	    for (j = 0; j < nts; j++)
 		smpl.buff[i * nts + j] = (double)tmpfdata[j];
 	    if ( feof(fpi) )   break;

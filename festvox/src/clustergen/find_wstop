@@ -114,7 +114,7 @@ then
          nrc=`cat ws.looo.$unittype | awk '{r+=$1; c+=$2} END {printf("%f %f\n",r/NR,c/NR)}'`
          echo $nrc $i $unittype >>ws.loo.$unittype
       done
-      sort -n ws.loo.$unittype >ws/$unittype.out
+      sort -g ws.loo.$unittype >ws/$unittype.out
       rm -f ws.*.$unittype
    done
    exit 0

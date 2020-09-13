@@ -47,7 +47,9 @@ TOP=../..
 DIRNAME=src/clustergen
 SCHEMEFILES = CLUSTERGEN_cg.scm CLUSTERGEN_statenames.scm \
               clustergen.scm clustergen_build.scm xsent.scm
-SCRIPTS = setup_cg make_dur_model_mcep do_clustergen cg_resynth \
+SCRIPTS = setup_cg setup_cg_indic \
+          make_dur_model_mcep do_clustergen cg_resynth \
+	  cg_resynth_world \
           d2a.pl a2d.pl a2l.pl \
           cg_get_feats cg_get_f0_feats cg_get_track \
           cg_get_feats_all cg_get_feats_all_traj \
@@ -58,8 +60,9 @@ SCRIPTS = setup_cg make_dur_model_mcep do_clustergen cg_resynth \
           do_move_label do_move_label_me \
           cg_get_mcd get_cd_dtw get_cd_dtw_mgc get_str_sptk \
           build_cg_voice find_wstop find_nstates freq_response_vector_gen \
-          do_xsent find_dg wagon_rf rf_post_build build_rfs \
-          make_dur_model_mcep_rf build_cg_rfs_voice reduce_senones
+          do_xsent find_dg wagon_rf wagon_rf_f0 rf_post_build build_rfs \
+          make_dur_model_mcep_rf build_cg_rfs_voice reduce_senones \
+          build_cg_world_rfs_voice build_cg_world_voice
 OTHERS = mcep.desc mceptraj.desc statedur.feats statedur.feats_flite HOWTO \
          mcep.desc.graph statedur.feats.graph statedur.feats_flite.graph \
 	 SPTK-3.6.patch xsent.desc

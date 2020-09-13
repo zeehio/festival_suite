@@ -211,21 +211,34 @@ plus previous phone (or something else)."
 (define (INST_LANG_VOX::rfs_load_models)
   (let ((c 1))
     (set! INST_LANG_VOX:rfs_models nil)
+    (set! INST_LANG_VOX:rfs_f0_models nil)
     (if (probe_file (format nil "%s/rf_models/mlist" INST_LANG_VOX::dir))
+        (begin
+          (set! INST_LANG_VOX:rfs_f0_models
+              (mapcar
+               (lambda (c)
+                  (load (format nil "%s/rf_models/trees_%02d/INST_LANG_VOX_f0.tree" INST_LANG_VOX::dir c) t))
+               (load (format nil "%s/rf_models/mlistf0" INST_LANG_VOX::dir) t)))
         (set! INST_LANG_VOX:rfs_models
               (mapcar
                (lambda (c)
                  (list
                   (load (format nil "%s/rf_models/trees_%02d/INST_LANG_VOX_mcep.tree" INST_LANG_VOX::dir c) t)
-                  (track.load (format nil "%s/rf_models/trees_%02d/INST_LANG_VOX_mcep.params" INST_LANG_VOX::dir c))))
-               (load (format nil "%s/rf_models/mlist" INST_LANG_VOX::dir) t)))
+                    (track.load (format nil "%s/rf_models/trees_%02d/INST_LANG_VOX_mcep.params" INST_LANG_VOX::dir c))
+                    c))
+                 (load (format nil "%s/rf_models/mlist" INST_LANG_VOX::dir) t))))
         ;; no mlist file so just load all of them
         (while (<= c cg:rfs)
+               (set! INST_LANG_VOX:rfs_f0_models
+                     (cons
+                      (load (format nil "%s/rf_models/trees_%02d/INST_LANG_VOX_f0.tree" INST_LANG_VOX::dir c) t)
+                      INST_LANG_VOX:rfs_f0_models))
                (set! INST_LANG_VOX:rfs_models
                      (cons
                       (list
                        (load (format nil "%s/rf_models/trees_%02d/INST_LANG_VOX_mcep.tree" INST_LANG_VOX::dir c) t)
-                       (track.load (format nil "%s/rf_models/trees_%02d/INST_LANG_VOX_mcep.params" INST_LANG_VOX::dir c)))
+                       (track.load (format nil "%s/rf_models/trees_%02d/INST_LANG_VOX_mcep.params" INST_LANG_VOX::dir c))
+                       c)
                       INST_LANG_VOX:rfs_models))
                (set! c (+ 1 c))))
     INST_LANG_VOX:rfs_models))
@@ -260,10 +273,18 @@ Dump the names of the files that must be included in the distribution."
         (begin
           (mapcar
            (lambda (mn)
+             (format ofd "festival/lib/voices/LANG/INST_LANG_VOX_cg/rf_models/trees_%02d/INST_LANG_VOX_f0.tree\n" mn)
              (format ofd "festival/lib/voices/LANG/INST_LANG_VOX_cg/rf_models/trees_%02d/INST_LANG_VOX_mcep.tree\n" mn)
              (format ofd "festival/lib/voices/LANG/INST_LANG_VOX_cg/rf_models/trees_%02d/INST_LANG_VOX_mcep.params\n" mn))
            (load "rf_models/mlist" t))
           (format ofd "festival/lib/voices/LANG/INST_LANG_VOX_cg/rf_models/mlist\n")
+          (mapcar
+           (lambda (mn)
+             ;; Don't list this again if already in mlist
+             (if (not (member_string mn (load "rf_models/mlist" t)))
+                 (format ofd "festival/lib/voices/LANG/INST_LANG_VOX_cg/rf_models/trees_%02d/INST_LANG_VOX_f0.tree\n" mn)))
+           (load "rf_models/mlistf0" t))
+          (format ofd "festival/lib/voices/LANG/INST_LANG_VOX_cg/rf_models/mlistf0\n")
           ))
     ;; Always include these too
     (format ofd "festival/lib/voices/LANG/INST_LANG_VOX_cg/festival/trees/INST_LANG_VOX_mcep.tree\n")
@@ -367,7 +388,7 @@ SHould only be called once per session."
   ;; Random forests
   (if (and cg:rfs (not (boundp 'INST_LANG_VOX:rfs_models)) )
       (INST_LANG_VOX::rfs_load_models))
-  (if (and cg:rfs_dur (not (boundp 'INST_LANG_VOICE:rfs_dur_models)))
+  (if (and cg:rfs_dur (not (boundp 'INST_LANG_VOX:rfs_dur_models)))
       (INST_LANG_VOX::rfs_load_dur_models))
 
   (set! INST_LANG_VOX::cg_loaded t)
@@ -463,6 +484,8 @@ Define voice for LANG."
                                   "festvox/lpf.track"))))
         (if (and cg:rfs (boundp 'INST_LANG_VOX:rfs_models))
             (set! cg:rfs_models INST_LANG_VOX:rfs_models))
+        (if (and cg:rfs (boundp 'INST_LANG_VOX:rfs_f0_models))
+            (set! cg:rfs_f0_models INST_LANG_VOX:rfs_f0_models))
         (if (and cg:rfs_dur (boundp 'INST_LANG_VOX:rfs_dur_models))
             (set! cg:rfs_dur_models INST_LANG_VOX:rfs_dur_models))
 

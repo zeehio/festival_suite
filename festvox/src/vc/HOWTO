@@ -180,7 +180,7 @@ This puts the first 30 utterances into etc/txt.transform.data
 
 Put the waveform files you want to use as targets in wav-target/
 
-Traing the model, this synthesizes the utterances in
+Train the model, this synthesizes the utterances in
 etc/txt.transform.data with the current CG synthesizer and dumps the
 mcep, f0 and npow files ready for training the transformation model.
 This will take an hour or so

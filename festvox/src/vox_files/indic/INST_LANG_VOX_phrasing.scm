@@ -107,13 +107,18 @@
   (set! phrase_cart_tree (load (format nil "syntax/break_prediction.%s.%s.tree" cg:phrasyn_grammar_ntcount cg:phrasyn_mode) t))
   )  
 
-(set! INST_LANG_phrase_cart_tree
-'
-((lisp_token_end_punc in ("'" "\"" "?" "." "," ":" ";"))
-  ((B))
-  ((n.name is 0)
-   ((B))
-   ((NB)))))
+(if (probe_file (path-append INST_LANG_VOX::dir "festvox/INST_LANG_VOX_phrasetree.scm"))
+    (begin
+      (set! INST_LANG_phrase_cart_tree
+            (car (load (path-append INST_LANG_VOX::dir "festvox/INST_LANG_VOX_phrasetree.scm") t))))
+    (begin
+      (set! INST_LANG_phrase_cart_tree
+            '
+            ((lisp_token_end_punc in ("'" "\"" "?" "." "," ":" ";"))
+             ((B))
+             ((n.name is 0)
+              ((B))
+              ((NB)))))))
 
 (define (INST_LANG_VOX::select_phrasing_default)
   "(INST_LANG_VOX::select_phrasing)

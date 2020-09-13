@@ -31,7 +31,7 @@
 ##  THIS SOFTWARE.                                                       ##
 ##                                                                       ##
 ###########################################################################
-##  Generic build all, clustergen voice script                           ##
+##  Generic build all, clustergen voice script (simple case)             ##
 ###########################################################################
 
 NAME=$1
@@ -42,6 +42,11 @@ PARALLEL=parallel
 
 ./bin/do_build $PARALLEL build_prompts
 ./bin/do_build label
+
+# Remove all short silences <80ms (you can change that number in 
+# festvox/clustergen_build.scm in ClusterGen_ml_delete_short_pauses)
+#./bin/do_clustergen remove_all_short_silences
+
 ./bin/do_clustergen $PARALLEL build_utts
 
 # Build first generation of voice
@@ -62,7 +67,7 @@ else
    ./bin/do_clustergen $PARALLEL f0_v_sptk
    # Because sometimes f0 extraction fails
    mv etc/txt.done.data etc/txt.done.data.0
-   ./bin/reduce_prompts etc/txt.done.data.0 f0/* >etc/txt.done.data
+   ./bin/reduce_prompts etc/txt.done.data.0 f0/*.f0 >etc/txt.done.data
    ./bin/do_clustergen $PARALLEL mcep_sptk
 fi
 ./bin/do_clustergen $PARALLEL combine_coeffs_v
@@ -79,19 +84,27 @@ cat bad.files |
 while read x
 do
    fname=`basename $x .mcep`
-   grep -v "^( "$fname" " etc/txt.done.data.xxx
-   mv etc/txt.done.data.xxx etc/txt.done.data
-done
+    echo "( "$fname
+done >etc/bad.data
+$FESTVOXDIR/src/promptselect/dataset_minus etc/txt.done.data.precombine etc/bad.data >etc/txt.done.data
 
+# If there isn't a predefined train/test split, we'll make one
+if [ ! -f etc/txt.done.data.test ]
+then
 ./bin/traintest etc/txt.done.data
+fi
 
 ./bin/do_clustergen $PARALLEL cluster etc/txt.done.data.train
 ./bin/do_clustergen dur etc/txt.done.data.train
 
 # Test initial build to get basic stats
-
-$FESTVOXDIR/src/clustergen/cg_test resynth cgp >mcd-base.out
+$FESTVOXDIR/src/clustergen/cg_test resynth cgp_base etc/txt.done.data.test >mcd-base.out
+# For historical compatibility we'll copy the predicted cgp files
+cp -pr test/cgp_base test/cgp
 mv dur.dur.S25.out dur.dur.S25.out-base
+
+# TTS for this model
+$FESTVOXDIR/src/clustergen/cg_test tts tts_base etc/txt.done.data.test 
 
 exit
 

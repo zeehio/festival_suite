@@ -760,12 +760,11 @@ double get_gauss_jde_dia(long clsidx,
 			 DMATRIX meanmat,	// [clsnum][dim]
 			 DMATRIX invcovmat)	// [clsnum * dim][dim]
 {
-    long k, b, clsnum, dim, dim2;
+    long k, b, dim, dim2;
     double gauss;
     DVECTOR subvec = NODATA;
 
     dim = vec->length;
-    clsnum = detvec->length;
     dim2 = dim / 2;
     b = clsidx * dim;
 

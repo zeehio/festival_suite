@@ -114,7 +114,7 @@ then
             ntot[$1] += $3}
            END { for (dg in ntot)
                     printf("%s %f %d\n",dg,ntot[dg]/ncount[dg],ncount[dg]) }' |
-      sort --key=2 -n >ns/all.$pass.scores
+      sort --key=2 -g >ns/all.$pass.scores
       cp -pr ns/all.$pass.scores ns/all.scores   
    done
 

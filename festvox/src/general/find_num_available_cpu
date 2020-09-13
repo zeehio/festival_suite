@@ -37,6 +37,13 @@
 #
 SYS=`uname`
 
+# You can override the actual number if you want
+if [ "$FESTVOX_NUM_CPUS" ]
+then 
+   echo $FESTVOX_NUM_CPUS
+   exit
+fi
+
 if [ $SYS = "Darwin" ]
 then
   num_cpus=$(sysctl -n hw.ncpu)

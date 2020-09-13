@@ -247,7 +247,12 @@ void get_stm_mlpgpara(MLPGPARA param, char *mseqf,
 	exit(1);
     }
     for (d = 0; d < dnum; d++) {
-	fread(param->mean->data[0], sizeof(double), (size_t)dim, fp);
+	if (fread(param->mean->data[0], sizeof(double), (size_t)dim, fp) !=
+            (size_t)dim)
+        {
+            fprintf(stderr, "Can't read enough doubles\n");
+            exit(1);
+        }
 	for (k = 0; k < dim2; k++)
 	    param->stm->data[d][k] = param->mean->data[0][k];
     }
@@ -287,8 +292,16 @@ void get_stm_mlpgpara(MLPGPARA param, char *stf, char *wseqf, char *mseqf,
 	param->stm = xdmalloc(dnum, dim2);
 	for (d = 0; d < dnum; d++) {
 	    for (c = 0; c < clsnum; c++) {
-		fread(param->wght->data[c], sizeof(double), (size_t)1, wfp);
-		fread(param->mean->data[c], sizeof(double), (size_t)dim, mfp);
+		if (fread(param->wght->data[c], sizeof(double), (size_t)1, wfp) != 1)
+                {
+                    fprintf(stderr, "Can't read enough doubles\n");
+                    exit(1);
+                }
+		if (fread(param->mean->data[c], sizeof(double), (size_t)dim, mfp) != (size_t)dim)
+                {
+                    fprintf(stderr, "Can't read enough doubles\n");
+                    exit(1);
+                }
 	    }
 	    for (k = 0; k < dim2; k++)
 		for (c = 0, param->stm->data[d][k] = 0.0; c < clsnum; c++)
@@ -407,8 +420,16 @@ double get_like_pdfseq(long dim, long dim2, long dnum, long clsnum,
     for (d = 0, like = 0.0; d < dnum; d++) {
 	// read weight and mean sequences
 	for (c = 0; c < clsnum; c++) {
-	    fread(param->wght->data[c], sizeof(double), (size_t)1, wfp);
-	    fread(param->mean->data[c], sizeof(double), (size_t)dim, mfp);
+	    if (fread(param->wght->data[c], sizeof(double), (size_t)1, wfp) != 1)
+            {
+                fprintf(stderr, "Can't read enough doubles\n");
+                exit(1);
+            }
+	    if (fread(param->mean->data[c], sizeof(double), (size_t)dim, mfp) != (size_t)dim)
+            {
+                fprintf(stderr, "Can't read enough doubles\n");
+                exit(1);
+            }
 	}
 
 	// observation vector
@@ -494,8 +515,16 @@ double get_like_pdfseq_vit(long dim, long dim2, long dnum, long clsnum,
 
     for (d = 0, like = 0.0; d < dnum; d++) {
 	// read weight and mean sequences
-	fread(param->wght->data[0], sizeof(double), (size_t)1, wfp);
-	fread(param->mean->data[0], sizeof(double), (size_t)dim, mfp);
+	if (fread(param->wght->data[0], sizeof(double), (size_t)1, wfp) != 1)
+        {
+            fprintf(stderr, "Can't read enough doubles\n");
+            exit(1);
+        }
+	if (fread(param->mean->data[0], sizeof(double), (size_t)dim, mfp) != (size_t)dim)
+        {
+            fprintf(stderr, "Can't read enough doubles\n");
+            exit(1);
+        }
 
 	// observation vector
 	for (k = 0; k < dim2; k++) {
@@ -738,7 +767,11 @@ void InitDWin(PStreamChol *pst, char *dynwinf, char *accwinf)
 	    exit(1);
 	}
 	pst->dw.coef[i] = dcalloc(fsize, 0);
-	fread(pst->dw.coef[i], sizeof(double), fsize, fp);
+	if (fread(pst->dw.coef[i], sizeof(double), fsize, fp) != (unsigned int)fsize)
+        {
+            fprintf(stderr, "Can't read enough doubles\n");
+            exit(1);
+        }
 	// set pointer
 	leng = fsize / 2;			// L (fsize = 2 * L + 1)
 	pst->dw.coef[i] += leng;		// [L] -> [0]	center

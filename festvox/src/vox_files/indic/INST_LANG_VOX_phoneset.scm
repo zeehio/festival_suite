@@ -1,8 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;                                                                     ;;;
 ;;;                     Carnegie Mellon University                      ;;;
-;;;                  and Alan W Black and Kevin Lenzo                   ;;;
-;;;                      Copyright (c) 1998-2000                        ;;;
+;;;                      Copyright (c) 1998-2017                        ;;;
 ;;;                        All Rights Reserved.                         ;;;
 ;;;                                                                     ;;;
 ;;; Permission is hereby granted, free of charge, to use and distribute ;;;
@@ -70,6 +69,7 @@
    (      i   -   +   s   1   1   -   0   0   0   -   0   ) ; इ
    (     i:   -   +   l   1   1   -   0   0   0   -   0   ) ; ई
    (      u   -   +   s   1   3   +   0   0   0   -   0   ) ; उ
+   (     uy   -   +   s   1   3   -   0   0   0   -   0   ) ; Tamil word(morpheme?)-final unrounded u
    (     u:   -   +   l   1   3   +   0   0   0   -   0   ) ; ऊ
    (    9r=   -   +   s   1   3   -   0   0   0   -   0   ) ; ऋ
    (    lr=   -   +   d   2   3   -   0   0   0   -   0   ) ; ऌ
@@ -114,6 +114,10 @@
    (     dB   -   -   0   0   0   0   s   d   +   -   -   ) ; द
    (    dBh   -   -   0   0   0   0   s   d   +   +   -   ) ; ध
    (     nB   -   -   0   0   0   0   n   d   +   -   -   ) ; न
+   
+   ;; Alveolar
+   
+   (      n   -   -   0   0   0   0   n   a   +   -   -   ) ; ऩ
 
    ;; Labial
    (      p   -   -   0   0   0   0   s   l   -   -   -   ) ; प
@@ -127,6 +131,7 @@
    (     9r   -   -   0   0   0   0   r   a   +   -   -   ) ; र
    (      l   -   -   0   0   0   0   r   d   +   -   -   ) ; ल
    (     lr   -   -   0   0   0   0   r   a   +   -   -   ) ; ळ
+   (     zr   -   -   0   0   0   0   r   a   +   -   -   ) ; ऴ
    (      v   -   -   0   0   0   0   r   l   +   -   -   ) ; व
 
    ;; Fricatives
@@ -137,13 +142,15 @@
 	  
    ;; More consonants
    (      q   -   -   0   0   0   0   s   g   -   -   +   ) ; क़
-   (      x   -   -   0   0   0   0   s   g   -   +   +   ) ; ख़
-   (      G   -   -   0   0   0   0   s   g   +   -   +   ) ; ग़
+   (      x   -   -   0   0   0   0   f   g   -   -   +   ) ; ख़
+   (      G   -   -   0   0   0   0   f   g   +   -   +   ) ; ग़
    (      z   -   -   0   0   0   0   f   d   +   -   +   ) ; ज़
    (     rr   -   -   0   0   0   0   s   a   +   -   +   ) ; ड़ 
    (    rrh   -   -   0   0   0   0   s   a   +   +   +   ) ; ढ़ 
    (      f   -   -   0   0   0   0   f   b   -   -   +   ) ; फ़ 
-   (      nX   -   -   0   0   0   0   n   v   +   -   -   )
+   (     dh   -   -   0   0   0   0   f   d   +   -   +   ) ; Tamil tB allophone 
+   (      B   -   -   0   0   0   0   f   l   +   -   +   ) ; Tamil p allophone 
+   (     nX   -   -   0   0   0   0   n   v   +   -   -   )
 
 
    ;; Nasalized vowels
@@ -161,6 +168,35 @@
    ( aUnas    -   +   d   1   3   +   0   0   0   -   0   ) ; औ
    ( aynas    -   +   s   2   2   -   0   0   0   -   0   ) ; अॅ
    ( ownas    -   +   s   3   3   +   0   0   0   -   0   ) ; ऑ
+
+   ;; English phones, which may be used in the bilingual indic databases
+   ;; Only those not already listed above
+   ( aa       -   +   l   3   3   -   0   0   0   -   0   ) ;; father
+   ( ae       -   +   s   3   1   -   0   0   0   -   0   ) ;; fat
+   ( ah       -   +   s   2   2   -   0   0   0   -   0   ) ;; but
+   ( ao       -   +   l   3   3   +   0   0   0   -   0   ) ;; lawn
+   ( aw       -   +   d   3   2   -   0   0   0   -   0   ) ;; how
+   ( ax       -   +   a   2   2   -   0   0   0   -   0   ) ;; about
+   ( axr      -   +   a   2   2   -   r   a   +   -   0   )
+   ( d        -   -   0   0   0   0   s   a   +   -   0   )
+   ( eh       -   +   s   2   1   -   0   0   0   -   0   ) ;; get
+   ( er       -   +   a   2   2   -   r   0   0   -   0   )
+   ( ey  -      +     d   2   1   -   0   0   0   -   0   ) ;; gate
+   ( hh  -      -     0   0   0   0   f   g   -   -   0   )
+   ( ih  -      +     s   1   1   -   0   0   0   -   0   ) ;; bit
+   ( iy  -      +     l   1   1   -   0   0   0   -   0   ) ;; beet
+   ( jh  -      -     0   0   0   0   a   p   +   -   0   )
+   ( ng  -      -     0   0   0   0   n   v   +   -   0   )
+   ( oy  -      +     d   2   3   +   0   0   0   -   0   ) ;; toy
+   ( r   -      -     0   0   0   0   r   a   +   -   0   )
+   ( sh  -      -     0   0   0   0   f   p   -   -   0   )
+   ( t   -      -     0   0   0   0   s   a   -   -   0   )
+   ( th  -      -     0   0   0   0   f   d   -   -   0   )
+   ( uh  -      +     s   1   3   +   0   0   0   -   0   ) ;; full
+   ( uw  -      +     l   1   3   +   0   0   0   -   0   ) ;; fool
+   ( w   -      -     0   0   0   0   r   l   +   -   0   )
+   ( y   -      -     0   0   0   0   r   p   +   -   0   )
+   ( zh  -      -     0   0   0   0   f   p   +   -   0   )
 
    )
 )

@@ -69,10 +69,12 @@ for (my $i = 0; $i <= $#pl; $i++) {
   print fp_out "$wrd[0] $nwrd ";
   for (my $j = 1; $j <= $#wrd; $j++) {
     if (!exists($map{$wrd[$j]})) {
+        # skip if there is no mapping phone
        print "$wrd[$j] doesn't exist in the mapping table \n";
-       exit;
+#        exit;
+    } else {
+        print fp_out "$map{$wrd[$j]} ";
     }
-    print fp_out "$map{$wrd[$j]} ";
   }
   print fp_out "\n";
 }

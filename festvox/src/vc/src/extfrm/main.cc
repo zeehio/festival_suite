@@ -162,15 +162,43 @@ int main(int argc, char *argv[])
     // extraction frames
     for (k = 0, num = 0; k < powvec->length; k++) {
 	if (cond.float_flag == XFALSE)
-	    fread(dvec->data, sizeof(double), (int)cond.dim, ifp);
+        {
+	    if (fread(dvec->data, sizeof(double), (int)cond.dim, ifp) !=
+                (unsigned int)cond.dim)
+            {
+                fprintf(stderr,"can't read enough doubles\n");
+                exit(1);
+            }
+        }
 	else
-	    fread(fvec->data, sizeof(float), (int)cond.dim, ifp);
+        {
+	    if (fread(fvec->data, sizeof(float), (int)cond.dim, ifp) !=
+                (unsigned int)cond.dim)
+            {
+                fprintf(stderr,"can't read enough floats\n");
+                exit(1);
+            }
+        }
 	if ((powvec->data[k] >= cond.lp || cond.lp == -100.0) &&
 	    (powvec->data[k] <= cond.up || cond.up == 100.0)) {
 	    if (cond.float_flag == XFALSE)
-		fwrite(dvec->data, sizeof(double), (int)cond.dim, ofp);
+            {
+		if (fwrite(dvec->data, sizeof(double), (int)cond.dim, ofp) !=
+                    (unsigned int)cond.dim)
+                {
+                    fprintf(stderr,"can't write enough doubles\n");
+                    exit(1);
+                }
+            }
 	    else
-		fwrite(fvec->data, sizeof(float), (int)cond.dim, ofp);
+            {
+		if (fwrite(fvec->data, sizeof(float), (int)cond.dim, ofp) !=
+                    (unsigned int)cond.dim)
+                {
+                    fprintf(stderr,"can't write enough floats\n");
+                    exit(1);
+                }
+            }
 	    num++;
 	}
     }

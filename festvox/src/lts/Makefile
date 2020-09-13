@@ -37,10 +37,20 @@
 TOP=../..
 DIRNAME=src/lts
 SCMFILES = 
-SCRIPTS = build_lts build_lts_rules make_allows make_allows-smt
+SCRIPTS = build_lts build_lts_rules make_allows make_allows-smt ults.scm
 FILES = Makefile  $(SCMFILES) $(SCRIPTS)
 
-ALL = 
+ALL = ults
+#ALL =
 
 include $(TOP)/config/common_make_rules
+
+ults: ults.scm
+	@echo making ults script
+	@rm -f ults
+	@echo "#!/bin/sh" >ults
+	@echo "\"true\" ; exec "$(FESTDIR)/bin/festival --script '$$0 $$*' >>ults
+	@cat ults.scm >> ults
+	@chmod +x ults
+
 

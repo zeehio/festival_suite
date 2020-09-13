@@ -226,3 +226,7 @@ festival/doc/refcard.aux
 festival/doc/refcard.dvi
 festival/doc/refcard.log
 festival/doc/refcard.ps
+festvox/config.log
+festvox/config.status
+festvox/config/config
+src/general/cmn

@@ -70,6 +70,7 @@
 ;;;           on build models
 ;;;  20/12/08 prune frame (dumping 5-10% gives same quality)
 ;;;  13/02/09 multimodel -- averaged separate static and delta models
+;;;  xx/07/14 random forests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require_module 'clunits)  ;; C++ modules support
@@ -93,6 +94,7 @@
 
 (defvar cg:vuv nil) ;; superseded by the v coefficient
 (defvar cg:prune_frame_threshold 0.0)
+(defvar cg:prune_dur_zscore_threshold 4.0) ;; ignore s with durzscore > 4.0
 (defvar cg:multimodel nil) ;; for separated static/delta models
 (defvar cg:mixed_excitation nil)
 (defvar cg:ml_ignore_dur nil)
@@ -157,7 +159,7 @@ Build cluster synthesizer for the given recorded data and domain."
 ;            '(clunit_name_feat lisp_cg_name)
 ;           '(wagon_cluster_size_mcep 50) ;; 50 70 normally
             (list 'wagon_cluster_size_mcep cg:mcep_clustersize) ;; 50 70 normally
-            '(wagon_cluster_size_f0 200)   ;; 200
+            (list 'wagon_cluster_size_f0 cg:f0_clustersize)   ;; 200
             '(cg_ccoefs_template "ccoefs/%s.mcep")
 ;            '(cg_ccoefs_template "hnm/%s.hnm")  ;; HNM
             )
@@ -285,7 +287,11 @@ Build cluster synthesizer for the given recorded data and domain."
                    (+ (* cg:delta_factor mcep_length) 5))) ;; with str, w/o v
           (set! cg::cluster_feats 
                 (format nil "-track_feats 1-%d" 
-                   (* cg:delta_factor mcep_length)))) ;; w/o v
+                        (* cg:delta_factor mcep_length)))) ;; w/o v
+      (if cg:world
+          (set! cg::cluster_feats
+                (format nil "-track_feats 1-%d"
+                        (+ 5 (* cg:delta_factor mcep_length)))))
       (format t "Do clustering\n")
       (clustergen::do_clustering 
        cg::unittypes clustergen_params 
@@ -318,6 +324,9 @@ Build cluster synthesizer for the given recorded data and domain."
         ;; prune_frames: not very useful - off by default
         (if (> cg:prune_frame_threshold 0.0)
             (clustergen::score_frames (car f) utt clustergen_params))
+
+        (if cg:expand_dynamic_features
+            (ClusterGen_expand_dynamic_features utt))
 
         ;; (clustergen::collect_prosody_stats utt clustergen_params)
         (utt.save utt (format nil "festival/utts_hmm/%s.utt" (car f)))
@@ -923,10 +932,13 @@ Find distance of t1.p1 wrt t2.p2 (with std)."
       (set! nseg (item.next seg))
       (set! seg_number (+ 1 seg_number))
       (if (and  ;; delete short silences
-           (string-equal "pau" (item.name seg))
-           (< (item.feat seg "duration") 0.015))
+           (or
+            (string-equal "pau" (item.name seg))
+            (string-equal "ssil" (item.name seg)))
+           (< (item.feat seg "duration") 0.08))
           (begin  ;; delete it and the states with it
-            (format t "deleting %s_pau_%s\n" (car f) seg_number)
+            (format t "deleting %s_pau_%s %s\n" (car f) seg_number
+                    (item.feat seg "duration"))
             (while (and state (< (item.feat state "end") 
                                  (+ 0.001 (item.feat seg "end"))))
              (set! nstate (item.next state))
@@ -1271,6 +1283,7 @@ a track file"
        (let ((cname (item.feat s cg_name_feat)))
          (if (or (string-equal cname "0")
                  (string-equal cname "ignore")
+;                 (> (cg:dur_zscore s) cg:prune_dur_zscore_threshold)
                  (> (item.feat s "cg_score") cg:prune_frame_threshold) ;; prune
                  (if cg:vuv (vuv_mismatch s)) ;; hnm
                  )
@@ -1295,6 +1308,16 @@ a track file"
      (reverse (utt.relation.items utt cg_relation))
      )
     t))
+
+(define (cg:dur_zscore i)
+  (let ((dur (item.feat i segment_duration))
+        (name (item.name i))
+        (dur_info 0)
+        (z 0))
+    (set! dur_info (cdar (assoc_string name duration_ph_info_cg)))
+    (set! z (/ (- dur (car dur_info)) (cadr dur_info)))
+    (format t "awb_debug %f %l\n" z dur_info)
+    z))
 
 (define (clustergen::name_units_para utt file_number params)
   (let ((cg_name_feat (get_param 'clunit_name_feat params "name"))
@@ -1709,8 +1732,11 @@ Load Combined Coefficients into this utt and link it in"
   (system
    (format 
     nil 
-    "$CLUSTERGENDIR/cg_get_feats_all %s\n"
-    datafile))
+    "$CLUSTERGENDIR/cg_get_feats_all %s %s\n"
+    datafile
+    (if cg:save_dumped_coeff_files
+        "save"
+        "")))
   t)
 
 (define (clustergen::extract_unittype_all_files_traj datafile unittypes)
@@ -1720,7 +1746,7 @@ Load Combined Coefficients into this utt and link it in"
 
   (system
    (format nil 
-    "$CLUSTERGENDIR/cg_get_feats_all %s traj\n"
+    "$CLUSTERGENDIR/cg_get_feats_all %s save\n"
     datafile))
 
   (system
@@ -1887,7 +1913,9 @@ Cluster different unit types."
 "Build tree with Wagon for this unittype."
   (let ((command 
 	 (format nil "%s %s -desc %s -data '%s' -test '%s' -balance %s -stop %s -output '%s' %s"
-		 (get_param 'wagon_progname cg_params "wagon")
+                 (if cg:rfs
+                     "./bin/wagon_rf_f0"
+                     (get_param 'wagon_progname cg_params "$ESTDIR/bin/wagon"))
 ;                 "-stepwise -swopt rmse"
                  "-ignore '(R:mcep_link.parent.lisp_duration)'"
                  (format nil "festival/clunits/f0.desc")
@@ -2628,7 +2656,7 @@ x))))
            (set! i (+ 1 i)))
          (utt.relation.items utt1 'mcep))
         (set! cg_predict_unvoiced nil)
-        (cg_wave_synth utt1)
+        (cluster_synth_method utt1) ;; whatever waveform method is selected
         (wave.save (utt.wave utt1)
          (format nil "%s/%s.wav" testdir (car x)))
         )) ;; end of resynth wave

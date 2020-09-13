@@ -136,7 +136,7 @@ OPTIONS options_struct = {
 int main(int argc, char *argv[])
 {
     int i, fc;
-    long k, j, dim;
+    long k, j;
     LMATRIX twf = NODATA;
     DMATRIX orgmat = NODATA;
     DMATRIX tarmat = NODATA;
@@ -186,7 +186,6 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "sdim or ldim error\n");
 	exit(1);
     }
-    dim = cond.ldim - cond.sdim + 1;
 
     // calculate CD or minus likelihood without time warping
     if (cond.notwf_flag == XTRUE) {

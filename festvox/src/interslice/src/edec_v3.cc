@@ -326,8 +326,6 @@ void PostProcess(int *path, int *stMap, int ns, int nt, ofstream& fp_log, char *
   double tim = 0;
   //double pT = 0;
 
-  //int uno = 0;
-
   //char labD[] = "lab/";
   
   char myfile[nmL];
@@ -354,8 +352,6 @@ void PostProcess(int *path, int *stMap, int ns, int nt, ofstream& fp_log, char *
   fp_out<<"#"<<endl;
   fp_st<<"#"<<endl;
   fp_log<<fnm<<endl;
-
-  //uno = 0;
 
   s = path[0];
   ps = s;
@@ -640,8 +636,6 @@ void FillWordTrans(double **arcW, int *tar, int ltar, double **trw, int *bI, int
   int tw;
   int bs;
   int es;
-  //int cw;
-  //int nw;
 
   int *esa; 
   int *bsa;
@@ -649,7 +643,6 @@ void FillWordTrans(double **arcW, int *tar, int ltar, double **trw, int *bI, int
 
   int nos;
 
-  //double sum;
   double estrn;
   double bias;
 

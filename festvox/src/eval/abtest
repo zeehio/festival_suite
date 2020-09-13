@@ -48,11 +48,32 @@ then
 fi
 
 PLAY=$ESTDIR/bin/na_play
-#PLAY=play
+PLAY="play -q"
 
 ls $1/*.wav | head -10 >/tmp/$$.aout
 ls $2/*.wav | head -10 >/tmp/$$.bout
 paste /tmp/$$.aout /tmp/$$.bout >/tmp/$$.about
+
+eee=`basename $1`
+fff=`basename $2`
+
+function print_results() {
+    echo
+    sed 's+/.*++' /tmp/$$.results |
+        awk '
+     # Print list of word frequencies
+     {
+         for (i = 1; i <= NF; i++)
+             freq[$i]++
+     }
+     
+     END {
+         for (word in freq)
+             printf "%s\t%d\n", word, freq[word]
+     }' | tee $eee.$fff.results | sort --key=1 -gr
+    }
+
+trap print_results INT
 
 awk 'BEGIN {iii='$$';
            for (i=1; i < iii; i++)
@@ -101,20 +122,8 @@ do
    fi
 #   echo $tt2 >/dev/tty
 done >/tmp/$$.results
-eee=`basename $1`
-fff=`basename $2`
-sed 's+/.*++' /tmp/$$.results |
-awk '
-     # Print list of word frequencies
-     {
-         for (i = 1; i <= NF; i++)
-             freq[$i]++
-     }
      
-     END {
-         for (word in freq)
-             printf "%s\t%d\n", word, freq[word]
-     }' | tee $eee.$fff.results | sort --key=1 -nr
+print_results
 
 rm -f /tmp/$$.*
 

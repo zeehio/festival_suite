@@ -90,7 +90,7 @@ do
      awk '{freq[$1] = $2; t+=$2}
          END {for (word in freq)
                 printf("%s %f\n",word,freq[word]/(t*1.0));
-             }' | sort --key=2 -nr |
+             }' | sort --key=2 -gr |
      awk '{t += $2;
            if (NR < 3)
               printf("%s\n",$1);

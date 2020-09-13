@@ -77,7 +77,11 @@ char *xreadheader_wav(char *filename)
     }
 
     // read data
-    fread(header, sizeof(char), (int)44, fp);
+    if (fread(header, sizeof(char), (int)44, fp) != 44)
+    {
+	fprintf(stderr, "can't read header from: %s\n", filename);
+        return NULL;
+    }
 
     // close file
     fclose(fp);

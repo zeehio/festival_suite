@@ -58,10 +58,7 @@ ALL = doc
 
 include $(TOP)/config/common_make_rules
 
-doc: bsv/book1.html bsv.ps bsv.pdf
-	@ cp -p bsv.ps bsv
-	@ (cd bsv; rm -f bsv.ps.gz; gzip bsv.ps)
-	@ (cd bsv; rm -f index.html; ln book1.html index.html)
+doc: bsv/book1.html bsv.pdf
 	@ cp -p bsv.pdf bsv
 	@ rm -rf $(TOP)/html
 	@ cp -pr bsv $(TOP)/html
@@ -70,11 +67,9 @@ bsv/book1.html: $(TEXT)
 	db2html bsv.sgml
 	mkdir bsv/figures
 	cp -p figures/*.gif bsv/figures/
-	cat stuff.ed | ed bsv/book1.html
-bsv.ps: $(TEXT)
-	db2ps bsv.sgml
-bsv.pdf: bsv.ps
-	ps2pdf bsv.ps bsv.pdf
+	(cd bsv && cat ../stuff.ed | ed index.html)
+bsv.pdf: $(TEXT)
+	db2pdf bsv.sgml
 refs:
 	texirefs $(TEXT)
 

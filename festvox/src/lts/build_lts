@@ -85,7 +85,7 @@ then
       cp -p allowables.scm allowables.scm-old
    fi
 
-   $FESTIVAL --heap $HEAP -b "(require 'lts_build)" '(dump-lets-phones "lts_scratch/lex_entries.out")'
+   $FESTIVAL --heap $SIODHEAPSIZE -b "(require 'lts_build)" '(dump-lets-phones "lts_scratch/lex_entries.out")'
 
    $FESTVOXDIR/src/lts/make_allows >allowables.scm
 
@@ -100,7 +100,7 @@ then
       cp -p allowables.scm allowables.scm-old
    fi
 
-   $FESTIVAL --heap $HEAP -b "(require 'lts_build)" '(dump-lets-phones "lts_scratch/lex_entries.out")'
+   $FESTIVAL --heap $SIODHEAPSIZE -b "(require 'lts_build)" '(dump-lets-phones "lts_scratch/lex_entries.out")'
 
    $FESTVOXDIR/src/lts/make_allows-smt >allowables.scm
 
@@ -117,7 +117,7 @@ then
    fi
 
    echo Find probabilities of letter-phone pairs
-   $FESTIVAL -b --heap $HEAP allowables.scm '(begin
+   $FESTIVAL -b --heap $SIODHEAPSIZE allowables.scm '(begin
        (cummulate-pairs "lts_scratch/lex_entries.out")
        (save-table "lts_scratch/lex-") )'
    exit 0
@@ -128,10 +128,43 @@ if [ "$1" = "align" ]
 then
 
    echo Align letter-phone pairs with best path
-   $FESTIVAL -b --heap $HEAP allowables.scm lts_scratch/lex-pl-tablesp.scm '(begin
+   $FESTIVAL -b --heap $SIODHEAPSIZE allowables.scm lts_scratch/lex-pl-tablesp.scm '(begin
       (aligndata "lts_scratch/lex_entries.out" "lts_scratch/lex.align")
       (build-feat-file "lts_scratch/lex.align" "lts_scratch/lex.feats"))' |
       tee align.log
+   exit 0
+fi
+
+if [ "$1" = "align_p" ]
+then
+
+    echo Align letter-phone pairs with best path -- in parallel
+    numlines=`cat lts_scratch/lex_entries.out | awk 'END { printf("%d\n",(NR+6)/6)}'`
+    split --lines=$numlines lts_scratch/lex_entries.out lts_scratch/lex_entries.out.
+    for i in aa ab ac ad ae af 
+    do
+        echo lts_scratch/lex_entries.out.$i
+    done >all.cmd
+    cat all.cmd | xargs -n 1 -P 6 $0 align_part 1> align.log 2> align.log
+    cat lts_scratch/lex_entries.out.*.align >lts_scratch/lex.align
+
+    rm -f lts_scratch/lex.feats
+    for i in aa ab ac ad ae af 
+    do
+      $FESTIVAL -b --heap $SIODHEAPSIZE allowables.scm lts_scratch/lex-pl-tablesp.scm '(begin
+         (build-feat-file "lts_scratch/lex_entries.out.'$i'.align" "lts_scratch/lex.feats.part"))'
+      cat lts_scratch/lex.feats.part >>lts_scratch/lex.feats
+   done
+    exit 0
+fi
+
+if [ "$1" = "align_part" ]
+then
+    echo Align letter-phone pairs with best path -- part
+        
+   $FESTIVAL -b --heap $SIODHEAPSIZE allowables.scm lts_scratch/lex-pl-tablesp.scm '(begin
+      (aligndata "'$2'" "'$2.align'"))' |
+       tee align.log
    exit 0
 fi
 
@@ -139,7 +172,7 @@ if [ "$1" = "traintest" ]
 then
    echo "Split into training and test sets"
    $FESTVOXDIR/src/general/traintest lts_scratch/lex.align
-   $FESTIVAL -b --heap $HEAP allowables.scm lts_scratch/lex-pl-tablesp.scm '(begin
+   $FESTIVAL -b --heap $SIODHEAPSIZE allowables.scm lts_scratch/lex-pl-tablesp.scm '(begin
       (build-feat-file "lts_scratch/lex.align.train" "lts_scratch/lex.feats.train"))'
    exit 0
 fi
@@ -162,7 +195,7 @@ if [ "$1" = "merge" ]
 then
    echo Build complete model
    (cd lts_scratch;
-       $FESTIVAL -b --heap $HEAP ../allowables.scm '(begin
+       $FESTIVAL -b --heap $SIODHEAPSIZE ../allowables.scm '(begin
          (merge_models "lex_lts_rules" "lex_lts_rules.scm" allowables))')
    cp -p lts_scratch/lex_lts_rules.scm ./lex_lts_rules.scm
    exit 0
@@ -173,10 +206,10 @@ then
   echo Test model
   if [ -f lts_scratch/lex.align.test ]
   then
-     $FESTIVAL -b --heap $HEAP allowables.scm lts_scratch/lex_lts_rules.scm '(lts_testset "lts_scratch/lex.align.test" lex_lts_rules)' | tee lts_test.log
+     $FESTIVAL -b --heap $SIODHEAPSIZE allowables.scm lts_scratch/lex_lts_rules.scm '(lts_testset "lts_scratch/lex.align.test" lex_lts_rules)' | tee lts_test.log
      echo "with TEST set"
   else
-     $FESTIVAL -b --heap $HEAP allowables.scm lts_scratch/lex_lts_rules.scm '(lts_testset "lts_scratch/lex.align" lex_lts_rules)' | tee lts_test.log
+     $FESTIVAL -b --heap $SIODHEAPSIZE allowables.scm lts_scratch/lex_lts_rules.scm '(lts_testset "lts_scratch/lex.align" lex_lts_rules)' | tee lts_test.log
      echo "with ALL data -- no held out test set"
   fi
   exit 0

@@ -2,7 +2,7 @@
 ##                                                                       ##
 ##                   Carnegie Mellon University and                      ##
 ##                   Alan W Black and Kevin A. Lenzo                     ##
-##                      Copyright (c) 1998-2014                          ##
+##                      Copyright (c) 1998-2020                          ##
 ##                        All Rights Reserved.                           ##
 ##                                                                       ##
 ##  Permission is hereby granted, free of charge, to use and distribute  ##
@@ -33,7 +33,7 @@
 ##                                                                       ##
 ##  Authors: Alan W Black (awb@cs.cmu.edu)                               ##
 ##           Kevin A. Lenzo (lenzo@cs.cmu.edu)                           ##
-##  Version: festvox-2.7 January 2014                                    ##
+##  Version: festvox-2.8.2 July 2020                                     ##
 ##                                                                       ##
 ###########################################################################
 ##                                                                       ##
@@ -42,18 +42,19 @@
 ##                                                                       ##
 ##  This project's home page is http://www.festvox.org                   ##
 ##                                                                       ##
-##  This release corresponds to the Festival 2.4 release (which          ##
-##  incorporates Edinburgh Speech Tools 2.4)                             ##
+##  This release corresponds to the Festival 2.5 release (which          ##
+##  incorporates Edinburgh Speech Tools 2.5)                             ##
 ##                                                                       ##
 ###########################################################################
 TOP=.
 DIRNAME=.
 BUILD_DIRS = src 
-ALL_DIRS=config docbook festvox.org $(BUILD_DIRS)
+ALL_DIRS=config docbook $(BUILD_DIRS)
 CONFIG=configure configure.ac config.sub config.guess \
        missing install-sh mkinstalldirs
-OTHERS = README ACKNOWLEDGEMENTS 
-FILES = Makefile $(OTHERS) $(CONFIG)
+OTHERS = README.md ACKNOWLEDGEMENTS COPYING
+OTHERDIRS = voices # challenges
+FILES = Makefile $(OTHERS) $(CONFIG) $(OTHERDIRS)
 
 ALL = $(BUILD_DIRS)
 

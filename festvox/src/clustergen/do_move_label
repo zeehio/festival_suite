@@ -78,7 +78,7 @@ then
    else
       # Sometimes the passes fail, so only find those with a full line 
       # in the summary file (might not be robust enough -- but should help
-      bestpass=`awk '{if (NF == 10) print $0}' ml/summary | sort --key=6 -n | awk '{if (NR==1) print $2}'`
+      bestpass=`awk '{if (NF == 10) print $0}' ml/summary | sort --key=6 -g | awk '{if (NR==1) print $2}'`
    fi
 
    if [ ! -d ml/lab${bestpass} ]

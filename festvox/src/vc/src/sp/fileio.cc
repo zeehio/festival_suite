@@ -187,7 +187,10 @@ void freadshort(short *data, long length, int swap, FILE *fp)
     if (data == NULL) return;
     
     /* read file */
-    fread((char *)data, sizeof(short), (int)length, fp);
+    if (fread((char *)data, sizeof(short), (int)length, fp) != (unsigned int)length)
+    {
+        fprintf(stderr,"not enough shorts to read\n");
+    }
 
     if (swap) {
 	/* byte swap */
@@ -202,7 +205,10 @@ void freadlong(long *data, long length, int swap, FILE *fp)
     if (data == NULL) return;
     
     /* read file */
-    fread((char *)data, sizeof(long), (int)length, fp);
+    if (fread((char *)data, sizeof(long), (int)length, fp) != (unsigned int)length)
+    {
+        fprintf(stderr,"not enough longs to read\n");
+    }
 
     if (swap) {
 	/* byte swap */
@@ -217,7 +223,10 @@ void freadfloat(float *data, long length, int swap, FILE *fp)
     if (data == NULL) return;
     
     /* read file */
-    fread((char *)data, sizeof(float), (int)length, fp);
+    if (fread((char *)data, sizeof(float), (int)length, fp) != (unsigned int)length)
+    {
+        fprintf(stderr,"not enough floats to read\n");
+    }
 
     if (swap) {
 	/* byte swap */
@@ -232,7 +241,10 @@ void freaddouble(double *data, long length, int swap, FILE *fp)
     if (data == NULL) return;
     
     /* read file */
-    fread((char *)data, sizeof(double), (int)length, fp);
+    if (fread((char *)data, sizeof(double), (int)length, fp) != (unsigned int)length)
+    {
+        fprintf(stderr,"not enough doubles to read\n");
+    }
 
     if (swap) {
 	/* byte swap */
@@ -251,7 +263,10 @@ void freadshorttod(double *data, long length, int swap, FILE *fp)
 
     for (k = 0; k < length; k++) {
 	/* read file */
-	fread((char *)&value, sizeof(short), 1, fp);
+	if (fread((char *)&value, sizeof(short), 1, fp) != 1)
+        {
+            fprintf(stderr,"not enough short to read\n");
+        }
 	
 	if (swap) {
 	    /* byte swap */
@@ -283,11 +298,18 @@ void fwriteshort(short *data, long length, int swap, FILE *fp)
 	    swapshort(&value, 1);
 
 	    /* write file */
-	    fwrite((char *)&value, sizeof(short), 1, fp);
+	    if (fwrite((char *)&value, sizeof(short), 1, fp) != 1)
+            {
+                fprintf(stderr,"failed to write short\n");
+            }
+                
 	}
     } else {
 	/* write file */
-	fwrite((char *)data, sizeof(short), (int)length, fp);
+	if (fwrite((char *)data, sizeof(short), (int)length, fp)  != (unsigned int)length)
+        {
+            fprintf(stderr,"failed to write shorts\n");
+        }
     }
 
     return;
@@ -1957,7 +1979,8 @@ void check_dir(const char *file)
 	if (dir[k] == '/' && dir[k - 1] != '/') {
 	    dir[k + 1] = '\0';
 	    sprintf(tmp, "if [ ! -r %s ];then\n mkdir %s\n fi", dir, dir);
-	    system(tmp);
+	    if (system(tmp) != 0)
+                fprintf(stderr,"failed to make dir %s\n",dir);
 	}
     }
 

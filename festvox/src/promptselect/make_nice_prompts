@@ -155,7 +155,7 @@ then
          END {
             for (word in freq)
                 printf "%s\t%d\n", word, freq[word]
-         }' | sort --key=2 -nr >$DBNAME.wc
+         }' | sort --key=2 -gr >$DBNAME.wc
     echo "INFO Number of tokens "`cat $* | wc -w`
     echo "INFO Number of words "`cat $DBNAME.wc | wc -l`
     echo "INFO Occurrence of 1000th word "`cat $DBNAME.wc | awk '{if (NR==1000) print $0}'`
@@ -173,7 +173,7 @@ then
        cat $i
     done |
     awk '{for (i=1; i<=NF; i++)
-          printf("%s\n",$i);}' |
+          printf("%s\n",$i);}' | 
     grep -v "^'" |
     grep -v '"' |
     grep -v "'$" |
@@ -184,7 +184,7 @@ then
          END {
             for (word in freq)
                 printf "%s\t%d\n", word, freq[word]
-         }' | sort --key=2 -nr >$DBNAME.wc
+         }' | sort --key=2 -gr >$DBNAME.wc
     echo "INFO Number of tokens "`cat $* | wc -w`
     echo "INFO Number of words "`cat $DBNAME.wc | wc -l`
     echo "INFO Occurrence of 1000th word "`cat $DBNAME.wc | awk '{if (NR==1000) print $0}'`
@@ -202,6 +202,7 @@ then
    fi
    echo Building frequency lex for top $VOCAB words
    cat $DBNAME.wc |
+   sed 's/\\/\\\\/g;s/"/\\"/g' |
    awk -v count=$VOCAB 'BEGIN {t=0;}
      {if (t < count)
       {
@@ -244,6 +245,7 @@ then
    fi
    echo Building frequency lex for top $VOCAB words
    cat $DBNAME.wc |
+   sed 's/\\/\\\\/g;s/"/\\"/g' |
    awk -v count=$VOCAB 'BEGIN {t=0;}
      {if (t < count)
       {
@@ -274,10 +276,18 @@ then
    echo "Finding nice utterances in database"
    shift
    $FESTVOXDIR/src/promptselect/text2utts -upto 100000 -onlynice -eval $DBNAME.scm -dbname $DBNAME -o  $DBNAME"_nice.data" $*
+   $0 find_nice_asis_from_data $DBNAME"_nice.data"
+   exit
+fi
+
+if [ "$1" = "find_nice_asis_from_data" ]
+then
+   echo "Finding nice utterances in database"
+   shift
 
    # If the data has the same nice sentence multiple times it will appear
    # in X_nice.data multiple times, so we remove the duplcates.
-   cat $DBNAME"_nice.data" |
+   cat $* |
    awk '{ s="";
           for (i=3; i < NF; i++)
              s = sprintf("%s %s",s,$i);
@@ -432,7 +442,7 @@ then
      END {
          for (word in freq)
              printf "%s\t%d\n", word, freq[word]
-     }' | sort --key=2 -nr >$DBNAME.vocab
+     }' | sort --key=2 -gr >$DBNAME.vocab
     exit
 fi
 
@@ -448,7 +458,7 @@ then
      END {
          for (word in freq)
              printf "%s\t%d\n", word, freq[word]
-     }' | sort --key=2 -nr >$DBNAME.vocab
+     }' | sort --key=2 -gr >$DBNAME.vocab
     exit
 fi
 

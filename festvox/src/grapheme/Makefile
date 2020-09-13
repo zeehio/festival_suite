@@ -35,8 +35,9 @@
 ##                                                                       ##
 ##  Note the unicode_sampa_mapping.scm file is copyright UIUC under the  ##
 ##  apache license.  It provides a mapping for (many) unicode characters ##
-##  to sampa phonemes                                                    ##
-##                                                                       ##
+##  to sampa phonemes.  The original code can be found here              ##
+##  https://github.com/nltk/nltk_contrib/tree/master/nltk_contrib/scripttranscriber/Unitran
+##  
 ##  The sampa phonemes and phonetic features have random origins and     ##
 ##  not as good as they should be                                        ##
 ##                                                                       ##
@@ -44,7 +45,7 @@
 TOP=../..
 DIRNAME=src/grapheme
 SCHEMEFILES = grapheme_unicode.scm unicode_sampa_mapping.scm
-SCRIPTS = make_cg_grapheme build_cg_grapheme_voice
+SCRIPTS = make_cg_grapheme build_cg_grapheme_voice latin_norm
 OTHERS = sampa.top sampa.table sampa.bottom
 MAINS = 
 

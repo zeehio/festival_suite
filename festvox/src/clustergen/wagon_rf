@@ -95,6 +95,16 @@ while read i
 do
    echo Iteration $i $WGN_treev
    SSEED=`cat $WD/seed`
+   RRR=40
+   if [ -f rrr ]
+   then
+      RRR=`cat rrr`
+   fi
+   RRF=40
+   if [ -f rrf ]
+   then
+      RRF=`cat rrf`
+   fi
    # make random description file
    # Keep first two features always
    cat $WD/desc.base |
@@ -108,7 +118,7 @@ do
          else if (substr($0,1,1) == "(")
          {
             p = randint(100);
-            if (p < 40)
+            if (p < '$RRR')
             {
                printf("%s %s ignore ",$1,$2);
                for (i=3; i<=NF; i++)
@@ -122,6 +132,25 @@ do
             print $0
         }' >$WD/desc.$i
 
+   echo $WGN_TFV | sed 's/-/ /' |
+   awk 'BEGIN {for (i=1;i<'$SSEED'; i++)
+                      randint(10)}
+        function randint(n) { return int(n * rand()) }
+        {for (i=$1; i<=$2; i++)
+         {
+            p = randint(100);
+            if (p > '$RRF')
+            {
+               printf("%d ",i);
+            }
+         }
+         printf("\n");}' |
+   awk '{for (i=1; i<NF; i++)
+            printf("%d,",$i);
+         printf("%d",$NF);}' >$WD/feats.$i
+#   echo $RRF | awk '{printf("1-50,%s",$1)}' >$WD/feats.$i
+   NEW_WGN_TFV=`cat $WD/feats.$i`
+
    echo $SSEED |
    awk 'function randint(n) { return int(n * rand()) }
         {for (i=1;i<$1; i++)
@@ -129,7 +158,7 @@ do
          print n}' >$WD/seed
 
     # Build a tree (note we don't use our $WD/data.test.$i here yet)
-    $WAGON $WGN_TF $WGN_TFV $WGN_VO $WGN_VOV $WGN_desc $WD/desc.$i $WGN_data $WD/data $WGN_test $WD/data $WGN_bal $WGN_balv $WGN_track $WGN_trackv $WGN_stop $WGN_stopv $WGN_tree $WD/tree.$i
+    $WAGON $WGN_TF $NEW_WGN_TFV $WGN_VO $WGN_VOV $WGN_desc $WD/desc.$i $WGN_data $WD/data $WGN_test $WD/data $WGN_bal $WGN_balv $WGN_track $WGN_trackv $WGN_stop $WGN_stopv $WGN_tree $WD/tree.$i
 
     if [ ! -d rf_models/trees_$i ]
     then

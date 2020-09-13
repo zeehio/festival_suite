@@ -78,6 +78,8 @@ MODELNAME=$FV_VOICENAME
 VOICENAME="(voice_"$FV_VOICENAME"_cg)"
 VOICESCM=${3:-festvox/${MODELNAME}_cg.scm}
 
+NUM_CPUS=`./bin/find_num_available_cpu`
+OMP="-omp_nthreads ${NUM_CPUS}"
 DURMEANSTD=$ESTDIR/../festival/examples/durmeanstd
 DUMPFEATS=$ESTDIR/../festival/examples/dumpfeats
 WAGON=$ESTDIR/bin/wagon
@@ -131,7 +133,7 @@ PREF=dur
 
 (
 echo ";;; Build the duration model itself"
-$WAGON -data festival/dur/data/dur.data.train.train -desc festival/dur/etc/dur.desc -test festival/dur/data/dur.data.train.test -stop $STOP -output festival/dur/tree/$PREF.S$STOP.tree || exit -1
+$WAGON $OMP -data festival/dur/data/dur.data.train.train -desc festival/dur/etc/dur.desc -test festival/dur/data/dur.data.train.test -stop $STOP -output festival/dur/tree/$PREF.S$STOP.tree || exit -1
 
 echo ";;; Test the duration model"
 $WAGON_TEST -heap $HEAPSIZE -data festival/dur/data/dur.data.test -desc festival/dur/etc/dur.desc -tree festival/dur/tree/$PREF.S$STOP.tree ) |

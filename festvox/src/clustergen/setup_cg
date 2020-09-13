@@ -60,18 +60,38 @@ fi
 if [ $# = 0 ]
 then
     echo "Build dirs, and setup scripts and scm files for a clustergen voice "
-    echo "Usage: setup_clustergen INST LANG VOX [DATASET]"
+    echo "Usage: setup_cg INST LANG VOX"
     echo "INST is the institute building the language, e.g. cmu, cstr, ogi"
     echo "     if there isn't an appropriate institute use, net."
-    echo "LANG is the language, e.g. us, fr etc"
+    echo "LANG is the language, e.g. us, indic, grapheme, fr etc"
     echo "SPEAKER is speaker/style identifier e.g kal, awb, golem"
-    echo "DATASET (optional) the name of a prompt list e.g. uniphone, timit"
+    echo "You can extend the VOX with a dataset e.g. awb_arctic"
+    echo "Arguments must match \"^[A-Za-z][A-Za-z0-9_]*\$\""
     exit 1
 fi
 
 FV_INST=$1
 FV_LANG=$2
 FV_VOX=$3
+
+check=`echo $FV_INST | grep "^[A-Za-z][A-Za-z0-9_]*$"`
+if [ "$check" = "" ]
+then
+    echo "Invalid INST name, not matching \"^[A-Za-z][A-Za-z0-9_]*\$\""
+    exit 1
+fi
+check=`echo $FV_LANG | grep "^[A-Za-z][A-Za-z0-9_]*$"`
+if [ "$check" = "" ]
+then
+    echo "Invalid LANG name, not matching \"^[A-Za-z][A-Za-z0-9_]*\$\""
+    exit 1
+fi
+check=`echo $FV_VOX | grep "^[A-Za-z][A-Za-z0-9_]*$"`
+if [ "$check" = "" ]
+then
+    echo "Invalid VOX name, not matching \"^[A-Za-z][A-Za-z0-9_]*\$\""
+    exit 1
+fi
 
 if [ ! -f festvox/build_clunits.scm ]
 then
@@ -135,6 +155,7 @@ cp -p $CLUSTERGENDIR/make_dur_model_mcep bin
 cp -p $CLUSTERGENDIR/make_dur_model_mcep_rf bin
 cp -p $CLUSTERGENDIR/build_rfs bin
 cp -p $CLUSTERGENDIR/wagon_rf bin
+cp -p $CLUSTERGENDIR/wagon_rf_f0 bin
 cp -p $CLUSTERGENDIR/rf_post_build bin
 cp -p $CLUSTERGENDIR/build_cg_voice bin
 cp -p $CLUSTERGENDIR/build_cg_rfs_voice bin

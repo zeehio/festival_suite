@@ -77,11 +77,15 @@ Basic lexicon should (must ?) have basic letters, symbols and punctuation."
   "(INST_LANG_VOX::select_lexicon)
 Set up the lexicon for INST_LANG."
   (lex.select "cmu_indic")
-  (INST_LANG_addenda))
+  (INST_LANG_addenda)
+  (set! INST_LANG_VOX_old_lex:use_eng_share lex:use_eng_share)
+  (set! lex:use_eng_share "0") ;; set to one if DB includes English acoustics
+)
 
 (define (INST_LANG_VOX::reset_lexicon)
   "(INST_LANG_VOX::reset_lexicon)
 Reset lexicon information."
+  (set! lex:use_eng_share INST_LANG_VOX_old_lex:use_eng_share)
   t)
 
 (provide 'INST_LANG_VOX_lexicon)

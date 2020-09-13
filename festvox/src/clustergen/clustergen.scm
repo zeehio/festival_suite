@@ -75,18 +75,33 @@
 (defvar cg:deltas t)
 (defvar cg:debug nil)
 (defvar cg:save_param_track nil)
+(defvar cg:expand_dynamic_features nil) ;; explicitly add ph_* lisp_* features
+(defvar cg:save_dumped_coeff_files nil) ;; don't delete festival/coeffs/*
 
 (set! cg:multimodel nil)  ;; probably doesn't work any more!
 (set! cg:mcep_clustersize 50)
+(set! cg:f0_clustersize 200)
 (set! cg:rfs nil) ;; random forests, set this to 20 to get 20 rfs
 (defvar cg:rfs_models nil)  ;; will get loaded at synthesis time
 (set! cg:rfs_dur nil) ;; random forests for duration
 (defvar cg:rfs_dur_models nil)  ;; will get loaded at synthesis time
+(defvar cg:rfs_prune_stats nil) ;; t to print out senome usage stats
 (defvar cg:gmm_transform nil)
-(set! cg:mixed_excitation nil)
+(set! cg:mixed_excitation nil)  ;; t if ccoeffs contain 5 strength features
 (set! cg:spamf0 nil)
 (set! cg:spamf0_viterbi nil)
 (set! cg:vuv_predict_dump nil)
+;; Can be used for external prediction models
+(set! cg:post_filter nil)
+(set! cg:post_filter_script_name "./bin/post_filter")
+
+(defvar cg:world nil) ; World vocoder (Experimental, not yet stable)
+(if cg:world
+    (begin
+      (set! mcep_length 60)
+      (set! cg:mixed_excitation t)
+      (set! cg:mlpg t)
+      (set! cg:deltas t)))
 
 (defvar me_filter_track nil)
 (defvar lpf_track nil)
@@ -99,6 +114,9 @@
 
 (if cg:spamf0
     (require 'spamf0))
+
+(if cg:post_filter
+    (set! post_filter_feats (mapcar car (cdr (car (load "festival/clunits/mcep.desc" t))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -117,6 +135,10 @@
     ;; Predict number of frames
     (ClusterGen_make_mcep utt) ;; durations for # of vectors
     ;; Then predict the frame values
+
+    (if cg:expand_dynamic_features
+        (ClusterGen_expand_dynamic_features utt))
+
     (if (assoc 'cg::trajectory clustergen_mcep_trees)
         (ClusterGen_predict_trajectory utt) ;; predict trajectory (or ola)
         (ClusterGen_predict_mcep utt) ;; predict vector types
@@ -139,6 +161,123 @@
 
     (apply_hooks cluster_synth_post_hooks utt)
     utt
+)
+
+;; Knowledge-free structural dynamic features
+(define (edf_num_prev i)
+  (let ((p (item.prev i)))
+    (if (null p)
+        0
+        (+ 1 (edf_num_prev p)))))
+(define (edf_num_next i)
+  (let ((n (item.next i)))
+    (if (null n)
+        0
+        (+ 1 (edf_num_next n)))))
+(define (edf_position i)
+  (let ((ps (edf_num_prev i)))
+    (/ (+ 1 ps)
+       ;; Ensure we never get 0                                                 
+       (+ 1 ps (edf_num_next i)))))
+(define (edf_parents_daughters i)
+  (if (null (item.parent i))
+     0
+     (edf_num_descendant (item.parent i))))
+(define (edf_dtype 1)
+  (if (null (item.next i))
+      (if (null (item.prev i))
+         's
+         'b)
+      (if (null (item.prev i))
+         'e
+         'm)))
+(define (edf_num_ancestor i)
+  (if (item.parent i)
+      0
+      (+ 1 (edf_num_ancestor (item.parent i)))))
+(define (edf_num_descendant i)
+  (if (item.daughtern i)
+      0
+      (+ 1 (edf_num_descendant (item.daughtern i)))))
+(define (edf_ancestor_position i)
+  (/ (+ 1 (edf_num_ancestor))
+     ;; Ensure we never get 0
+     (+ 1 (edf_num_ancestor i) (edf_num_descendant i))))
+(define (edf_num_daughters i)
+  (length (item.daughters i)))
+;;(define (edf_prevparent_equal_parentprev i)
+;;  (if (and (item.parent i)
+;;           (
+
+
+;; previous parent equal parent previous
+
+(define (ClusterGen_expand_dynamic_features utt)
+  "(ClusterGen_expand_dynamic_features utt) 
+For arbitrary downstream machine learning (and other reasons)
+sometimes you want features to be explicitly present as local
+features/values on the items.  This does this -- yes it might not be
+the most efficient technique but it can make some things easier).
+This first implementation however does this naively, it gets the
+value from the feature at this point in the process, later changes could
+potentially affect the dynamic features so they will not get appropriate
+updated -- but this comment will be ignored by everyone until I point them
+at it."
+  (mapcar
+   (lambda (seg)
+     ;; The phonetic features
+     (mapcar 
+      (lambda (phf)
+        (item.set_feat seg (format nil "ph_%s" phf)
+                  (item.feat seg (format nil "ph_%s" phf))))
+      ;; Should be got automatically from the phoneme set 
+      '(vc vlng vheight vfront vrnd ctype cplace cvox))
+     t)
+   (utt.relation.items utt 'Segment))
+
+  ;; Others 
+  (mapcar
+   (lambda (word)
+     (item.set_feat word "gpos" (item.feat word "gpos")))
+   (utt.relation.items utt 'Word))
+  (mapcar
+   (lambda (syl)
+     (item.set_feat syl "lisp_cg_break" (item.feat syl "lisp_cg_break"))
+     (item.set_feat syl "position_type" (item.feat syl "position_type"))
+     )
+   (utt.relation.items utt 'Syllable))
+  (mapcar
+   (lambda (m)
+     (mapcar 
+      (lambda (f) (item.set_feat m f (item.feat m f)))
+      '(lisp_cg_phone_place
+        lisp_cg_state_index
+        lisp_cg_phone_rindex
+        lisp_cg_phone_index
+        lisp_cg_state_rindex
+        lisp_cg_position_in_phrasep
+        lisp_cg_state_place
+        lisp_cg_position_in_phrase)))
+   (utt.relation.items utt 'mcep))
+
+  (mapcar 
+   (lambda (r)
+     (mapcar
+      (lambda (i)
+        (mapcar
+         (lambda (f) 
+           (item.set_feat i (format nil "R_%s_%s" r f)
+                          (item.feat i (format nil "lisp_%s" f))))
+         '(edf_num_prev
+           edf_num_next
+           edf_position
+           edf_num_daughters
+           edf_parents_daughters
+           edf_dtype)))
+      (utt.relation.items utt r)))
+   (utt.relationnames utt))
+
+  utt
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -408,6 +547,66 @@
 ;; experimental
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (mcep_24 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   24))
+(define (mcep_23 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   23))
+(define (mcep_22 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   22))
+(define (mcep_21 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   21))
+(define (mcep_20 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   20))
+(define (mcep_19 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   19))
+(define (mcep_18 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   18))
+(define (mcep_17 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   17))
+(define (mcep_16 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   16))
+(define (mcep_15 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   15))
+(define (mcep_14 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   14))
+(define (mcep_13 i)
+  (track.get
+   (utt.feat (item.get_utt i) "param_track")
+   (item.feat i "frame_number")
+   13))
 (define (mcep_12 i)
   (track.get
    (utt.feat (item.get_utt i) "param_track")
@@ -561,6 +760,11 @@
 
 (define (cg_utt_fileid i)
   (utt.feat (item.get_utt i) "fileid"))
+
+(define (cg_utt_speaker i)
+  ;; Will only work with spk_arctic_.... fileids 
+  (string-before (utt.feat (item.get_utt i) "fileid") "_")
+)
 
 (define (cg_position_in_sentenceX x)
   (/ (item.feat x "R:mcep_link.parent.end")
@@ -933,6 +1137,28 @@ Filter synthesized voice with transformation filter and reload waveform."
 )
 (set! cg_F0_interpolate cg_F0_interpolate_spline)
 
+(define (world_postfix utt pt)
+  "(world_postfix utt param_track)
+Do voicing fixes, and attenuate the excitation params."
+  (format t "world_postfix\n")
+  (set! f 0)
+  (mapcar
+   (lambda (m)
+     (if (or (not (ClusterGen_voicing_v m))
+             (< (track.get pt f 0) 50.0))
+         (track.set pt f 0 0.0))
+     (if (equal? 0.0 (track.get pt f 0))
+         (begin
+           (track.set pt f (+ 2 (* 2 2 mcep_length) 2) 0.0)
+           (track.set pt f (+ 2 (* 2 2 mcep_length) 4) 0.0)
+           (track.set pt f (+ 2 (* 2 2 mcep_length) 6) 0.0)
+           (track.set pt f (+ 2 (* 2 2 mcep_length) 8) 0.0)))
+     (set! f (+ f 1))
+     )
+   (utt.relation.items utt 'mcep))
+  t
+  )
+
 (define (ClusterGen_predict_mcep utt)
   (let ((param_track nil)
         (frame_advance cg:frame_shift)
@@ -952,24 +1178,22 @@ Filter synthesized voice with transformation filter and reload waveform."
     (mapcar
      (lambda (mcep)
        ;; Predict mcep frame
+       (set! mcep_name (item.feat mcep cg_name_feature))
        (let ((mcep_tree 
-              (assoc_string 
-               (item.feat mcep cg_name_feature) 
-               clustergen_mcep_trees))
+              (assoc_string mcep_name clustergen_mcep_trees))
              (mcep_tree_delta
-              (assoc_string 
-               (item.feat mcep cg_name_feature) 
+              (assoc_string mcep_name
                (if cg:multimodel
                    clustergen_delta_mcep_trees nil)))
              (mcep_tree_str
               (assoc_string
-               (item.feat mcep cg_name_feature)
+               mcep_name
                (if (boundp 'clustergen_str_mcep_trees)
                    clustergen_str_mcep_trees nil)))
              (f0_tree 
               (assoc_string 
 ;               "all"
-               (item.feat mcep cg_name_feature) 
+               mcep_name
                clustergen_f0_trees))
 )
          (if (null mcep_tree)
@@ -981,6 +1205,17 @@ Filter synthesized voice with transformation filter and reload waveform."
                      (wagon mcep (cadr f0_tree))
 ;                     (list 1.0 (cg_all_f0 mcep))
                      )
+
+               (if cg:rfs
+                   (set! f0_val
+                         (list 'filler
+                         (/ (apply +  ;; average f0 val over the models
+                           (mapcar
+                            (lambda (trees)
+                              (cadr (wagon mcep
+                                     (cadr (assoc_string mcep_name trees)))))
+                            cg:rfs_f0_models))
+                          (length cg:rfs_f0_models)))))
                (track.set param_track i 0 (cadr f0_val))
 
                ;; MCEP prediction
@@ -994,12 +1229,16 @@ Filter synthesized voice with transformation filter and reload waveform."
                    (set! rfs_info
                          (mapcar
                           (lambda (rf_model)
-                            (list (cadr rf_model) 
-                                  (car (wagon 
+                            (set! frame 
+                                  (wagon 
                                         mcep
                                         (cadr (assoc_string 
                                                (item.feat mcep cg_name_feature)
-                                               (car rf_model)))))))
+                                               (car rf_model)))))
+                            (if cg:rfs_prune_stats
+                                (format t "cg_prune %02d_%04d\n"
+                                        (car (cddr rf_model)) (car frame)))
+                            (list (cadr rf_model) (car frame)))
                           cg:rfs_models)))
                (if cg:multimodel
                    (track.set param_track i 0 
@@ -1067,25 +1306,32 @@ Filter synthesized voice with transformation filter and reload waveform."
           (+ cg:initial_frame_offset (* i frame_advance)))
          (set! i (+ 1 i))))
      (utt.relation.items utt 'mcep))
+    
+    (if cg:F0_interpolate (cg_F0_interpolate utt param_track))
+
+    (if cg:world
+        (world_postfix utt param_track)) ;; fix some voicing things 
 
     (if cg:mixed_excitation
         (let ((nf (track.num_frames param_track))
-              (f 0) (c 0))
+              (f 0) (c 0)
+              (vpos (- (track.num_channels param_track) 2)))
           (set! str_params (track.resize nil nf 5))
           (set! f 0)
           (while (< f nf)
              (track.set_time str_params f (track.get_time param_track f)) 
              (set! c 0)
              (while (< c 5)
-              (track.set str_params f c 
-                         (track.get param_track f (* 2 (+ c 
+                (track.set
+                 str_params f c 
+                 (track.get param_track f
+                            (* (if cg:mlpg 2 1)
+                               (+ c 
 							  (+ 1 (* 2 mcep_length))  ; after all mcep and deltas
 							  ))))
               (set! c (+ 1 c)))
              (set! f (+ 1 f)))
           (utt.set_feat utt "str_params" str_params)))
-
-    (if cg:F0_interpolate (cg_F0_interpolate utt param_track))
 
     (if (or cg:vuv cg:with_v)
            ;; need to get rid of the vuv coefficient (last one)
@@ -1102,6 +1348,36 @@ Filter synthesized voice with transformation filter and reload waveform."
              (set! f (+ 1 f)))
           (set! param_track nnn_track)
           ))
+
+    ;; Post Filter (or cart replacement)
+    (if cg:post_filter
+        (let ((params_file (make_tmp_filename))
+              (feats_file (make_tmp_filename))
+              (new_params_file (make_tmp_filename)))
+          (format t "in post_filter\n")
+          (track.save param_track params_file)
+          (set! fffd (fopen feats_file "w"))
+          (mapcar
+           (lambda (m)
+             (mapcar
+              (lambda (f)
+                (format fffd "%s " (item.feat m f)))
+              post_filter_feats)
+             (format fffd "\n"))
+           (utt.relation.items utt 'mcep))
+          (fclose fffd)
+          (system 
+           (format nil "%s %s %s %s\n"
+                   cg:post_filter_script_name
+                   params_file
+                   feats_file
+                   new_params_file))
+          (set! new_param_track (track.load new_params_file))
+          (utt.set_feat utt "param_track" new_param_track)
+          (set! param_track new_param_track)
+          (delete-file params_file)
+          (delete-file feats_file)
+          (delete-file new_params_file)))
     ;; MLPG
     (if cg:mlpg  ;; assume cg:deltas too
           (let ((nf (track.num_frames param_track))
@@ -1120,13 +1396,36 @@ Filter synthesized voice with transformation filter and reload waveform."
             (set! new_param_track (cg_do_mlpg param_track))
             (utt.set_feat utt "param_track" new_param_track)
             (set! param_track new_param_track)))
+    (if cg:world  ;; we've extracted the str params, so put them back
+        (begin
+          (let ((nf (track.num_frames param_track))
+                (nc (track.num_channels param_track))
+                (f 0) (c 0) (i 0))
+            (set! nnn_track (track.resize nil nf (+ nc 5 1)))
+            (while (< f nf)
+               (track.set_time nnn_track f (track.get_time param_track f)) 
+               (set! c 0)
+               (while (< c nc)
+                  (track.set nnn_track f c (track.get param_track f c))
+                  (set! c (+ 1 c)))
+               (set! i 0)
+               (while (< i 5)
+                  (track.set nnn_track f c (track.get str_params f i))
+                  (set! i (+ i 1))
+                  (set! c (+ 1 c)))
+               (track.set nnn_track f c 0) ;; fake "voicing flag"
+               (set! f (+ 1 f)))
+            (set! param_track nnn_track)
+            (utt.set_feat utt "param_track" param_track))))
     (if (and (not cg:mlpg) cg:deltas)
         (begin   ;; have to reduce param_track to remove deltas
           (set! new_param_track 
                 (track.resize 
                  param_track
                  (track.num_frames param_track)
-                 26)) ;; not very portable
+                 (if cg:world
+                     (track.num_channels param_track)
+                     26))) ;; not very portable
           (utt.set_feat utt "param_track" new_param_track)
           (set! param_track new_param_track)))
     
@@ -1594,6 +1893,19 @@ Add trajectory to daughters of state, interpolating as necessary."
 
 ; (require 'hsm_cg)
 
+(define (cg_wave_synth_world utt)
+  (let ((trackname (make_tmp_filename))
+        (wavename (make_tmp_filename))
+        )
+    (track.save (utt.feat utt "param_track") trackname "est")
+    (system
+     (format nil "$FESTVOXDIR/src/clustergen/cg_resynth_world %s %s"
+             trackname wavename))
+    (utt.import.wave utt wavename)
+    (delete-file trackname)
+    (delete-file wavename)
+    utt))
+
 (define (cg_wave_synth_deltas utt)
   ;; before we had it built-in to Festival
   (let ((trackname (make_tmp_filename))
@@ -1609,6 +1921,9 @@ Add trajectory to daughters of state, interpolating as necessary."
     utt)
 )
 (set! cluster_synth_method cg_wave_synth)
+(if cg:world
+    (set! cluster_synth_method cg_wave_synth_world))
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -131,7 +131,7 @@ do
 #  $ESTDIR/bin/pitchmark -o pm_unfilled/$fname.pm -otype est $PM_ARGS $F0_ARGS
 
   $ESPS_BASE/bin/get_f0 -i 0.005 wav/$fname.wav f0_get_f0/$fname.f0
-  ch_track -c "0 1" -otype ssff f0_get_f0/$fname.f0 -o f0_get_f0/$fname.f0
+  $ESTDIR/bin/ch_track -c "0 1" -otype ssff f0_get_f0/$fname.f0 -o f0_get_f0/$fname.f0
 
   $FESTVOXDIR/src/general/smooth_f0 -o f0/$fname.f0 f0_get_f0/$fname.f0 -otype ssff -lab lab/$fname.lab -silences $SILENCE  -interpolate -postsmooth -postwindow 0.025
 

@@ -81,6 +81,7 @@ then
    echo or
    echo '   csh% setenv ESTDIR /home/awb/projects/speech_tools/'
    exit 1
+
 fi
 
 if [ ! "$FESTVOXDIR" ]
@@ -141,7 +142,7 @@ do
    SEED=`grep "^SEED" $DATASET.split | awk '{print $2}'`
 
    # Use the TRAIN set to build a model
-   ./bin/do_clustergen cluster $DATASET.train
+   ./bin/do_clustergen parallel cluster $DATASET.train
    # test on the TEST set
    SCORE=`$FESTVOXDIR/src/clustergen/cg_test mcdf0 cv $DATASET.test | grep MCD | awk '{print $3}'`
 
@@ -150,7 +151,7 @@ do
 #   awk '{printf("%s %f %d\n",$2,20.0-'$SCORE','$x')}' >>$DATASET.scores
    cat $DATASET.train | 
    awk '{printf("%s %f %d\n",$2,'$SCORE','$x')}' >>$DATASET.scores
-
+   cp -pr $DATASET.scores.$x
 done
 
 # new line
@@ -165,7 +166,7 @@ awk '{ if ($2 != "nan")
        }
      }
     END { for (i in count)
-              printf("%f %s\n",sum[i]/count[i],i);
+              printf("%f %s %d\n",sum[i]/count[i],i,count[i]);
         }' | sort -n >$DATASET.order
 
 exit

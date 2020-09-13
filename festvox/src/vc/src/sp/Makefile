@@ -66,5 +66,5 @@ include $(ESTDIR)/config/rules/compile_options.mak
 
 
 ../lib/libsp.a: $(OBJS)
-	$(AR) cruv ../lib/libsp.a $(OBJS)
+	$(AR) crv ../lib/libsp.a $(OBJS)
 	$(RANLIB) ../lib/libsp.a

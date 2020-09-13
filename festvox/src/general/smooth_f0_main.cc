@@ -140,11 +140,11 @@ int main(int argc,char **argv)
 	{
 	    r->load(al.val("-lab"));
 	    // If labels go passed end of F0 (common for PM based F0 files)
-  	    if (r->last()->F("end") > f0_in.end())
+  	    if (r->rlast()->F("end") > f0_in.end())
   	    {
   		int cn = f0_in.num_frames();
   		f0_in.resize(
-  		    (int)(cn-1+((r->last()->F("end")-f0_in.end())/f0_in.shift())),
+  		    (int)(cn-1+((r->rlast()->F("end")-f0_in.end())/f0_in.shift())),
   		    f0_in.num_channels());
   		f0_in.fill_time(f0_in.shift());
   		for (i=cn; i<f0_in.num_frames(); i++)
@@ -154,8 +154,8 @@ int main(int argc,char **argv)
   		}
   	    }
 	}
-	if ((r->last() == 0) ||
-	    (r->last()->F("end") < f0_in.end()))
+	if ((r->rlast() == 0) ||
+	    (r->rlast()->F("end") < f0_in.end()))
 	{
 	    item = r->append(0);
 	    item->set("name","something"); // fake name
@@ -168,7 +168,7 @@ int main(int argc,char **argv)
 	{
 	    while (item && (item->F("end") < spsil.t(i)))
 	    {
-		item = item->next();
+		item = inext(item);
 	    }
 	    if ((item == 0) ||
 		(item->name() == silences) ||

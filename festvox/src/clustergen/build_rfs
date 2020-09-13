@@ -262,6 +262,7 @@ then
    $0 test_dur_rfs_set mlist_dur
 
    rm -rf mlist_dur.x mlist_dur.x.score mlist_dur mlist_dur.best mlist_dur.score
+   exit 0
 
 fi
 
@@ -327,7 +328,9 @@ then
    cat mlist
    # $0 test_dur_rfs_set mlist
 
-   rm -rf mlist mlist.best mlist.best.score mlist.x mlist.x.score
+   rm -rf mlist.best mlist.best.score mlist.x mlist.x.score
+   exit 0
+
 fi
 
 if [ $1 = "minimize_rfs_mcep_3" ]
@@ -393,7 +396,75 @@ then
    # $0 test_dur_rfs_set mlist
   
    rm -rf mlist mlist.best mlist.better mlist.better.score mlist.x.score mlist.better.x
+   exit 0
 
+fi
+
+if [ $1 = "minimize_rfs_f0_3" ]
+then 
+   # Find smallest set of F0 models
+   # find best (rather than remove worst) (but it gives the same result)
+   # Stop when you've found the best 3 
+
+   echo 1 20 | awk '{for (i=1; i<=$2; i++)
+                            printf("%02d ",i);
+                         printf("\n")}' >mlistf0.list
+
+   head -50 etc/txt.done.data.test >etc/50.data.test
+   rm -rf mlistf0.betters
+   rm -rf mlistf0
+   rm -rf mlistf0.best
+   rm -rf mlistf0.best.all
+   touch mlistf0.best
+   for i in 1 2 3
+   do
+     rm -rf mlistf0.better.score
+     for j in `cat mlistf0.list`
+     do
+        printf "$j " >mlistf0
+        cat mlistf0.best >>mlistf0
+        cp -pr mlistf0 rf_models/mlistf0
+        rm -rf test/all
+        ./bin/do_clustergen parallel utt_by_utt_mcd etc/50.data.test 
+        rm -rf test/cgp_rf_${i}; mv test/all test/cgp_rf_${i}
+        grep "^F0" test/cgp_rf_${i}/*.scores |
+        awk '{m+=$3; s+=$5; v+=$7; n+=$9} 
+             END {printf("F0   mean %f std %f var %f n %d\n",m/NR,s/NR,v/NR,n);}' >test/cgp_rf_${i}/scores
+        cp -pr mlistf0 test/cgp_rf_${i}
+        cp -pr test/cgp_rf_${i}/scores mlistf0.x.score
+
+        if [ ! -f mlistf0.better.score ]
+        then
+           cp -pr mlistf0 mlistf0.better
+           cp -pr mlistf0.x.score mlistf0.better.score
+           echo $j >mlistf0.better.x
+        fi
+        bbb=`grep "F0" mlistf0.better.score | awk '{print $3}'`
+        xxx=`grep "F0" mlistf0.x.score | awk '{print $3}'`
+        better=`echo $bbb $xxx | awk '{if ($2 < $1) print 1; else print 0}'` 
+#        echo "   "$bbb $xxx $better 
+        if [ "$better" = "1" ]
+        then
+           cp -pr mlistf0 mlistf0.better
+           cp -pr mlistf0.x.score mlistf0.better.score
+           echo $j >mlistf0.better.x
+        fi
+     done
+     k=`cat mlistf0.better.x`
+     cat mlistf0.list | sed 's/'$k'//' | sed 's/  / /' >mlistf0.list.new
+     mv mlistf0.list.new mlistf0.list
+     cat mlistf0.better >>mlistf0.best.all
+     cat mlistf0.better.score >>mlistf0.best.all
+     cp -pr mlistf0.better mlistf0.best
+   done
+
+   # The best(greedily) single model
+   # cat mlistf0
+   # $0 test_dur_rfs_set mlistf0
+  
+   rm -rf mlistf0 mlistf0.best mlistf0.better mlistf0.better.score mlistf0.x.score mlistf0.better.x
+
+   exit 0
 fi
 
 

@@ -125,17 +125,19 @@ int main(int argc, char** argv) {
     exit(-1);
   }
 
-  if (fscanf(wavelist_file, "NoOfFiles: %d", &num_utts) != 1) {
-	  printf("Error reading %s\n", wavelist_filename);
-	  exit(-1);
+  if (fscanf(wavelist_file, "NoOfFiles: %d", &num_utts) != 1)
+  {
+      fprintf(stderr, "Can't read NoOfFiles\n");
+      exit(1);
   }
 
   // Build Utterance ID list by reading the items in wavelist_file
   utt_id_list = new char*[num_utts];
   for (int i = 0; i < num_utts; i++) {
-    if (fscanf(wavelist_file, "%s", tmp) != 1) {
-	  printf("Error reading %s\n", wavelist_filename);
-	  exit(-1);
+      if (fscanf(wavelist_file, "%s", tmp) != 1)
+      {
+          fprintf(stderr, "Can't read wavelist file name\n");
+          exit(1);
 	}
     utt_id_list[i] = new char[strlen(tmp)+1];
     snprintf(utt_id_list[i], strlen(tmp)+1, "%s", tmp);
@@ -214,13 +216,15 @@ void CalculateFeatureMeansAndVariances(const char** utt_id_list, int num_utts,
       perror("Could not open Feature file");
       exit(-1);
     }
-    if (fread(&utt_num_rows, sizeof(utt_num_rows), 1, utt_feat_file) != 1) {
-		printf("Read error");
-		exit(-1);
+    if (fread(&utt_num_rows, sizeof(utt_num_rows), 1, utt_feat_file) != 1)
+    {
+        fprintf(stderr, "Can't read num_rows\n");
+        exit(1);
 	}
-    if (fread(&utt_num_cols, sizeof(utt_num_cols), 1, utt_feat_file) != 1) {
-		printf("Read error");
-		exit(-1);
+    if (fread(&utt_num_cols, sizeof(utt_num_cols), 1, utt_feat_file) != 1)
+    {
+        fprintf(stderr, "Can't read num_cols\n");
+        exit(1);
 	}
 
     if (i == 0) {
@@ -234,10 +238,12 @@ void CalculateFeatureMeansAndVariances(const char** utt_id_list, int num_utts,
       datarow = new double[utt_num_cols];
     }
 
-    for (int row = 0; row < utt_num_rows; row++) {
-      if (fread(datarow, sizeof(datarow[0]), utt_num_cols, utt_feat_file) != 1) {
-		printf("Read error");
-		exit(-1);
+    for (int row = 0; row < utt_num_rows; row++)
+    {
+        if (fread(datarow, sizeof(datarow[0]), utt_num_cols, utt_feat_file) != (unsigned int)utt_num_cols)
+        {
+            fprintf(stderr, "Can't read enouhg cols\n");
+            exit(1);
 	}
       total_num_rows++;
       for (int col = 0; col < utt_num_cols; col++) {
@@ -302,13 +308,15 @@ void GenerateScaledFeatureFile(const char* utt_id,
   }
 
   // File Header
-  if (fread(&utt_num_rows, sizeof(utt_num_rows), 1, input_file) != 1) {
-		printf("Read error");
-		exit(-1);
+  if (fread(&utt_num_rows, sizeof(utt_num_rows), 1, input_file) != 1)
+  {
+      fprintf(stderr, "Can't read num_rows\n");
+      exit(1);
 	}
-  if (fread(&utt_num_cols, sizeof(utt_num_cols), 1, input_file) != 1) {
-		printf("Read error");
-		exit(-1);
+  if (fread(&utt_num_cols, sizeof(utt_num_cols), 1, input_file) != 1)
+  {
+      fprintf(stderr, "Can't read num_cols\n");
+      exit(1);
 	}
 
   fwrite(&utt_num_rows, sizeof(utt_num_rows), 1, output_file);
@@ -316,10 +324,12 @@ void GenerateScaledFeatureFile(const char* utt_id,
 
 
   datarow = new double[utt_num_cols];
-  for (int row = 0; row < utt_num_rows; row++) {
-    if (fread(datarow, sizeof(datarow[0]), utt_num_cols, input_file) != 1) {
-		printf("Read error");
-		exit(-1);
+  for (int row = 0; row < utt_num_rows; row++)
+  {
+      if (fread(datarow, sizeof(datarow[0]), utt_num_cols, input_file) != (unsigned int)utt_num_cols)
+      {
+          fprintf(stderr, "Can't read enough cols\n");
+          exit(1);
 	}
     for (int col = 0; col < utt_num_cols; col++) {
       datarow[col] = (datarow[col] - feature_means[col]) /

@@ -38,14 +38,20 @@
 ##                                                                       ##
 ###########################################################################
 
+if [ ! -d nwav ]
+then
+   mv wav nwav
+   mkdir wav
+fi
+
 cat $1 |
 awk '{print $2}' |
 while read x 
 do
    echo $x
-   ch_wave -otype raw -ostype ascii nwav/$x.wav |
+   $ESTDIR/bin/ch_wave -otype raw -ostype ascii nwav/$x.wav |
    awk '{print int($1 - 10 + (20 * rand()))}' |
-   ch_wave -f 16000 -itype raw -istype ascii -o wav/$x.wav
+   $ESTDIR/bin/ch_wave -f 16000 -itype raw -istype ascii -o wav/$x.wav
 done
 
 

@@ -54,11 +54,9 @@ awk '{for (i=$1; i<=$2; i++)
 while read i
 do
    echo Iteration $i
-   # Get f0 tree
-   cp -pr festival/trees/${FV_VOICENAME}_f0.tree rf_models/trees_$i
    
    # Collate mcep trees and build raw_params
-   for j in rf_models/trees_$i/*_?_mcep.tree
+   for j in rf_models/trees_$i/*_?_mcep.tree rf_models/trees_$i/*_?_f0.tree
    do
       # sometimes the tree is zero size -- so we don't copy it in, and 
       # use the previous tree. (you should catch this earlier in wagon_rf)
@@ -74,10 +72,14 @@ do
      (set! '$FV_VOICENAME':rfs_models nil)
      (set! '$FV_VOICENAME':rfs_dur_models nil)
      (voice_'$FV_VOICENAME'_cg)
+     (clustergen:collect_trees 
+        '$FV_VOICENAME'::clustergen_f0_trees clustergen_params "f0")
      (clustergen:collect_mcep_trees 
         '$FV_VOICENAME'::clustergen_f0_trees clustergen_params "mcep")
    )'
-   cp -pr festival/trees/${FV_VOICENAME}_mcep.* rf_models/trees_$i
+   cp -pr festival/trees/${FV_VOICENAME}_mcep.tree rf_models/trees_$i
+   cp -pr festival/trees/${FV_VOICENAME}_mcep.params rf_models/trees_$i
+   cp -pr festival/trees/${FV_VOICENAME}_f0.* rf_models/trees_$i
 
    lastnum=$i;
 

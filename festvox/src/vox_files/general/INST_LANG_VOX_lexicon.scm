@@ -150,6 +150,11 @@ t if this is a syl break, nil otherwise."
      (set! syls (cons (list (reverse syl) stress) syls)))
     (reverse syls)))
 
+(if (probe_file (path-append INST_LANG_VOX::dir "festvox/lex_lts_rules.scm"))
+    (begin
+      (load (path-append INST_LANG_VOX::dir "festvox/lex_lts_rules.scm"))
+      (set! INST_LANG_lts_rules lex_lts_rules)))
+
     ;; utf8-sampa map based on unitran 
 (if (probe_file (path-append INST_LANG_VOX::dir "festvox/INST_LANG_VOX_char_phone_map.scm"))
     (begin
@@ -164,9 +169,12 @@ t if this is a syl break, nil otherwise."
       "(INST_LANG_lts_function WORD FEATURES)
 Return pronunciation of word not in lexicon."
       (let ((dword word) (phones) (syls) (aphones))
-        (set! aphones (INST_LANG_map_modify (utf8explode dword)))
-        (set! phones (INST_LANG_map_phones aphones))
-	(set! phones (sampa_lookup phones))
+        (if (boundp 'INST_LANG_lts_rules)
+            (set! phones (lts_predict (utf8explode dword) INST_LANG_lts_rules))
+            (begin
+              (set! aphones (INST_LANG_map_modify (utf8explode dword)))
+              (set! phones (INST_LANG_map_phones aphones))
+              (set! phones (sampa_lookup phones))))
 ;        (set! phones (indic_unicode_lts sphones))
         (set! syls (INST_LANG_lex_syllabify_phstress phones))
         (list word features syls)))
@@ -178,7 +186,7 @@ Return pronunciation of word not in lexicon."
      (lambda (gg)
        (set! sp (assoc_string gg unicode_sampa_mapping))
        (if sp
-           (set! phlist (append (car (cadr sp)) phlist))
+           (set! phlist (append (reverse (car (cadr sp))) phlist))
            (set! phlist (cons gg phlist))))
      gphones)
     (reverse phlist)))

@@ -49,13 +49,17 @@ while read i
 do
 #   echo Collecting feats $i >/dev/tty
    cat festival/coeffs/$i.feats
-   if [ "$2" != "traj" ]
+   if [ "$2" != "save" ]
    then
       rm -f festival/coeffs/$i.feats
    fi
-done > festival/coeffs/cg_all.feats
+done |
+awk '{printf("%s %d ",$1,NR-1);
+      for (i=3; i<=NF; i++)
+         printf("%s ",$i);
+      printf("\n");}' > festival/coeffs/cg_all.feats
 echo Sorting all feats
-sort -n festival/coeffs/cg_all.feats >festival/coeffs/cg_all_sorted.feats
+sort -g festival/coeffs/cg_all.feats >festival/coeffs/cg_all_sorted.feats
 rm -f festival/coeffs/cg_all.feats
 
 awk '{print $2}' $DATAFILE |
@@ -63,7 +67,10 @@ while read i
 do
 #   echo Collecting mcep $i >/dev/tty
    cat festival/coeffs/$i.mcep
+   if [ "$2" != "save" ]
+   then
    rm -f festival/coeffs/$i.mcep
+   fi
 done | 
 awk '{printf("%s %d ",$1,NR-1);
       for (i=2; i<=NF; i++)
@@ -118,14 +125,14 @@ cat festival/disttabs/unittypes |
 while read x
 do
 
-   sort -n festival/feats/$x.feats.unsorted |
+   sort -g festival/feats/$x.feats.unsorted |
    awk '{printf("%d ",NR-1);
          for (i=2; i<=NF; i++)
             printf("%s ",$i);
          printf("\n");}'>festival/feats/$x.feats
    rm -f festival/feats/$x.feats.unsorted
 
-   sort -n festival/disttabs/$x.mcep.unsorted |
+   sort -g festival/disttabs/$x.mcep.unsorted |
    sed 's/^[^ ]*//' |
    $ESTDIR/bin/ch_track -itype ascii -otype est_binary -s 0.005 -o festival/disttabs/$x.mcep
    rm festival/disttabs/$x.mcep.unsorted

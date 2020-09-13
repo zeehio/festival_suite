@@ -82,6 +82,8 @@ MODELNAME=$FV_VOICENAME
 VOICENAME="(voice_"$FV_VOICENAME"_cg)"
 VOICESCM=${3:-festvox/${MODELNAME}_cg.scm}
 
+NUM_CPUS=`./bin/find_num_available_cpu`
+OMP="-omp_nthreads ${NUM_CPUS}"
 DURMEANSTD=$ESTDIR/../festival/examples/durmeanstd
 DUMPFEATS=$ESTDIR/../festival/examples/dumpfeats
 WAGON=$ESTDIR/bin/wagon
@@ -150,7 +152,7 @@ cat festival/dur/etc/dur.desc.all |
          else if (substr($0,1,1) == "(")
          {
             p = randint(100);
-            if (p < 40)
+            if (p < 30) # 20150407 tests
             {
                printf("%s %s ignore ",$1,$2);
                for (i=3; i<=NF; i++)
@@ -168,13 +170,14 @@ $ESTDIR/../festival/bin/festival --heap $SIODHEAPSIZE -b festvox/build_prosody.s
 
 # emacs festival/dur/etc/dur.desc
 
-STOP=25
+# 20150407 tested on some arctics
+STOP=15
 PREF=dur
 rm -f festival/dur/tree/$PREF.S*.tree
 
 (
 echo ";;; Build the duration model itself"
-$WAGON -data festival/dur/data/dur.data.train.train -desc festival/dur/etc/dur.desc -test festival/dur/data/dur.data.train.test -stop $STOP -output festival/dur/tree/$PREF.S$STOP.tree || exit -1
+$WAGON $OMP -data festival/dur/data/dur.data.train.train -desc festival/dur/etc/dur.desc -test festival/dur/data/dur.data.train.test -stop $STOP -output festival/dur/tree/$PREF.S$STOP.tree || exit -1
 
 echo ";;; Test the duration model"
 $WAGON_TEST -heap $SIODHEAPSIZE -data festival/dur/data/dur.data.test -desc festival/dur/etc/dur.desc -tree festival/dur/tree/$PREF.S$STOP.tree ) |

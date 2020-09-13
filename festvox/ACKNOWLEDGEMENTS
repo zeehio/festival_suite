@@ -7,10 +7,19 @@ which include substantial new content.
 
 Thanks goes to
 
+Suresh Bazaj/Hear2Read for continuing funding the INDIC support
 Richard Sproat (UIUC)
-   Who contribute unitrans for translating unicode characters into
+   Who contributed unitrans for translating unicode characters into
    probably phoneme sequences, used in the grapheme based builds
-   Their works is released under an apache free software license.
+   Their work is released under an apache free software license.
+Alok Parlikar
+   parallel support, Indic support
+Sunayana Sitaram
+   Indic support and grapheme support
+Gopala Anumanchipalli
+   SPAM prosody modeling
+Kishore Prahallad
+   ehmm and other fixes
 Raj Reddy:
    for inviting AWB to CMU to allow him to work with KAL
 CMU:
@@ -28,7 +37,7 @@ US National Science Foundation
 OGI:
    for hosting a workshop in June 98 to build a German voice in Festival
    which showed the need for a document/tools such as this.
-Maria Walters, Borja Etxebarria, Mike Macon, Argyris Biris, 
+Maria Wolters, Borja Etxebarria, Mike Macon, Argyris Biris, 
 Stephen Robert Norris, Karin Mueller, Bettina Saeuberlich, 
 Horst Meyer, Gregor Moehler, Mark Breitenbuech, Dominika Oliver, 
 Tae-Yeoub Jang and Weonhee Yun:

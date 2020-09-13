@@ -117,7 +117,7 @@ do
          }}
         END { for (line in pair)
                 printf("%s %f %f\n",line,pair[line],pair[line]/(1.0*tot))}' | 
-   sort --key=3 -nr
+   sort --key=3 -gr
 done >probpl.out
 
 # probpl.out: letter phone score probability

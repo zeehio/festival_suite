@@ -34,7 +34,7 @@
 ##  Find simple POS classes from unlabeled data in language              ##
 ##  Its good to have at least thousands of utterances to start with      ##
 ##                                                                       ##
-##  find_gpos DATA.txt                                                   ##
+##  find_gpos DATA.txt [NUM_ITER]                                        ##
 ##                                                                       ##
 ###########################################################################
 
@@ -42,9 +42,14 @@ LANG=C; export LANG
 
 PREV="00"
 awk '{printf(" %s \n",$0)}' $1 |
-sed 's/,/_/g' >data_${PREV}.txt
+sed 's/,/ __COMMA__ /g' >data_${PREV}.txt
 
-NUMITER=20
+NUMITER=50
+if [ $# = 2 ]
+then
+   NUMITER=$2
+fi
+
 echo 1 $NUMITER |
 awk '{for (i=$1; i<=$2; i++)
          printf("%02d\n",i);}' |
@@ -61,13 +66,13 @@ do
          tot+=NF;
          }
          END { for (word in freq)
-                 printf "%s %f %d\n", word, (freq[word])/tot, freq[word] }' >data_${i}.ngram
+                 printf "%s %g %d\n", word, (freq[word])/tot, freq[word] }' >data_${i}.ngram
 
    echo "0" >base_e
    base_e=`cat base_e`
    best_x=_nonex_
    best_y=_noney_
-   echo Base_e $base_e iteration $i
+   echo iteration $i
 
    cat data_${PREV}.txt |
    awk '{
@@ -77,9 +82,9 @@ do
        END {
            for (word in freq)
                printf "%s\t%d\n", word, freq[word]
-       }' | sort --key=2 -nr |
-   grep -v OOV |
-   grep -v "[()]" |
+       }' | sort --key=2 -gr |
+   grep -a -v OOV |
+   grep -a -v "[()]" |
    awk '{ if (NR < 51) x[NR] = $1}
         END {for (i=1; i<=15; i++)
               for (j=i+1; j<30; j++)
@@ -132,7 +137,7 @@ do
                 }
                 printf("\n");
               }' >data_${i}_best.txt
-         echo Better $x $y $this_e $base_e $i
+#         echo Better $x $y $this_e $base_e $i
          echo $x >base_x
          echo $y >base_y
          echo $this_e >base_e
@@ -142,7 +147,7 @@ do
    base_e=`cat base_e`
    best_x=`cat base_x`
    best_y=`cat base_y`
-   echo Best $base_e $best_x $best_y
+   echo "   "Best clustering: $best_x $best_y
    mv data_${i}_best.txt data_${i}.txt
    cat data_${i}.txt |
    awk '{for (i=1; i<=NF; i++)
@@ -171,6 +176,6 @@ do
    fi
 done
 
-rm data_${PREV}.txt
+rm -f data_${PREV}.txt
 rm -f base_e base_x base_y this_e
 

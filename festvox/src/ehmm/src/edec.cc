@@ -36,6 +36,8 @@
 /*            Last Modified: 05/25/2005                                  */
 /*            Purpose: A state class for HMM implementation              */
 /*                                                                       */
+/*       Additional Documentation added by Prasanna in May 2015          */
+/*                                                                       */
 /*************************************************************************/
 
 #include <string.h>
@@ -56,15 +58,16 @@ using std::ofstream;
 using std::ios;
 
 
-wrdC *hwrd;
-stC  *hst;
-double **trw;
+wrdC *hwrd; //Word Class defined in hmmword.h
+//Note: what Kishore calls words are actually phone(me)s
+stC  *hst;  //State Class defined in hmmstate.h
+double **trw; //transition weights: Matrix that's [number of words x number of words]
 
 int _tst;
-int _now;
-int _dim;
-int _noc;
-int _nog;
+int _now; // number of words
+int _dim; // number of dimensions (of MFCCs)
+int _noc; // number of connections
+int _nog; // number of Gaussians
 
 int **tarUL;
 int *lenU;
@@ -169,20 +172,28 @@ int main(int argc, char *argv[]) {
 #endif
 
 
-  Get_FrameRate(argv[6], _shift, _sf, _size);
+  Get_FrameRate(argv[6], _shift, _sf, _size); //argv[6] is the settings file
 
 
-  int max_string_length = strlen(argv[7])+20;
+  int max_string_length = strlen(argv[7])+20; //argv[7] is the path to the directory 
+                                              //where the HMM models are. 
 
+
+  //The next three lines basically construct the filename with the full path
+  //The log101.txt file seems to contain a list of filenames
   mstring1 = new char[max_string_length];
   snprintf(mstring1, max_string_length, "%s/%s", argv[7], "log101.txt");
   fp_log100.open(mstring1, ios::out);
 
-  phF  = argv[1];
-  prmF = argv[2];
-  _seqF = atoi(argv[3]);
-  _ndeF = atoi(argv[8]);
-  _labD = argv[9];
+  phF  = argv[1]; // ehmm/etc/ph_list.int file that lists all the phonemes and
+                  // how many states they each have
+
+  prmF = argv[2]; // ehmm/etc/txt.phseq.data.int file that lists the HMM states
+                  // in each utterance
+
+  _seqF = atoi(argv[3]); // Sequential flag. (Turns off ergodic transitions).
+  _ndeF = atoi(argv[8]); // NDE flag. No idea what NDE is ??
+  _labD = argv[9];       // Directory where the label files should be written out to.
 
   _numthreads = 1;
 
@@ -194,29 +205,51 @@ int main(int argc, char *argv[]) {
   // cout << "Sequential Processing Flag: " << _seqF << endl;
   // cout << "non-deterministic Processing Flag: " << _ndeF << endl;
 
-  fDir = argv[4];
-  tFext = argv[5];
+  fDir = argv[4]; // Directory with the feature files (binfeats)
+  tFext = argv[5];// File extension of the files in the above mentioned directory
+
   // cout << "Feature Path: " << fDir << endl;
   // cout << "Feature exten: " << tFext << endl;
 
 
+  // The next few lines read in the model101.txt file from the ehmm/mod directory.
+  // This file contains all the HMMs that were trained in the bw step.
   mstring2 = new char[max_string_length];
   snprintf(mstring2, max_string_length, "%s/%s", argv[7], "model101.txt");
-
   mF = mstring2;
   FileExist(mF);
   ifstream fp_md;
   fp_md.open(mF, ios::in);
 
-  // Read the ph_list file; create objects
-  BuildEnv(phF, hwrd, hst, _now, _tst, _dim, fp_md);
 
-  Alloc2f(trw, _now, _now);  // transition weights
+
+  // This function reads in the list of phonemes, the number of states associated
+  // with each phoneme, the HMM model parameters, etc..
+  BuildEnv(phF, hwrd, hst, _now, _tst, _dim, fp_md);
+  // Arguments being passed in: 
+  // (phF="ehmm/etc/ph_list.int", This is the file described earlier
+  // hwrd is an empty HMM word object
+  // hst is an empty HMM state object
+  // _now is the number of words
+  // _tst: no idea
+  // _dim: number of dimensions of the MCEPs
+  // fp_md: File pointer to the models file
+
+
+  Alloc2f(trw, _now, _now);  // Allocate 2D array for Transition weights matrix
   ReadWordTran(trw, _now, fp_md);
   // PrintMatrix(trw, _now, _now, "WORD-TRANS");
   fp_md.close();
 
+  // This function reads in the HMM state numbers corresponding to the 
+  // text in each utterance of the promptfile. 
   LoadPromptFile(prmF, tarUL, lenU, wavF, _nsen);  // Load Prompt file....
+  // Arguments passed in:
+  // prmF="ehmm/etc/txt.phseq.data.int"
+  // tarUL: ??
+  // lenU: Length of utterance?
+  // wavF: List of wav file names
+  // _nsen: Probably number of sentences
 
   next_sentence_number_to_process = 0;
 
@@ -315,14 +348,36 @@ void ProcessSentence(int sent_num) {
   // cout << "LOAD FILE....." << endl;
   //LoadFeatFile(tF, ft, fr, fc);
   LoadBinaryFeatFile(tF, &ft, &fr, &fc);
+  // tF = filename
+  // ft = pointer to the features
+  // fr = number of rows
+  // fc = number of columns
 
   // PrintMatrix(ft, fr, fc, "FEAT-FILE");
 
   // cout << "ENTERING EMISSIONS..." << endl;
+  
+  // Looks like the purpose of this function is to generate the Emissions matrix
+  // 'emt'. This matrix is (number of states x number of MFCC frames). Each entry
+  // in the matrix tells you the probability of that particular state emitting 
+  // that particular MFCC frame. Since emission probabilities are modeled using
+  // GMMs, each entry in the matrix is generated by plugging in the frame into
+  // the GMM corresponding to each state.
   Emissions(hwrd, hst, emt, er, ec, ft, fr, fc, tarUL[p], lenU[p], stMap);
-  // PrintMatrix(emt, er, 15, "EMISSIONS");
+  // hwrd : HMM words (phonemes)
+  // hst : HMM states
+  // emt : Emission matrix
+  // er : Number of rows of emission matrix
+  // ec : Number of columns of emission matrix
+  // ft : Pointer to the feats
+  // fr : Number of rows of features
+  // fc : Number of columns of features
+  // tarUL[p] : Array containing list of phones in utterance 'p'
+  // lenU[p] : Number of phones in utterance 'p'
+  // stMap : List of states corresponding to this utterance
 
-  Alloc2f(arcW, er, er);
+
+  Alloc2f(arcW, er, er); //arcW: Matrix that's number of states x number of states
   Alloc1d(bI, er);
   Alloc1d(eI, er);
   // bI and eI matrices indicate which state are beginner and enders
@@ -330,12 +385,37 @@ void ProcessSentence(int sent_num) {
   // column and n-1th for beta
   Alloc1d(nullI, er);
 
+
   // cout << "ENTERING STATE TRANSITIONS..." << endl;
+
+  // The 'tar' array in the second argument of this function contains
+  // a list of phones in the utterance. This function fills the arcW 
+  // matrix with transition probabilites of going from each HMM state
+  // in the utterance to any other state. The arcW matrix is probably
+  // block-diagonal
   FillStateTrans(arcW, tarUL[p], lenU[p], nullI);
+  // arcW: Empty matrix
+  // tarUL[p]: Array containing list of phones in utterance 'p'
+  // lenU[p]: Number of phones in utterance 'p'
+  // nullI: Empty matrix
 
   if (1 == _seqF) {
     // cout << "ENTERING SEQ. WORD TRANSITIONS..." << endl;
+
+    // This function updates the arcW matrix to include the transition
+    // probabilities across phones too. It also generates fwM and bwM
+    // matrices that keep track of the forward and backward connections
+    // of each state.
     FillWordTrans_Seq(arcW, tarUL[p], lenU[p], trw, bI, eI, fwM, bwM, er);
+    // arcW: Transition probabilities matrix
+    // tarUL[p]: Array containing list of phones in utterance 'p'
+    // lenU[p]: Number of phones in utterance 'p'
+    // trw: Transition probability matrix between phones (not states)
+    // bI: described earlier
+    // eI: described earlier
+    // fwM: Matrix that keeps track of forward connections of each state
+    // bwM: Matrix that keeps track of backward connections of each state
+    // er: Number of rows of emission matrix (number of states)
   } else {
     // cout << "ENTERING ERG. WORD TRANSITIONS..." << endl;
     FillWordTrans(arcW, tarUL[p], lenU[p], trw, bI, eI, fwM, bwM, er);
@@ -354,8 +434,24 @@ void ProcessSentence(int sent_num) {
   if (1 == _seqF) {
     // cout << "ENTERING Viterbi SEQ..." << endl;
     if (0 == _ndeF) {
+      // Viterbi of course
       nanF = Viterbi_Seq(emt, er, ec, arcW, alp, bet, nrmF, bI, eI,
                          path, fwM, bwM, nullI, pubf, lastS);
+      // emt : Matrix containing the emission probabilities
+      // er : Number of rows of emt (number of states)
+      // ec : Number of columns of emt (number of MFCC frames)
+      // arcW: Transition probabilities between states
+      // alp : Alphas. Parameters calculated during Viterbi
+      // bet : Empty matrix. Unused. Probably a leftover from the baum-welch code
+      // nrmF: Empty vector
+      // bI : Matrix indicating beginning of phones
+      // eI : Matrix indicating end of phones
+      // path: Presumably the vector that tells you the optimal state path
+      // fwM : Matrix that keeps track of forward connections of each state
+      // bwM : Matrix that keeps track of backward connections of each state
+      // nullI: Keeps track of null states (beginning and end of each phone)
+      // pubf : Empty matrix
+      // lastS : Last state
     } else {
       nanF = Viterbi_Seq_nde(emt, er, ec, arcW, alp, bet, nrmF,
                              bI, eI, path, fwM, bwM, nullI, pubf, lastS);
@@ -378,6 +474,15 @@ void ProcessSentence(int sent_num) {
     // cout << "ENTERING POST PROCESS..." << endl;
     PostProcess(path, stMap, er, ec, fp_log100, wavF[p],
                 tarUL[p], lenU[p], wrdB);
+    // path: Viterbi path through the states
+    // stMap: List of states corresponding to this utterance
+    // er: Number of states
+    // ec: Number of MFCC frames
+    // fp_log100: List of filenames to run edec on
+    // wavF[p]: Filename of current file
+    // tarUL[p] : List of phones in current utterance
+    // lenU[p]: Number of phones in current utterance
+    // wrdB: Word (actually phone) beginning
   }
     Delete2f(ft, fr);
     Delete2f(emt, er);
@@ -396,6 +501,7 @@ void ProcessSentence(int sent_num) {
     Delete1d(wrdB);
 }
 
+// Reads in the settings file and sets variables for shift, sampling freq, etc..
 void Get_FrameRate(char *file, double& shft, double& sf, double& size) {
   FileExist(file);
 
@@ -450,20 +556,31 @@ void NewProcess(int *path, int **pbuf, int *wrdB, int *nullI, int *stMap,
   path[0] = mas;
 }
 
+// This function writes out the label file based on the path. I didn't 
+// read this function very carefully because file I/O is never that
+// interesting and not very relevant for my task anyway.
 void PostProcess(int *path, int *stMap, int ns, int nt, ofstream& fp_log,
                  char *fnm, int *list, int ltar, int *wrdB) {
+  // path: Viterbi path through the states
+  // stMap: List of states corresponding to this utterance
+  // er: Number of states
+  // ec: Number of MFCC frames
+  // fp_log100: List of filenames to run edec on
+  // wavF[p]: Filename of current file
+  // tarUL[p] : List of phones in current utterance
+  // lenU[p]: Number of phones in current utterance
+  // wrdB: Word (actually phone) beginning
+
   // int prev = list[0]; //Assign the first word-id of list[0]...
   (void) ns;
   (void) list;
   (void)ltar;
+
   int sid;
   int wid;
   int s;
   double tim = 0;
   // double pT = 0;
-
-  //int uno = 0;
-
   // char labD[] = "lab/";
 
   char myfile[kNmLimit];
@@ -495,8 +612,6 @@ void PostProcess(int *path, int *stMap, int ns, int nt, ofstream& fp_log,
 #endif
     fp_log << fnm << endl;
   }
-
-  //uno = 0;
 
   s = path[0];
   ps = s;
@@ -546,7 +661,14 @@ void PostProcess(int *path, int *stMap, int ns, int nt, ofstream& fp_log,
   fp_st.close();
 }
 
+// This function reads in the phoneme to phoneme transition probabilities
+// that are at the end of the model file. The values seem to be set to be uniform.
+// The probabilites are 1/(num of states * num of phonemes)
 void ReadWordTran(double **trw, int nw, ifstream& fp_md) {
+  // Arguments are:
+  // trw: Transition weights matrix
+  // nw: Number of words
+  // fp_md: File pointer to the model101.txt file
   int tw;
   fp_md >> tw >> tw;
 
@@ -562,8 +684,18 @@ void ReadWordTran(double **trw, int nw, ifstream& fp_md) {
   }
 }
 
+// Initializes the setup
 void BuildEnv(char *fnm, wrdC*& hwrd, stC*& hst, int& now,
               int& tst, int& dim, ifstream& fp_md) {
+  // Arguments being passed in: 
+  // fnm="ehmm/etc/ph_list.int", This is the file described earlier
+  // hwrd is an empty HMM word object
+  // hst is an empty HMM state object
+  // now is the number of words
+  // tst: no idea (possibly temp string)
+  // dim: number of dimensions of the MCEPs
+  // fp_md: File pointer to the models file
+
   char tstr[kNmLimit];
 
   FileExist(fnm);
@@ -584,14 +716,14 @@ void BuildEnv(char *fnm, wrdC*& hwrd, stC*& hst, int& now,
   hwrd = new wrdC[now];
   hst  = new stC[tst];
 
-  char nm[kNmLimit];
-  int  nst;
-  int  bst;
-  int  est;
-  int  wid = 0;
-  int  st  = 0;
-  int  noc;
-  int  nog;
+  char nm[kNmLimit]; //name of phone
+  int  nst; //number of states
+  int  bst; //begin state
+  int  est; //end state
+  int  wid = 0; //word id
+  int  st  = 0; //state id
+  int  noc; //number of connections
+  int  nog; //number of Gaussians
 
   for (int i = 0; i < now; i++) {
     // Though noc & nog are read here, they are actually read from the
@@ -619,9 +751,17 @@ void BuildEnv(char *fnm, wrdC*& hwrd, stC*& hst, int& now,
   }
 }
 
-
+// This function reads in the HMM state numbers corresponding to the 
+// text in each utterance of the promptfile. 
 void LoadPromptFile(char *fnm, int**& tarUL, int*& lenU,
                     char**&wavF, int& nos) {
+  // Arguments passed in:
+  // fnm="ehmm/etc/txt.phseq.data.int"
+  // tarUL: List of phones corresponding to each utterance
+  // lenU: Length of utterance?
+  // wavF: List of wav file names
+  // nos: Probably number of sentences
+
   FileExist(fnm);
 
   ifstream fp_in;
@@ -688,36 +828,51 @@ void LoadBinaryFeatFile(char *filename, double*** feats_ptr,
     exit(-1);
   }
 
-  if (fread(num_rows, sizeof(*num_rows), 1, input_file) != 1) {
-    cout << "Error reading file: "
-         << filename << endl;
-    cout << "Aborting." << endl;
-    exit(-1);
+  if (fread(num_rows, sizeof(*num_rows), 1, input_file) != 1)
+  {
+      fprintf(stderr, "Can't read num_rows\n");
+      exit(1);
   }
-  if (fread(num_cols, sizeof(*num_cols), 1, input_file) != 1) {
-    cout << "Error reading file: "
-         << filename << endl;
-    cout << "Aborting." << endl;
-    exit(-1);
+  if (fread(num_cols, sizeof(*num_cols), 1, input_file) != 1)
+  {
+      fprintf(stderr, "Can't read num_cols\n");
+      exit(1);
   }
 
   feats = new double*[*num_rows];
   for (int row = 0; row < *num_rows; row++) {
     feats[row] = new double[*num_cols];
-    if (fread(feats[row], sizeof(feat), *num_cols, input_file) != (size_t) *num_cols) {
-		cout << "Error reading file: "
-			 << filename << endl;
-		cout << "Aborting." << endl;
-		exit(-1);
+    if (fread(feats[row], sizeof(feat), *num_cols, input_file) != (unsigned int)*num_cols)
+    {
+        fprintf(stderr, "Can't read enough feats\n");
+        exit(1);
 	}
+
   }
   *feats_ptr = feats;
   fclose(input_file);
 }
 
-
+// Looks like the purpose of this function is to generate the Emissions matrix
+// 'emt'. This matrix is (number of states x number of MFCC frames). Each entry
+// in the matrix tells you the probability of that particular state emitting 
+// that particular MFCC frame. Since emission probabilities are modeled using
+// GMMs, each entry in the matrix is generated by plugging in the frame into
+// the GMM corresponding to each state.
 void Emissions(wrdC *hwrd, stC *hst, double**& emt, int& er, int& ec,
                double **ft, int fr, int fc, int *tar, int ltar, int*& stMap) {
+  // hwrd : HMM words (phonemes)
+  // hst : HMM states
+  // emt : Emission matrix
+  // er : Number of rows of emission matrix (number of states)
+  // ec : Number of columns of emission matrix (number of MFCC frames)
+  // ft : Pointer to the feats
+  // fr : Number of rows of features
+  // fc : Number of columns of features
+  // tar : Array containing list of phones in utterance
+  // ltar : Number of phones in utterance
+  // stMap : List of statenames corresponding to this utterance (I think)
+
   (void)fc;
   int tw;
   int bs;
@@ -726,11 +881,14 @@ void Emissions(wrdC *hwrd, stC *hst, double**& emt, int& er, int& ec,
 
   ec = fr;
   er = 0;
+  // Counts total number of states for this utterance
   for (int i = 0; i < ltar; i++) {
     tw = tar[i];
     er += hwrd[tw].nst;
   }
+  // Creates emissions matrix that is number of states x number of MCEP frames
   Alloc2f(emt, er, ec);
+  // Creates an array to store the frames that correspond to each state
   Alloc1d(stMap, er);
 
   rn = 0;
@@ -756,11 +914,13 @@ void Emissions(wrdC *hwrd, stC *hst, double**& emt, int& er, int& ec,
   int ts;
   double *cshP;
   Alloc1f(cshP, _tst);
+  // k iterates over each MFCC frame
   for (int k = 0; k < ec; k++) {
     // Calculate Gaussian for all states.....
     for (int s = 0; s < _tst; s++) {
       cshP[s] = hst[s].GauProb(ft[k]);
     }
+    // j iterates over each HMM state
     for (int j = 0; j < er; j++) {
       ts = stMap[j];
       emt[j][k] = cshP[ts];
@@ -780,7 +940,17 @@ void PrintMatrix(double **arr, int r, int c, char *nm) {
   }
 }
 
+// The 'tar' array in the second argument of this function contains
+// a list of phones in the utterance. This function fills the arcW 
+// matrix with transition probabilites of going from each HMM state
+// in the utterance to any other state. The arcW matrix is probably
+// block-diagonal
 void FillStateTrans(double **arcW, int *tar, int ltar, int *nullI) {
+  // arcW: Empty matrix
+  // tar: Array containing list of phones in utterance
+  // ltar: Number of phones in utterance 
+  // nullI: Empty matrix
+
   int rn;   // row number
   int tw;   // temporary word
   int bs;   // begin state
@@ -791,12 +961,14 @@ void FillStateTrans(double **arcW, int *tar, int ltar, int *nullI) {
   int barn;  // begining arc row number;;
 
   rn = 0;
+  // Loops through each phone
   for (int i = 0; i < ltar; i++) {
     tw = tar[i];
     bs = hwrd[tw].bst;
 
     srn = rn;  // store the row number of the word begining state...
 
+    // Loops through each state in the phone
     for (int j = 0; j < hwrd[tw].nst; j++) {
       sid = bs + j;
 
@@ -810,6 +982,8 @@ void FillStateTrans(double **arcW, int *tar, int ltar, int *nullI) {
       nullI[rn] = hst[sid].getnullF();
       // 1 or 0, depending on null state or not.
 
+      // Fills the arcW[i][j] matrix with probabilities of transition from
+      // state i to state j
       for (int k = 0; k < hst[sid].getnc(); k++) {
         nxt = barn + k;
         arcW[rn][nxt] = hst[sid].trans(k);
@@ -826,8 +1000,6 @@ void FillWordTrans(double **arcW, int *tar, int ltar, double **trw,
   int tw;
   int bs;
   int es;
-  //int cw;
-  //int nw;
 
   int *esa;
   int *bsa;
@@ -835,7 +1007,6 @@ void FillWordTrans(double **arcW, int *tar, int ltar, double **trw,
 
   int nos;
 
-  //double sum;
   double estrn;
   double bias;
 
@@ -862,9 +1033,9 @@ void FillWordTrans(double **arcW, int *tar, int ltar, double **trw,
 
   for (int i = 0; i < ltar; i++) {
     es = esa[i];
-    //cw = wa[i];
 
     /*This code stops transition leaks, if any.. */
+    // cw = wa[i];
     // sum = 0;     //Compute the summations of the remianing trans.
     // for (int j = 0; j < ltar; j++) {
     //    bs = bsa[j];
@@ -872,7 +1043,6 @@ void FillWordTrans(double **arcW, int *tar, int ltar, double **trw,
     //  sum += trw[cw][nw];
     //  }
 
-    //sum = 0;
     estrn = arcW[es][es];  // Take end state transition
     if (0 != estrn) {
       cout << "ESTRN SHOULD HAVE BEEN ZERO ALWAYS..." << endl;
@@ -1121,10 +1291,27 @@ int Viterbi(double **emt, int r, int c, double **trp,
   return nanF;
 }
 
+// Vanilla Viterbi search
 int Viterbi_Seq(double **emt, int r, int c, double **trp,
                 double **alp, double **bet, double *nrmF,
                 int *bI, int *eI, int *path, int **fwM, int **bwM,
                 int *nullI, int **pbuf, int &lastS) {
+  // emt : Matrix containing the emission probabilities
+  // r : Number of rows of emt (number of states)
+  // c : Number of columns of emt (number of MFCC frames)
+  // trp: Transition probabilities between states
+  // alp : Alphas. Parameters calculated during Viterbi search
+  // bet : Betas. Unused. Probably a vestigial remnant of the baum-welch code
+  // nrmF: Empty vector
+  // bI : Matrix indicating beginning of phones
+  // eI : Matrix indicating end of phones
+  // path: Presumably the vector that tells you the optimal state path
+  // fwM : Matrix that keeps track of forward connections of each state
+  // bwM : Matrix that keeps track of backward connections of each state
+  // nullI: Keeps track of null states (beginning and end of each phone)
+  // pbuf : Empty matrix
+  // lastS : Last state
+
   (void)bet;
   (void) bI;
   (void) eI;
@@ -1145,8 +1332,8 @@ int Viterbi_Seq(double **emt, int r, int c, double **trp,
 
   // Alloc2d(pbuf, r, c);
 
-  ns = r;
-  nt = c;
+  ns = r; //number of states
+  nt = c; //number of frames
   t = 0;
   s = 0;
   maxV = -1.0e+32;
@@ -1155,6 +1342,7 @@ int Viterbi_Seq(double **emt, int r, int c, double **trp,
   int tit;
 
   alp[s][t] = 0;  // s = 0; and it is a null state..
+  // This for loop probably initializes the first row of the alpha matrix
   for (int myc = 0; myc < fwM[s][0]; myc++) {
     int n = fwM[s][myc + 1];
     alp[n][t] = emt[n][t] * trp[s][n];
@@ -1164,6 +1352,7 @@ int Viterbi_Seq(double **emt, int r, int c, double **trp,
     }
   }
 
+  // Do stuff for the first frame
   for (s = 0; s < ns; s++) {
     tit = t;
     if (1 == nullI[s]) {
@@ -1203,7 +1392,7 @@ int Viterbi_Seq(double **emt, int r, int c, double **trp,
     alp[s][t] /= nrmF[t];
   }
 
-
+  // Standard Viterbi from here on:
   for (t = 1; t < nt; t++) {
     tm1 = t - 1;
     maxV = -1.0e+32;
@@ -1443,9 +1632,23 @@ int Viterbi_Seq_nde(double **emt, int r, int c, double **trp,
   return nanF;
 }
 
+// This function updates the arcW matrix to include the transition
+// probabilities across phones too. It also generates fwM and bwM
+// matrices that keep track of the forward and backward connections
+// of each state.
 void FillWordTrans_Seq(double **arcW, int *tar, int ltar,
                        double **trw, int *bI, int *eI,
                        int**& fwM, int**& bwM, int er) {
+  // arcW: Transition probabilities matrix
+  // tar: Array containing list of phones in utterance 'p'
+  // ltar: Number of phones in utterance 'p'
+  // trw: Transition probability matrix between phones (not states)
+  // bI: described earlier
+  // eI: described earlier
+  // fwM: Forward connection Matrix for each state
+  // bwM: Backward connection Matrix for each state
+  // er: Number of rows of emission matrix (number of states)
+
   // There is no need of trw matrix here....
   (void) trw;
   int rn;
@@ -1539,8 +1742,8 @@ void FillWordTrans_Seq(double **arcW, int *tar, int ltar,
     }
   }
 
-  fwM = new int*[er];
-  bwM = new int*[er];
+  fwM = new int*[er]; //fwM and bwM seem to keep track of the forward and backward
+  bwM = new int*[er]; //connections between each state and the others.
 
   for (int i = 0; i < er; i++) {
     int cn = 0;

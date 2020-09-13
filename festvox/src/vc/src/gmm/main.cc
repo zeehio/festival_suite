@@ -361,7 +361,11 @@ int main(int argc, char *argv[])
     }
     if (cond.file_flag == XTRUE) {
 	sprintf(tmpstr, "rm -f %s %s", tmpgauss, tmpgamma);
-	system(tmpstr);
+	if (system(tmpstr) != 0)
+        {
+            fprintf(stderr,"can't remove tmp files\n");
+            exit(1);
+        }
     } else {
 	xdmfree(gaussm);
 	xdmfree(gammam);

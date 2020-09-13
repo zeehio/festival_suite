@@ -44,7 +44,7 @@ export SPTKDIR=/home/awb/projects/SPTK
 </literallayout></blockquote>
 </para>
 <para>
-We will use Thai as the example language.
+We will use Thai as the example language, and "am" as the speaker name.
 <blockquote><literallayout>
 mkdir cmu_thai_am
 cd cmu_thai_am
@@ -111,7 +111,7 @@ and label the data.
 ./bin/do_build build_prompts etc/txt.done.data
 ./bin/do_build label etc/txt.done.data
 ./bin/do_clustergen parallel build_utts etc/txt.done.data
-./bin/do_clustergen generate_statename
+./bin/do_clustergen generate_statenames
 ./bin/do_clustergen generate_filters
 </literallayout></blockquote> 
 Then do feature extraction
@@ -132,6 +132,12 @@ measures, the second to generate standard tts output
 ./bin/do_clustergen cg_test resynth cgp etc/txt.done.data.test
 ./bin/do_clustergen cg_test tts tts etc/txt.done.data.test
 </literallayout></blockquote> 
+</para>
+<para>
+This will generate aligned speech examples in test/cgp/*.wav, and an
+alignmend score of how well the synthesizer generated those examples in
+the text file test/cgp/scores.  Also it will generate a set of test to
+speech utterances in test/tts/*.wav which you should listen to.
 </para>
 <para>
 Note that for grapheme voices you can build with the random forest
@@ -243,6 +249,10 @@ measures, the second to generate standard tts output
 ./bin/do_clustergen cg_test resynth cgp etc/txt.done.data.test
 ./bin/do_clustergen cg_test tts tts etc/txt.done.data.test
 </literallayout></blockquote> 
+This will generate aligned speech examples in test/cgp/*.wav, and an
+alignmend score of how well the synthesizer generated those examples in
+the text file test/cgp/scores.  Also it will generate a set of test to
+speech utterances in test/tts/*.wav which you should listen to.
 </para>
 
 </sect1>

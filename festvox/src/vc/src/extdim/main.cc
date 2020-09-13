@@ -191,10 +191,12 @@ int main(int argc, char *argv[])
 	    for (l = sc; l < ec; l++) {
 		if (chiv != NODATA) {
 		    if (chiv->data[l] != 0.0)
+                    {
 			if (cond.eprt_flag == XFALSE)
 			    fprintf(fp, "%f", mat->data[k][l]);
 			else
 			    fprintf(fp, "%e", mat->data[k][l]);
+                    }
 		} else {
 		    if (cond.eprt_flag == XFALSE)
 			fprintf(fp, "%f", mat->data[k][l]);
