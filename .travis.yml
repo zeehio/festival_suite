@@ -26,7 +26,7 @@ addons:
     notification_email: sergioller@gmail.com
     build_command_prepend:
     build_command:   ./run_testsuite.sh -f
-    branch_pattern: coverity_scan
+    branch_pattern: (coverity_scan)|(stl_playground)
   apt:
     packages:
     - libasound2-dev
