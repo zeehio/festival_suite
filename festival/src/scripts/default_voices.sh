@@ -1,8 +1,10 @@
-###########################################################################
+#!/bin/sh
+#####################################################-*-mode:shell-script-*-
 ##                                                                       ##
-##                Centre for Speech Technology Research                  ##
-##                     University of Edinburgh, UK                       ##
-##                       Copyright (c) 1996,1997                         ##
+##                                                                       ##
+##                  Language Technologies Institute                      ##
+##                     Carnegie Mellon University                        ##
+##                         Copyright (c) 2017                            ##
 ##                        All Rights Reserved.                           ##
 ##                                                                       ##
 ##  Permission is hereby granted, free of charge, to use and distribute  ##
@@ -19,10 +21,10 @@
 ##      derived from this software without specific prior written        ##
 ##      permission.                                                      ##
 ##                                                                       ##
-##  THE UNIVERSITY OF EDINBURGH AND THE CONTRIBUTORS TO THIS WORK        ##
+##  CARNEGIE MELLON UNIVERSITY AND THE CONTRIBUTORS TO THIS WORK         ##
 ##  DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING      ##
 ##  ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT   ##
-##  SHALL THE UNIVERSITY OF EDINBURGH NOR THE CONTRIBUTORS BE LIABLE     ##
+##  SHALL CARNEGIE MELLON UNIVERSITY NOR THE CONTRIBUTORS BE LIABLE      ##
 ##  FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    ##
 ##  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN   ##
 ##  AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,          ##
@@ -30,16 +32,40 @@
 ##  THIS SOFTWARE.                                                       ##
 ##                                                                       ##
 ###########################################################################
-TOP=../..
-DIRNAME=examples/songs
-BUILD_DIRS=
-ALL_DIRS=$(BUILD_DIRS)
+##                                                                       ##
+##  Download and install the defauly voice and lexicons                  ##
+##                                                                       ##
+###########################################################################
 
-SONGS = america1.xml america2.xml america3.xml america4.xml \
-        daisy.xml doremi.xml lochlomond.xml \
-        spice1.xml spice2.xml spice3.xml spice4.xml \
-        baabaablacksheep.xml
-FILES=Makefile $(SONGS)
+if [ ! -f ../festival/src/include/festival.h ]
+then
+    echo Not in the right directory: cannot install Festival default voice
+    echo You should be in the festival source top level directory
+    echo Where ls -l src/include/festival.h is found
 
-include $(TOP)/config/common_make_rules
+    exit -1
+fi
+
+if [ ! -d packed ]
+then
+   mkdir packed
+fi
+
+( cd packed;
+  wget http://www.festvox.org/packed/festival/2.4/voices/festvox_kallpc16k.tar.gz;
+  wget http://www.festvox.org/packed/festival/2.4/festlex_CMU.tar.gz;
+  wget http://www.festvox.org/packed/festival/2.4/festlex_POSLEX.tar.gz
+)
+
+THISDIR=`pwd`
+
+( cd ..;
+  tar zxvf $THISDIR/packed/festvox_kallpc16k.tar.gz;
+  tar zxvf $THISDIR/packed/festlex_CMU.tar.gz;
+  tar zxvf $THISDIR/packed/festlex_POSLEX.tar.gz
+)
+
+exit 0
+
+
 

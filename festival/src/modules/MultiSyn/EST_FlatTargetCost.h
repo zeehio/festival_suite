@@ -124,7 +124,7 @@ class EST_FlatTargetCost : public EST_TargetCost {
 
 
 
-#endif // __EST_TARGETCOST_H__
+#endif // __EST_TARGETCOST_FLAT_H__
 
 
 

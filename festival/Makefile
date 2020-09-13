@@ -2,7 +2,7 @@
 ##                                                                       ##
 ##                Centre for Speech Technology Research                  ##
 ##                     University of Edinburgh, UK                       ##
-##                      Copyright (c) 1996-2002                          ##
+##                      Copyright (c) 1996-2020                          ##
 ##                        All Rights Reserved.                           ##
 ##                                                                       ##
 ##  Permission is hereby granted, free of charge, to use and distribute  ##
@@ -34,7 +34,7 @@
 ##                The Festival Speech Synthesis System                   ##
 ##                                                                       ##
 ##       Authors:  Alan W Black, Paul Taylor, Richard Caley and others   ##
-##          Date:  January 2003                                          ##
+##          Date:  July 2020                                             ##
 ##                                                                       ## 
 ###########################################################################
 TOP=.
@@ -43,7 +43,7 @@ BUILD_DIRS = src lib examples bin doc
 ALL_DIRS= $(BUILD_DIRS) testsuite config
 CONFIG=configure configure.in config.sub config.guess \
        missing install-sh mkinstalldirs
-FILES = Makefile README ACKNOWLEDGMENTS NEWS COPYING INSTALL $(CONFIG)
+FILES = Makefile README.md ACKNOWLEDGMENTS NEWS COPYING INSTALL $(CONFIG)
 VERSION=$(PROJECT_VERSION)
 
 LOCAL_CLEAN= Templates.DB
@@ -59,6 +59,9 @@ config_dummy := $(shell test -f config/config || ( echo '*** '; echo '*** Making
 system_dummy := $(shell $(MAKE) -C $(TOP)/config -f make_system.mak TOP=.. system.mak)
 
 include $(TOP)/config/common_make_rules
+
+default_voices:
+	./src/scripts/default_voices.sh
 
 backup:  time-stamp
 	 @ $(RM) -f $(TOP)/FileList

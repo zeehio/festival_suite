@@ -273,6 +273,7 @@
     ;; All the rest 
     (us_generate_wave utt (Parameter.get 'us_sigpr)
 		      'analysis_period)))
+  utt
 )
 
 (defSynthType None
@@ -365,19 +366,30 @@
     and then those demanded by the voice.  After modules have been
     applied synth_hooks are applied to allow extra manipulation.
     [see Utterance types]"
+  (let ((uttr))
+    (set! uttr (apply_hooks before_synth_hooks utt))
 
-  (apply_hooks before_synth_hooks utt)
-
-  (let ((type (utt.type utt)))
+    (let ((type (utt.type uttr)))
     (let ((definition (assoc type UttTypes)))
       (if (null? definition)
 	  (error "Unknown utterance type" type)
 	  (let ((body (eval (cons 'lambda 
-				  (cons '(utt) (cdr definition))))))
-	    (body utt)))))
+                                    (list '(utt) 
+                                          (utttype_recursify 
+                                           (reverse (cdr definition))))))))
+              (set! uttr (body uttr)))))
 
-  (apply_hooks after_synth_hooks utt)
-  utt)
+      (apply_hooks after_synth_hooks uttr))))
+
+(define (utttype_recursify definition)
+  "(utttype_recursify definition)
+Change the linear list of module names into a recursive list so you can
+truly modify the utterance within the synthesis process."
+  (cond 
+   ((null definition) nil)
+   ((null (cdr definition)) (car definition))
+   (t
+    (list (caar definition) (utttype_recursify (cdr definition))))))
 
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  ;;                                                                       ;;

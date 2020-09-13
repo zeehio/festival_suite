@@ -254,7 +254,7 @@ static LISP HTS_Synthesize_Utt(LISP utt) {
   r->load("tmp.lab", ts_label, "htk");
 
   for (o = r->first(), s = u->relation("Segment")->first();
-       (o != NULL) && (s != NULL); o = o->next(), s = s->next())
+       (o != NULL) && (s != NULL); o = inext(o), s = inext(s))
     if (o->S("name").before("+").after("-").matches(s->S("name")))
       s->set("end", o->F("end"));
     else
@@ -272,24 +272,11 @@ static LISP HTS_Synthesize_Utt(LISP utt) {
 
 /* HTS_get_copyright: write copyright to string */
 void HTS_get_copyright(char *str) {
-  int i, nCopyright = HTS_NCOPYRIGHT;
-  char url[] = HTS_URL, version[] = HTS_VERSION;
-  const char *copyright[] = { HTS_COPYRIGHT };
-
   sprintf(str,
-           "\nThe HMM-Based Speech Synthesis Engine \"hts_engine API\"\n");
-
-  sprintf(str,
-           "%shts_engine API version %s (%s)\n", str, version, url);
-  for (i = 0; i < nCopyright; i++) {
-    if (i == 0)
-      sprintf(str,
-               "%sCopyright (C) %s\n", str, copyright[i]);
-    else
-      sprintf(str,
-               "%s              %s\n", str, copyright[i]);
-  }
-  sprintf(str, "%sAll rights reserved.\n", str);
+           "\nThe HMM-Based Speech Synthesis Engine \"hts_engine API\"\n"
+           "hts_engine API version %s (%s)\n"
+           "Copyright (C) %s\n"
+           "All rights reserved.\n", HTS_VERSION, HTS_URL, HTS_COPYRIGHT);
 
   return;
 }

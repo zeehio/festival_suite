@@ -81,9 +81,9 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
   TCData *f =new TCData(TCHI_LAST);
 
   syl=tc_get_syl(seg);
-  nsyl=tc_get_syl(seg->next()); 
-  if(seg->next()->next())
-    nnsyl=tc_get_syl(seg->next()->next());
+    nsyl=tc_get_syl(inext(seg)); 
+    if(inext(inext(seg)))
+        nnsyl=tc_get_syl(inext(inext(seg)));
   else nnsyl = 0;
 
   // This segment features
@@ -109,7 +109,7 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
   else 
     (*f)[BAD_DUR]=0;
 
-  if(seg->next()->f_present("bad_dur"))
+    if(inext(seg)->f_present("bad_dur"))
     (*f)[NBAD_DUR]=1;
   else 
     (*f)[NBAD_DUR]=0;
@@ -119,7 +119,7 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
   else 
     (*f)[BAD_OOL]=0;
 
-  if(seg->next()->f_present("bad_lex"))
+    if(inext(seg)->f_present("bad_lex"))
     (*f)[NBAD_OOL]=1;
   else 
     (*f)[NBAD_OOL]=0;
@@ -151,7 +151,7 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
   //cout << "NSEG: " << seg->next()->S("name") << " is sil: " 
   //    << ph_is_silence(seg->next()->S("name")) << endl;
 
-  if(ph_is_silence(seg->next()->S("name")))
+    if(ph_is_silence(inext(seg)->S("name")))
     (*f)[N_SIL]=1;
   else
     (*f)[N_SIL]=0;
@@ -159,7 +159,7 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
   //cout << "NSEG: " << seg->next()->S("name") << " is vowel: " 
   //   << ph_is_vowel(seg->next()->S("name")) << endl;
 
-  if(ph_is_vowel(seg->next()->S("name")))
+    if(ph_is_vowel(inext(seg)->S("name")))
     (*f)[N_VOWEL]=1;
   else
     (*f)[N_VOWEL]=0;
@@ -178,13 +178,13 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
       //cout << "no nsyl: " << endl;
     }
 
-  if(seg->next()->next())
+    if(inext(inext(seg)))
     {
       //cout << "RC: " << seg->next()->next()->S("name")
       //<< " " << simple_phone(seg->next()->next()->S("name"))
       //	   << endl;
-      (*f)[RC]=simple_phone(seg->next()->next()->S("name"));
-      (*f)[NNBAD_DUR]=seg->next()->next()->f_present("bad_dur");
+        (*f)[RC]=simple_phone(inext(inext(seg))->S("name"));
+        (*f)[NNBAD_DUR]=inext(inext(seg))->f_present("bad_dur");
     }
   else
     {
@@ -202,10 +202,10 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
     (*f)[NNSYL]=0;
 
   // Prev seg syl feature
-  if(seg->prev())
+    if(iprev(seg))
     {
-      (*f)[LC]=simple_phone(seg->prev()->S("name"));
-      (*f)[PBAD_DUR]=seg->prev()->f_present("bad_dur");
+        (*f)[LC]=simple_phone(iprev(seg)->S("name"));
+        (*f)[PBAD_DUR]=iprev(seg)->f_present("bad_dur");
     }
   else
     {
@@ -213,7 +213,7 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
     (*f)[PBAD_DUR]=0;
     }  
 
-  if(seg->prev() && (syl=tc_get_syl(seg->prev())))
+    if(iprev(seg) && (syl=tc_get_syl(iprev(seg))))
     (*f)[PSYL]=simple_id(syl->S("id"));
   else
     (*f)[PSYL]=0;
@@ -226,19 +226,19 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
   
 
   // Next seg word features
-  if((word=tc_get_word(seg->next())))
+    if((word=tc_get_word(inext(seg))))
     (*f)[NWQRD]=simple_id(word->S("id"));
   else
     (*f)[NWQRD]=0;
 
   // next next seg word feature
-  if(seg->next()->next() && (word=tc_get_word(seg->next()->next())))
+    if(inext(inext(seg)) && (word=tc_get_word(inext(inext(seg)))))
     (*f)[NNWQRD]=simple_id(word->S("id"));
   else
     (*f)[NNWQRD]=0;
 
   // Prev seg word feature
-    if(seg->prev() && (word=tc_get_word(seg->prev())))
+    if(iprev(seg) && (word=tc_get_word(iprev(seg))))
       (*f)[PWQRD]=simple_id(word->S("id"));
     else
       (*f)[PWQRD]=0;
@@ -288,7 +288,7 @@ TCData *EST_FlatTargetCost::flatpack(EST_Item *seg) const
     }
 
   // next seg punc and pos
-  if ((word=tc_get_word(seg->next())))
+    if ((word=tc_get_word(inext(seg))))
     {
       (*f)[NPOS]=simple_pos(word->S("pos"));
       (*f)[NPUNC]=simple_punc(parent(word,"Token")->S("punc","NONE"));
@@ -508,7 +508,7 @@ static int get_bad_f0(const EST_Item *seg)
   // the f0 (i.e. fv->a_no_check( fv->n()-1 ) )
 
   EST_String left(seg->S("name"));
-  EST_String right(seg->next()->S("name"));
+  EST_String right(inext(seg)->S("name"));
   
   EST_FVector *fv = 0;
   int penalty = 0;
@@ -523,12 +523,12 @@ static int get_bad_f0(const EST_Item *seg)
       penalty += 1;
   }
   
-  if( seg->next()->f_present("midcoef") && 
+  if( inext(seg)->f_present("midcoef") && 
       ( ph_is_vowel( right )
 	|| ph_is_approximant( right )
 	|| ph_is_liquid( right )
 	|| ph_is_nasal( right ) ) ){
-    fv = fvector( seg->next()->f("midcoef") );
+      fv = fvector( inext(seg)->f("midcoef") );
     if( fv->a_no_check(fv->n()-1) == -1.0 ) // means unvoiced 
       penalty += 1;
   }

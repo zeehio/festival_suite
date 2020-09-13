@@ -70,7 +70,7 @@ void rescoreCandidates( EST_VTCandidate *candidates, float beam_width, float mul
   // get all scores to work out what durations are "suitable"
   for( EST_VTCandidate *it = candidates; it != 0; it=it->next ){
     ph1 = it->s;
-    ph2 = ph1->next();
+        ph2 = inext(ph1);
     //       ph1_mid = fvector( ph1->f( "midcoef" ) );
     //       ph2_mid = fvector( ph2->f( "midcoef" ) );
     

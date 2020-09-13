@@ -110,11 +110,11 @@ float EST_TargetCost::apml_accent_cost() const
 	return 1.0;
     }
 
-  if( ph_is_vowel(targ->next()->features().val("name").String()) && 
-      !ph_is_silence(targ->next()->features().val("name").String()) )
+    if( ph_is_vowel(inext(targ)->features().val("name").String()) && 
+        !ph_is_silence(inext(targ)->features().val("name").String()) )
     {
-      tsyl = tc_get_syl(targ->next());
-      csyl = tc_get_syl(cand->next());
+        tsyl = tc_get_syl(inext(targ));
+        csyl = tc_get_syl(inext(cand));
       
       // Can't assume candidate and target identities are the same
       // (because of backoff to a silence for example)
@@ -165,11 +165,11 @@ float EST_TargetCost::stress_cost() const
 	}
     }
   
-  if( ph_is_vowel(targ->next()->features().val("name").String()) &&
-      !ph_is_silence(targ->next()->features().val("name").String()) )
+    if( ph_is_vowel(inext(targ)->features().val("name").String()) &&
+        !ph_is_silence(inext(targ)->features().val("name").String()) )
     {
-      tsyl = tc_get_syl(targ->next());
-      csyl = tc_get_syl(cand->next());
+        tsyl = tc_get_syl(inext(targ));
+        csyl = tc_get_syl(inext(cand));
 
       // Can't assume candidate and target identities are the same
       // (because of backoff to a silence for example)
@@ -198,13 +198,13 @@ float EST_TargetCost::position_in_syllable_cost() const
    tcpos_t cand_pos = TCPOS_MEDIAL;
 
    const EST_Item *targ_syl = tc_get_syl(targ);
-   const EST_Item *targ_next_syl = tc_get_syl(targ->next());
-   const EST_Item *targ_next_next_syl = tc_get_syl(targ->next()->next());
-   const EST_Item *targ_prev_syl = tc_get_syl(targ->prev());
+    const EST_Item *targ_next_syl = tc_get_syl(inext(targ));
+    const EST_Item *targ_next_next_syl = tc_get_syl(inext(inext(targ)));
+    const EST_Item *targ_prev_syl = tc_get_syl(iprev(targ));
    const EST_Item *cand_syl = tc_get_syl(cand);
-   const EST_Item *cand_next_syl = tc_get_syl(cand->next());
-   const EST_Item *cand_next_next_syl = tc_get_syl(cand->next()->next());
-   const EST_Item *cand_prev_syl = tc_get_syl(cand->prev());
+    const EST_Item *cand_next_syl = tc_get_syl(inext(cand));
+    const EST_Item *cand_next_next_syl = tc_get_syl(inext(inext(cand)));
+    const EST_Item *cand_prev_syl = tc_get_syl(iprev(cand));
    
    if( targ_syl != targ_next_syl )
      targ_pos = TCPOS_INTER;
@@ -229,13 +229,13 @@ float EST_TargetCost::position_in_word_cost() const
   tcpos_t cand_pos = TCPOS_MEDIAL;
   
   const EST_Item *targ_word = tc_get_word(targ);
-  const EST_Item *targ_next_word = tc_get_word(targ->next());
-  const EST_Item *targ_next_next_word = tc_get_word(targ->next()->next());
-  const EST_Item *targ_prev_word = tc_get_word(targ->prev());
+    const EST_Item *targ_next_word = tc_get_word(inext(targ));
+    const EST_Item *targ_next_next_word = tc_get_word(inext(inext(targ)));
+    const EST_Item *targ_prev_word = tc_get_word(iprev(targ));
   const EST_Item *cand_word = tc_get_word(cand);
-  const EST_Item *cand_next_word = tc_get_word(cand->next());
-  const EST_Item *cand_next_next_word = tc_get_word(cand->next()->next());
-  const EST_Item *cand_prev_word = tc_get_word(cand->prev());
+    const EST_Item *cand_next_word = tc_get_word(inext(cand));
+    const EST_Item *cand_next_next_word = tc_get_word(inext(inext(cand)));
+    const EST_Item *cand_prev_word = tc_get_word(iprev(cand));
   
   if( targ_word != targ_next_word )
     targ_pos = TCPOS_INTER;
@@ -271,11 +271,10 @@ float EST_TargetCost::position_in_phrase_cost() const
 
 float EST_TargetCost::punctuation_cost() const
 {
-
   const EST_Item *targ_word = tc_get_word(targ);
   const EST_Item *cand_word = tc_get_word(cand);
-  const EST_Item *next_targ_word = tc_get_word(targ->next());
-  const EST_Item *next_cand_word = tc_get_word(cand->next());
+    const EST_Item *next_targ_word = tc_get_word(inext(targ));
+    const EST_Item *next_cand_word = tc_get_word(inext(cand));
 
   float score = 0.0;
 
@@ -320,8 +319,8 @@ float EST_TargetCost::partofspeech_cost() const
     return 1;
 
   // Compare right phone half of diphone
-  const EST_Item *targ_right_word = tc_get_word(targ->next());
-  const EST_Item *cand_right_word = tc_get_word(cand->next());
+    const EST_Item *targ_right_word = tc_get_word(inext(targ));
+    const EST_Item *cand_right_word = tc_get_word(inext(cand));
 
   if(!targ_right_word && !cand_right_word)
     return 0;
@@ -339,9 +338,8 @@ float EST_TargetCost::partofspeech_cost() const
 
 float EST_TargetCost::left_context_cost() const
 {
-  
-  EST_Item *targ_context = targ->prev();
-  EST_Item *cand_context = cand->prev();
+    EST_Item *targ_context = iprev(targ);
+    EST_Item *cand_context = iprev(cand);
   
   if ( !targ_context && !cand_context)
      return 0;
@@ -354,8 +352,8 @@ float EST_TargetCost::left_context_cost() const
 float EST_TargetCost::right_context_cost() const
 {
   
-  EST_Item *targ_context = targ->next()->next();
-  EST_Item *cand_context = cand->next()->next();
+    EST_Item *targ_context = inext(inext(targ));
+    EST_Item *cand_context = inext(inext(cand));
   
   if ( !targ_context && !cand_context)
     return 0;
@@ -374,8 +372,8 @@ float EST_TargetCost::out_of_lex_cost() const
       != targ->f_present(ool_feat) )
     return 1.0;
   
-  if( cand->next()->f_present(ool_feat) 
-      != targ->next()->f_present(ool_feat) )
+    if( inext(cand)->f_present(ool_feat) 
+        != inext(targ)->f_present(ool_feat) )
     return 1.0;
 
   return 0.0;
@@ -390,16 +388,17 @@ float EST_TargetCost::bad_duration_cost() const
       != targ->f_present(bad_dur_feat) )
     return 1.0;
   
-  if( cand->next()->f_present(bad_dur_feat) 
-      != targ->next()->f_present(bad_dur_feat) )
+    if( inext(cand)->f_present(bad_dur_feat) 
+        != inext(targ)->f_present(bad_dur_feat) )
     return 1.0;
   // If the segments next to these segments are bad, then these ones are probably wrong too!
-  if( cand->prev() && targ->prev() && ( cand->prev()->f_present(bad_dur_feat) 
-					!= targ->prev()->f_present(bad_dur_feat) ) )
+    if( iprev(cand) && iprev(targ) && ( iprev(cand)->f_present(bad_dur_feat) 
+                                        != iprev(targ)->f_present(bad_dur_feat) ) )
     return 1.0;
   
-  if( cand->next()->next() && targ->next()->next() && ( cand->next()->next()->f_present(bad_dur_feat) 
-							!= targ->next()->next()->f_present(bad_dur_feat) ) )
+    if( inext(inext(cand)) && inext(inext(targ)) &&
+        ( inext(inext(cand))->f_present(bad_dur_feat)
+          != inext(inext(targ))->f_present(bad_dur_feat) ) )
     return 1.0;
 
   
@@ -412,7 +411,7 @@ float EST_TargetCost::bad_f0_cost() const
   // the f0 (i.e. fv->a_no_check( fv->n()-1 ) )
 
   const EST_Item *cand_left = cand;
-  const EST_Item *cand_right = cand_left->next();
+    const EST_Item *cand_right = inext(cand_left);
 
   const EST_String &left_phone(  cand_left->features().val("name").String()  );
   const EST_String &right_phone( cand_right->features().val("name").String() );  
@@ -515,11 +514,10 @@ float EST_APMLTargetCost::operator()(const EST_Item* targ, const EST_Item* cand)
 
 float EST_SingingTargetCost::pitch_cost() const
 {
-
   const EST_Item *targ_word = tc_get_word(targ);
   const EST_Item *cand_word = tc_get_word(cand);
-  const EST_Item *next_targ_word = tc_get_word(targ->next());
-  const EST_Item *next_cand_word = tc_get_word(cand->next());
+    const EST_Item *next_targ_word = tc_get_word(inext(targ));
+    const EST_Item *next_cand_word = tc_get_word(inext(cand));
   const float threshold = 0.1;
   float targ_pitch, cand_pitch;
   LISP l_tmp;
@@ -583,11 +581,10 @@ float EST_SingingTargetCost::pitch_cost() const
 
 float EST_SingingTargetCost::duration_cost() const
 {
-
   const EST_Item *targ_word = tc_get_word(targ);
   const EST_Item *cand_word = tc_get_word(cand);
-  const EST_Item *next_targ_word = tc_get_word(targ->next());
-  const EST_Item *next_cand_word = tc_get_word(cand->next());
+    const EST_Item *next_targ_word = tc_get_word(inext(targ));
+    const EST_Item *next_cand_word = tc_get_word(inext(cand));
   float targ_dur, cand_dur;
   LISP l_tmp;
 
@@ -734,7 +731,7 @@ static EST_String ff_tobi_accent(const EST_Item *s)
     EST_Item *nn = as(s,"Intonation");
     EST_Item *p;
 
-    for (p=daughter1(nn); p; p=p->next())
+    for (p=daughter1(nn); p; p=inext(p))
 	if (p->name().contains("*"))
 	    return p->name();
     return "NONE";
@@ -746,7 +743,7 @@ static EST_String ff_tobi_endtone(const EST_Item *s)
     EST_Item *nn = as(s,"Intonation");
     EST_Item *p;
 
-    for (p=daughter1(nn); p; p=p->next())
+    for (p=daughter1(nn); p; p=inext(p))
     {
 	EST_String l = p->name();
 	if ((l.contains("%")) || (l.contains("-")))

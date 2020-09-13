@@ -88,15 +88,24 @@ static void audsp_send(const char *c)
 	festival_error();
     }
 	
-    if (write(audfds[0],c,strlen(c))!= (int)strlen(c)) {
-        cerr << "Could not write to audio spooler pipe" << endl;
+    if ((unsigned int)write(audfds[0],c,strlen(c)) !=
+        (unsigned int)strlen(c))
+    {
+	cerr << "Audio spooler has died unexpectedly" << endl;
+	audsp_mode = FALSE;
+	festival_error();
     }
-    if (write(audfds[0],"\n",1) != 1){
-        cerr << "Could not write to audio spooler pipe" << endl;
+    if (write(audfds[0],"\n",1) != 1)
+    {
+	cerr << "Audio spooler has died unexpectedly" << endl;
+	audsp_mode = FALSE;
+	festival_error();
     }
-
-    if (read(audfds[1],reply,3) != 3) {
-        cerr << "Could not read confirmation from the audio spooler" << endl;  /* confirmation */
+    if (read(audfds[1],reply,3) != 3)  /* confirmation */
+    {
+	cerr << "Audio spooler has died unexpectedly" << endl;
+	audsp_mode = FALSE;
+	festival_error();
     }
 }
 
@@ -214,6 +223,7 @@ static int start_sub_process(int *fds, int argc, char **argv)
     int pid;
     int in[2];
     int out[2];
+    (void)argc;
 
     if ((pipe(in) != 0) ||
 	(pipe(out) != 0))
@@ -229,7 +239,6 @@ static int start_sub_process(int *fds, int argc, char **argv)
 	dup2(in[0],0);         /* reassign stdin to the pipe */
 	close(out[0]);
 	dup2(out[1],1);        /* reassign stdout to the pipe */
-    if (argc > 0)          /* If program name is given, use it */
       execvp(argv[0],argv);
 	cerr << "pipe_open: failed to start " << argv[0] << endl;
 	exit(-1);      /* should only get here on failure */

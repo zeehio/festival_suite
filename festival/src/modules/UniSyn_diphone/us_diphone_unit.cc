@@ -51,7 +51,7 @@ void dur_to_end(EST_Relation &r)
 {
     float prev_end = 0;
 
-    for (EST_Item *p = r.head(); p ; p = p->next())
+    for (EST_Item *p = r.head(); p ; p = inext(p))
     {
 	p->set("end", p->F("dur") + prev_end);
 	prev_end = p->F("end");
@@ -115,8 +115,8 @@ void parse_diphone_times(EST_Relation &diphone_stream,
     float t_time = 0.0, end;
     p_time = 0.0;
 
-    for (s = source_lab.head(), u = diphone_stream.head(); u; u = u->next(), 
-	 s = s->next())
+    for (s = source_lab.head(), u = diphone_stream.head(); u; u = inext(u), 
+             s = inext(s))
     {
 	pm = track(u->f("coefs"));
 	
@@ -218,7 +218,7 @@ void load_separate_diphone(int unit, bool keep_full,
     // go to the periods before and after
     samp_start = (int)(full_coefs.t(Gof((pm_start - 1), 0))
 		       * (float)full_sig.sample_rate());
-    if (pm_end+1 < full_coefs.num_frames())
+    if (pm_end+2 < full_coefs.num_frames())
 	pm_end++;
 
     samp_end = (int)(full_coefs.t(pm_end) * (float)full_sig.sample_rate());
@@ -242,7 +242,7 @@ void load_full_diphone(int unit)
     // someone else may clear them.  Note the full file is loaded
     // each time which isn't optimal if there are multiple diphones
     // is the same file
-    /*int pm_start, pm_end, pm_middle;*/
+    // int pm_start, pm_end, pm_middle;
     EST_Track *full_coefs;
 
     full_coefs = new EST_Track;

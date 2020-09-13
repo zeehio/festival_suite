@@ -58,6 +58,7 @@
                          SAYAS |
                          LANGUAGE |
                          SPEAKER |
+                         BC |
 			 DIV">
 
 <!ELEMENT SABLE (#PCDATA| %baseelements; )*>
@@ -90,6 +91,18 @@
 <!ATTLIST SAYAS MODE (literal|date|time|phone|net|postal|currency|math|fraction|measure|ordinal|cardinal|name) #REQUIRED
                 MODETYPE (DMY|MDY|YMD|YM|MY|MD|HM|HMS|EMAIL|URL) #IMPLIED
 		MARK CDATA #IMPLIED>
+<!ELEMENT BC  ( #PCDATA) >
+<!ATTLIST BC  SYL1_DUR CDATA #IMPLIED
+              SYL1_PITCH1 CDATA #IMPLIED
+              SYL1_PITCH2 CDATA #IMPLIED
+              SYL1_PITCH3 CDATA #IMPLIED
+              SYL1_RMS_POW CDATA #IMPLIED
+              SYL2_DUR CDATA #IMPLIED
+              SYL2_PITCH1 CDATA #IMPLIED
+              SYL2_PITCH2 CDATA #IMPLIED
+              SYL2_PITCH3 CDATA #IMPLIED
+              SYL2_RMS_POW CDATA #IMPLIED
+              ZSCORE CDATA #IMPLIED>
 
 <!-- The nestable ones -->
 

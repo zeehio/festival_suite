@@ -46,25 +46,6 @@ AC_PROG_INSTALL
 AC_LANG(C++)
 # Checks for libraries.
 
-# Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h unistd.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
-AC_C_INLINE
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-
-# Checks for library functions.
-AC_FUNC_FORK
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_FUNC_STRTOD
-AC_CHECK_FUNCS([dup2 gethostbyaddr gethostbyname inet_ntoa memmove memset pow putenv rint select socket sqrt strchr strdup strrchr strstr strtol])
-
-if test "x$GCC" = "xyes"; then
-	CFLAGS="$CFLAGS -Wall"
-fi
 AC_PROG_RANLIB
 AC_CHECK_TOOL(AR, ar)
 

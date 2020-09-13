@@ -52,7 +52,7 @@ H = UnitSelection.h \
     EST_TargetCost.h TargetCostRescoring.h \
     EST_JoinCost.h EST_JoinCostCache.h \
     DiphoneBackoff.h safety.h EST_DiphoneCoverage.h \
-    EST_FlatTargetCost.h
+    EST_FlatTargetCost.h EST_HybridTargetCost.h
 
 
 SRCS =  UnitSelection.cc \
@@ -61,7 +61,7 @@ SRCS =  UnitSelection.cc \
         EST_TargetCost.cc TargetCostRescoring.cc \
         EST_JoinCost.cc EST_JoinCostCache.cc \
 	DiphoneBackoff.cc EST_DiphoneCoverage.cc \
-        EST_FlatTargetCost.cc
+        EST_FlatTargetCost.cc EST_HybridTargetCost.cc
 
 OBJS = $(SRCS:.cc=.o)
 

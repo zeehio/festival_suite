@@ -147,7 +147,7 @@ int DiphoneBackoff::backoff(EST_Item *p1)
 
   if(! p1)
     EST_error("Backoff received null item.");
-  if ( ! (p2 = p1->next()) )
+    if ( ! (p2 = inext(p1)) )
     EST_error("Backoff didn't get passed a diphone.");
 
   n1=p1->S("name");
@@ -187,7 +187,7 @@ int DiphoneBackoff::backoff(EST_Item *p1)
 	      full_sub = EST_String::cat(full_sub," ",sub);
 	      pp->insert_after();
 	      pps = pp->as_relation("SylStructure");
-	      pp = pp->next();
+                pp = inext(pp);
 	      // insert in SylStructure as well.
 	      pps->insert_after(pp);
 

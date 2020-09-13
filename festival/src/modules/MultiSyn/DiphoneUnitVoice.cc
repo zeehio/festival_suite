@@ -89,7 +89,7 @@ static void my_parse_diphone_times(EST_Relation &diphone_stream,
   // the unit linked list *may be* shorter that the segment list. 
   //(admittedly could cause confusion)
 
-  for( s=source_lab.head(), u=diphone_stream.head(); (u!=0)&&(s!=0); u=u->next(), s=s->next()){
+  for( s=source_lab.head(), u=diphone_stream.head(); (u!=0)&&(s!=0); u=inext(u), s=inext(s)){
     EST_Track *pm = track(u->f("coefs"));
     
     int end_frame = pm->num_frames() - 1;
@@ -104,7 +104,7 @@ static void my_parse_diphone_times(EST_Relation &diphone_stream,
     u->set("end", p_time);
     
     if( u->f_present("extendRight") ){//because diphone squeezed out (see above)
-      s = s->next();
+        s = inext(s);
       s->set("end", p_time );
     }
   }
@@ -128,7 +128,9 @@ DiphoneUnitVoice::DiphoneUnitVoice( const EST_StrList& basenames,
 				    const EST_String& uttExt,
 				    const EST_String& wavExt,
 				    const EST_String& pmExt,
-				    const EST_String& coefExt )
+				    const EST_String& JCCoefExt,
+            const EST_String& TCCoefExt )
+
   : pruning_beam( -1 ),
     ob_pruning_beam( -1 ),
     tc_rescoring_beam( -1 ),
@@ -150,7 +152,7 @@ DiphoneUnitVoice::DiphoneUnitVoice( const EST_StrList& basenames,
   // make the default voice module with the supplied parameters
   addVoiceModule( basenames, uttDir, wavDir, pmDir, coefDir,
 		  wav_srate,
-		  uttExt, wavExt, pmExt, coefExt );
+		  uttExt, wavExt, pmExt, JCCoefExt, TCCoefExt );
 
   diphone_backoff_rules = 0;
 }
@@ -178,7 +180,8 @@ bool DiphoneUnitVoice::addVoiceModule( const EST_StrList& basenames,
 				       const EST_String& uttExt,
 				       const EST_String& wavExt,
 				       const EST_String& pmExt,
-				       const EST_String& coefExt )
+				       const EST_String& JCCoefExt,
+               const EST_String& TCCoefExt )
 
 {
   DiphoneVoiceModule *vm;
@@ -189,7 +192,7 @@ bool DiphoneUnitVoice::addVoiceModule( const EST_StrList& basenames,
 
   vm = new DiphoneVoiceModule( basenames, uttDir, wavDir, pmDir, coefDir,
 			       srate,
-			       uttExt, wavExt, pmExt, coefExt );
+			       uttExt, wavExt, pmExt, JCCoefExt, TCCoefExt );
   CHECK_PTR(vm);
   
   registerVoiceModule( vm );
@@ -280,7 +283,7 @@ void DiphoneUnitVoice::fillUnitRelation( EST_Relation *units, const EST_VTPath *
 {
   EST_Item *it=units->tail();
 
-  for ( ; path != 0 && it != 0; path=path->from, it=it->prev() ){
+  for ( ; path != 0 && it != 0; path=path->from, it=iprev(it) ){
     EST_Track *coefs = new EST_Track;
     CHECK_PTR(coefs);
     EST_Wave *sig = new EST_Wave;
@@ -335,7 +338,7 @@ void DiphoneUnitVoice::fillUnitRelation( EST_Relation *units, const EST_VTPath *
 //     np->score = c->score;
 //   else{
 //     // join cost between right edge of left diphone and vice versa
-//     np->score = p->score + c->score + jcost( p->c->s->next(), c->s );
+//     np->score = p->score + c->score + jcost( inext(p->c->s), c->s );
 //   }
 //   return np;
 // }
@@ -479,10 +482,10 @@ void DiphoneUnitVoice::getUnitSequence( EST_Utterance  *utt )
     EST_error( "Segment relation is empty" );
 
   bool extendLeftFlag = false;
-  for( ; it->next(); it=it->next() )
+  for( ; inext(it); it=inext(it) )
     {
       EST_String l = it->S("name");
-      EST_String r = it->next()->S("name");
+      EST_String r = inext(it)->S("name");
 
       EST_String diphone_name = EST_String::cat(l,"_",r);
       EST_String orig = diphone_name;
@@ -505,19 +508,19 @@ void DiphoneUnitVoice::getUnitSequence( EST_Utterance  *utt )
 
 	  if((s1 = parent(it,"SylStructure")))
 	    w1= parent(s1,"SylStructure");
-	  if( (s2 = parent(it->next(),"SylStructure")))
+	  if( (s2 = parent(inext(it),"SylStructure")))
 	    w2= parent(s2,"SylStructure");
 
 	  if( w1 && w2 && (w1 != w2) )
 	    {
 	      EST_Item *sil;
 
-	      cerr << " Interword so inseting silence.\n";
+	      cerr << " Interword so inserting silence.\n";
 
 	      sil = it->insert_after();
 	      sil->set("name",ph_silence());
 
-	      r = it->next()->S("name");
+	      r = inext(it)->S("name");
 	      diphone_name = EST_String::cat(l,"_",r);
 
 	    }
@@ -558,7 +561,7 @@ void DiphoneUnitVoice::getUnitSequence( EST_Utterance  *utt )
       //    while(!this->unitAvailable(diphone_name) && 
       //          diphone_backoff_rules && 
       //          !diphone_backoff_rules->backoff(it))
-      //      diphone_name = EST_String::cat(it->S("name"),"_",it->next()->S("name"));
+      //      diphone_name = EST_String::cat(it->S("name"),"_",inext(it)->S("name"));
       
       if( !this->unitAvailable( diphone_name ) ){
 	missing_diphones.append( diphone_name );
@@ -801,8 +804,8 @@ void DiphoneUnitVoice::getCopyUnitUtterance( const EST_String &utt_fname,
       EST_error( "Segment relation is empty" );
     else{
       ph2 = it->S("name");    
-      while( ((it=it->prev())!=0) && 
-	     ((db_utt_seg_it=db_utt_seg_it->prev())!=0) ){
+      while( ((it=iprev(it))!=0) && 
+	     ((db_utt_seg_it=iprev(db_utt_seg_it))!=0) ){
 	EST_Track *coefs = new EST_Track;
 	CHECK_PTR(coefs);
 	EST_Wave *sig = new EST_Wave;
@@ -830,7 +833,7 @@ void DiphoneUnitVoice::getCopyUnitUtterance( const EST_String &utt_fname,
     my_parse_diphone_times( *units, *segs );
     
     // this is for copy synthesis, so copy actual timings
-    //for( EST_Item *seg = segs->head(); it!=0; it=it->next() )
+    //for( EST_Item *seg = segs->head(); it!=0; it=inext(it) )
       //seg->set( "end", seg->F("source_end") );
   }  
 }

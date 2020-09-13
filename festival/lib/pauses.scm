@@ -41,7 +41,8 @@ Insert pauses where required."
      (rval rval) ;; new style
      (t
       (Classic_Pauses utt))))
-  (Pause_optional_deleting_B_X utt))
+  (Pause_optional_deleting_B_X utt)
+  utt)
 
 (define (Classic_Pauses utt)
   "(Pauses UTT)

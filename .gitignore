@@ -15,6 +15,7 @@ festival/bin/festival_client
 festival/bin/festival_server
 festival/bin/festival_server_control
 festival/bin/text2wave
+festival/bin/default_voices
 festival/config.log
 festival/config.status
 festival/config/config

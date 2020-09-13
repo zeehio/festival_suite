@@ -31,8 +31,9 @@
 ;;;                                                                       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;  Some specific tokens etc that might cause problems
-
 (require 'festtest)
+(require 'languages)
+(language.select 'british_english)
 
 ;;; Test the tokenization
 (test_words "e.g. 12,000 pounds")

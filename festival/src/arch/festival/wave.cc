@@ -559,14 +559,14 @@ static void utt_save_f0_from_targets(EST_Utterance *u,EST_String &filename)
   EST_Item *s;
     EST_Track f0;
     float p = 0.0;
-    float length = u->relation("Segment")->last()->f("end");
+    float length = u->relation("Segment")->rlast()->f("end");
     int i,frames = (int)(length / 0.010);
     f0.resize(frames,4);
     
     EST_Item *ptval, *tval;
 
-    ptval = tval = u->relation("Target")->first_leaf();
-    for (i=0,s=u->relation("Segment")->first(); s != 0; s=s->next())
+    ptval = tval = first_leaf(u->relation("Target")->first());
+    for (i=0,s=u->relation("Segment")->first(); s != 0; s=inext(s))
     {
 	if (i >= frames)
 	    break;  // may hit here one before end
@@ -661,12 +661,13 @@ static LISP utt_send_wave_client(LISP utt)
 #ifdef WIN32
     if (send(ft_server_socket,"WV\n",3,0) != 3) {
         std::cerr << "Error sending wave to client" << std::endl;
-        return NIL;
+	festival_error();
     }
 #else
-    if (write(ft_server_socket,"WV\n",3) != 3) {
-        std::cerr << "Error sending wave to client" << std::endl;
-        return NIL;
+    if (write(ft_server_socket,"WV\n",3) != 3)
+    {
+	cerr << "utt_send_wave_client: failed to acknowledge wave" << endl;
+	festival_error();
     }
 #endif
     socket_send_file(ft_server_socket,tmpfile);
@@ -705,12 +706,13 @@ static LISP utt_send_wave_asterisk(LISP utt)
 #ifdef WIN32
     if (send(ft_server_socket,"WV\n",3,0) != 3) {
         std::cerr << "Error sending wave to asterisk" << std::endl;
-        return NIL;
+	festival_error();
     }
 #else
-    if (write(ft_server_socket,"WV\n",3) != 3) {
-        std::cerr << "Error sending wave to asterisk" << std::endl;
-        return NIL;
+    if (write(ft_server_socket,"WV\n",3) != 3)
+    {
+	cerr << "utt_send_wave_client: failed to acknowledge wave" << endl;
+	festival_error();
     }
 #endif
     socket_send_file(ft_server_socket,tmpfile);
@@ -736,13 +738,14 @@ static LISP send_sexpr_to_client(LISP l)
     fclose(fd);
 #ifdef WIN32
     if (send(ft_server_socket,"LP\n",3,0) != 3) {
-        std::cerr << "Error sending expression to client" << std::endl;
-        return NIL;
+	cerr << "utt_send_wave_client: failed to acknowledge wave" << endl;
+	festival_error();
     }
 #else
-    if (write(ft_server_socket,"LP\n",3) != 3) {
-        std::cerr << "Error sending expression to client" << std::endl;
-        return NIL;
+    if (write(ft_server_socket,"LP\n",3) != 3)
+    {
+	cerr << "utt_send_wave_client: failed to acknowledge wave" << endl;
+	festival_error();
     }
 #endif
     socket_send_file(ft_server_socket,tmpfile);

@@ -30,6 +30,11 @@
 ##  THIS SOFTWARE.                                                       ##
 ##                                                                       ##
 ###########################################################################
+## To build the documentation you will have to run "make doc" from       ##
+## this directory.                                                       ##
+## You will need latex, dvips, makeinfo and having built festival        ##
+###########################################################################
+
 TOP=..
 DIRNAME=doc
 
@@ -68,21 +73,17 @@ festival.info: festival.texi festfunc.texi festvars.texi festfeat.texi
 	@ cp festfunc.texi info/festfunc.texi
 	@ cp festvars.texi info/festvars.texi
 	@ cp festfeat.texi info/festfeat.texi
-	( cd info; makeinfo festival.texi )
+	( cd info; makeinfo --output festival.info festival.texi )
 	@ rm info/*.texi
 
 festival.html: festival.texi festfunc.texi festvars.texi
 	@ if [ ! -d html ] ; \
           then mkdir -p html ; fi
 	(cd html; makeinfo --html --ifinfo  ../festival.texi)
-# give the html files background color of white
-	#@ for i in html/*.html ; \
-	#  do \
-	#    sed 's/<BODY>/<BODY bgcolor="#ffffff">/' $$i >ttt.html; \
-	#    mv ttt.html $$i ; \
-	#  done
+
 festival.ps: festival.dvi
 	dvips -f festival.dvi >festival.ps
+
 festival.dvi: festival.texi festfunc.texi festvars.texi
 	tex festival.texi
 	texindex festival.cp
@@ -90,8 +91,8 @@ festival.dvi: festival.texi festfunc.texi festvars.texi
 
 doc:	festival.ps festival.html festival.info refcard.ps
 
-festfunc.texi festvars.texi festfeat.texi: $(TOP)/src/main/festival
-	echo "(load_library \"festdoc.scm\") (make-doc)" | $(FESTIVAL)
+festfunc.texi festvars.texi festfeat.texi: $(TOP)/src/main/festival doc.scm
+	$(FESTIVAL) < doc.scm
 
 refcard.dvi:	refcard.tex
 	latex refcard.tex

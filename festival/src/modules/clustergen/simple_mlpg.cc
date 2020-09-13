@@ -77,6 +77,10 @@
 /*                                                                   */
 /*  Modified as a single file for inclusion in festival/flite        */
 /*  May 2008 awb@cs.cmu.edu                                          */
+/*                                                                   */
+/*  Modified again to make it work with cases where the covariance   */
+/*  is too small.                                                    */
+/*  March 2016 pmuthuku@cs.cmu.edu                                   */
 /*-------------------------------------------------------------------*/
 /*                                                                   */
 /*  ML-Based Parameter Generation                                    */
@@ -274,7 +278,6 @@ static double get_like_pdfseq_vit(int dim, int dim2, int dnum, int clsnum,
 
     return like;
 }
-
 #if 0
 static double get_like_gv(long dim2, long dnum, MLPGPARA param)
 {
@@ -759,25 +762,51 @@ static DVECTOR xget_detvec_diamat2inv(DMATRIX covmat)	// [num class][dim]
 {
     long dim, clsnum;
     long i, j;
+    long num_err_frames = 0;
     double det;
     DVECTOR detvec = NODATA;
+    XBOOL zero_determinant_flag;
+
+    // In cases where the determinant of the matrix ends up being
+    // zero, we can fix this by artificially setting the covariance
+    // to be a magic number. I chose this magic number by computing
+    // the mean of all MCEP SDs of all leaves in a standard RMS 
+    // voice. - Prasanna
+    //double magic_covariance = 0.0962*0.0962;
+    double magic_covariance = 0.0962;
 
     clsnum = covmat->row;
     dim = covmat->col;
     // memory allocation
     detvec = xdvalloc(clsnum);
     for (i = 0; i < clsnum; i++) {
+
+        zero_determinant_flag = XFALSE;
+
 	for (j = 0, det = 1.0; j < dim; j++) {
 	    det *= covmat->data[i][j];
 	    if (det > 0.0) {
 		covmat->data[i][j] = 1.0 / covmat->data[i][j];
 	    } else {
-		cst_errmsg("error:(class %ld) determinant <= 0, det = %f\n", i, det);
-                xdvfree(detvec);
-		return NODATA;
+                zero_determinant_flag = XTRUE;
+                covmat->data[i][j] = 1.0 / magic_covariance;
+                det = pow(magic_covariance, (int)j+1); 
+                // should actually be magic_covariance^2
 	    }
 	}
+	
+	if (zero_determinant_flag == XTRUE){
+            num_err_frames++;
+            //printf("Using Prasanna's magic numbers in frame number %d", i);
+	}
+
 	detvec->data[i] = det;
+    }
+
+    if (num_err_frames != 0)
+    {
+        printf("Warning: det <= 0. Using Prasanna's magic numbers in %d of %d frames\n",
+               (int)num_err_frames, (int)clsnum);
     }
 
     return detvec;
@@ -861,7 +890,6 @@ static double get_gauss_dia5(double det,
     return gauss;
 }
 #endif
-
 static double get_gauss_dia(long clsidx,
 		     DVECTOR vec,		// [dim]
 		     DVECTOR detvec,		// [clsnum]
@@ -982,7 +1010,7 @@ LISP mlpg(LISP ltrack)
     {
         get_dltmat(param->stm, &pst.dw, 1, param->dltm);
 
-        /*like = */get_like_pdfseq_vit(dim, dim_st, nframes, nframes, param,
+        get_like_pdfseq_vit(dim, dim_st, nframes, nframes, param,
                                    param_track, XTRUE);
 
         /* vlike = get_like_gv(dim2, dnum, param); */

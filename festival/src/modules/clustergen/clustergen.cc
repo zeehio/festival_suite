@@ -2,7 +2,7 @@
 /*                                                                       */
 /*                   Language Technologies Institute                     */
 /*                     Carnegie Mellon University                        */
-/*                       Copyright (c) 2005-2010                         */
+/*                       Copyright (c) 2005-2017                         */
 /*                        All Rights Reserved.                           */
 /*                                                                       */
 /*  Permission is hereby granted, free of charge, to use and distribute  */
@@ -53,7 +53,7 @@ LISP me_mlsa(LISP ltrack, LISP strtrack) {
 void festival_clustergen_init(void)
 {
     proclaim_module("clustergen_engine",
-                    "Copyright (C) Carnegie Mellon University 2005-2014\n");
+                    "Copyright (C) Carnegie Mellon University 2005-2017\n");
 
     init_subr_3("mlsa_resynthesis", mlsa_resynthesis,
                 "(mlsa_resynthesis TRACK STRTRACK FILTERTRACK)\n\

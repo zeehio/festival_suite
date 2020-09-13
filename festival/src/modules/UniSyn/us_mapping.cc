@@ -72,7 +72,7 @@ using namespace std;
 //     //cout << "Source_pm" << source_pm.equal_space() << endl << endl;
 //     //cout << "Target_pm" << target_pm.equal_space() << endl << endl;
 
-//     for (s = source_lab.head(); s; s = s->next())
+//     for (s = source_lab.head(); s; s = inext(s))
 //     {
 // 	s_end = s->F("source_end");
 // 	t_end = s->F("end");
@@ -126,7 +126,7 @@ void make_segment_single_mapping(EST_Relation &source_lab,
   
   
   
-  for (s = source_lab.head(); s; s = s->next())
+    for (s = source_lab.head(); s; s = inext(s))
     {
 
       //      printf( "*********************************************\nphone %s\n", s->S("name").str());
@@ -188,7 +188,7 @@ void make_segment_single_mapping(EST_Relation &source_lab,
       }
       
       // for next loop
-      if (s->next())
+        if (inext(s))
       {
           s_i_start = s_i_end+1;
           t_i_start = t_i_end+1;
@@ -216,7 +216,7 @@ void make_linear_mapping(EST_Track &pm, EST_IVector &map)
 
 static bool contiguous( const EST_Item*left, const EST_Item* right )
 {
-  if( (item(left->f("source_ph1")))->next() == item(right->f("source_ph1")) )
+    if( (inext(item(left->f("source_ph1")))) == item(right->f("source_ph1")) )
     return true;
   
   return false;
@@ -271,9 +271,9 @@ void make_join_interpolate_mapping( const EST_Track &source_pm,
     voicing[i] = 0;
   }
   // middle loop 
-  for( EST_Item *diphone_right=diphone_left->next(); 
+  for( EST_Item *diphone_right=inext(diphone_left); 
        diphone_right; 
-       diphone_right=diphone_left->next() ){
+       diphone_right=inext(diphone_left) ){
 
     printf( "%s\t%f\n", diphone_left->S("name").str(), diphone_left->F("end"));
     
@@ -286,7 +286,7 @@ void make_join_interpolate_mapping( const EST_Track &source_pm,
 	    right_start_index,
 	    right_end_index );
 
-    EST_String join_phone_name = item(diphone_left->f("ph1"))->next()->S("name");
+    EST_String join_phone_name = inext(item(diphone_left->f("ph1")))->S("name");
 
     cerr << "phone contigous " << contiguous(diphone_left,diphone_right) << endl;
 
@@ -463,9 +463,9 @@ void make_join_interpolate_mapping2( const EST_Track &source_pm,
     voicing[i] = 0;
   }
   // middle loop 
-  for( EST_Item *diphone_right=diphone_left->next(); 
+  for( EST_Item *diphone_right=inext(diphone_left); 
        diphone_right; 
-       diphone_right=diphone_left->next() ){
+       diphone_right=inext(diphone_left) ){
 
     printf( "%s\t%f\n", diphone_left->S("name").str(), diphone_left->F("end"));
     
@@ -478,7 +478,7 @@ void make_join_interpolate_mapping2( const EST_Track &source_pm,
 	    right_start_index,
 	    right_end_index );
 
-    EST_String join_phone_name = item(diphone_left->f("ph1"))->next()->S("name");
+    EST_String join_phone_name = inext(item(diphone_left->f("ph1")))->S("name");
 
     cerr << "phone contigous " << contiguous(diphone_left,diphone_right) << endl;
 
@@ -610,8 +610,7 @@ void make_join_interpolate_mapping2( const EST_Track &source_pm,
 
 void us_mapping(EST_Utterance &utt, const EST_String &method)
 {
-    /*EST_Relation *source_lab;*/
-    EST_Relation *target_lab;
+    EST_Relation /* *source_lab, */ *target_lab;
     EST_IVector *map;
     EST_Track *source_coef=0, *target_coef=0;
 
@@ -694,10 +693,10 @@ void map_to_relation(EST_IVector &map, EST_Relation &r,
 
     EST_Item *last_s = 0;
 
-    for (s = u->relation("smap")->head(); s; s = s->next())
+    for (s = u->relation("smap")->head(); s; s = inext(s))
     {
 	int n = s->I("index");
-	for (t = u->relation("tmap")->head(); t; t = t->next())
+	for (t = u->relation("tmap")->head(); t; t = inext(t))
 	{
 	    if (map(t->I("index")) == n)
 	    {
@@ -731,7 +730,7 @@ void make_segment_double_mapping(EST_Relation &source_lab,
 		    "timings. Expect a truncated utterance.\n");
 
     for (s = source_lab.head(), t = target_lab.head(); s && t; 
-	 s = s->next(), t = t->next())
+	 s = inext(s), t = inext(t))
     {
         if (s->S("name") != t->S("name"))
 	  cerr << "Warning: Source and Target segment names do not match: "
@@ -781,14 +780,14 @@ void make_dp_mapping(EST_Relation &source_lab, EST_Track &source_pm,
     s_start = t_start = 0.0;
 
     // should really be replaced by feature functions.
-    for (prev_end = 0.0, s = source_lab.head(); s; s = s->next())
+    for (prev_end = 0.0, s = source_lab.head(); s; s = inext(s))
     {
 	s->set("start", prev_end);
 	prev_end = s->F("end");
     }
 
     // should really be replaced by feature functions.
-    for (prev_end = 0.0, s = target_lab.head(); s; s = s->next())
+    for (prev_end = 0.0, s = target_lab.head(); s; s = inext(s))
     {
 	s->set("start", prev_end);
 	prev_end = s->F("end");
@@ -799,14 +798,14 @@ void make_dp_mapping(EST_Relation &source_lab, EST_Track &source_pm,
 	EST_warning("Target pitchmarks end before end of target segment "
 		    "timings. Expect a truncated utterance.\n");
 
-    for (s = source_lab.head(); s; s = s->next())
+    for (s = source_lab.head(); s; s = inext(s))
     {
 	s_start = s->F("start");
 
 	cout << "source: " << *s << endl;
 
 	while (s && (!s->in_relation(match_name)))
-	    s = s->next();
+	    s = inext(s);
 
 	cout << "active source: " << *s << endl;
 

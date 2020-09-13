@@ -60,7 +60,6 @@ LISP FT_Int_Targets_General_Utt(LISP utt)
     EST_Utterance *u = get_c_utt(utt);
     EST_Item *s;
     EST_Item *seg;
-    /*EST_Relation *targrel;*/
     LISP gen_params, targets, t;
     LISP tfunc;  // a lisp function that returns list of targets and values
 
@@ -74,9 +73,7 @@ LISP FT_Int_Targets_General_Utt(LISP utt)
 	festival_error();
     }
     
-    /*targrel =*/ u->create_relation("Target");
-    
-    for (s=u->relation("Syllable")->first(); s != 0 ; s=s->next())
+    for (s=u->relation("Syllable")->first(); s != 0 ; s=inext(s))
     {
 	targets = 
           leval(cons(tfunc,cons(utt,cons(siod(s),NIL))),NIL);
@@ -101,7 +98,7 @@ static EST_Item *find_nearest_seg(EST_Utterance *u,float pos)
     // this is not very efficient
     EST_Item *seg;
 
-    for (seg=u->relation("Segment")->first(); seg != 0;seg=seg->next())
+    for (seg=u->relation("Segment")->first(); seg != 0;seg=inext(seg))
     {
 	if (seg->F("end") >= pos)
 	    return seg;
@@ -119,7 +116,7 @@ static void check_targs(EST_Utterance *u)
     EST_Item *t;
     float l = 0.0;
 
-    for (t=u->relation("Target")->first_leaf(); t != 0;t=next_leaf(t))
+    for (t=first_leaf(u->relation("Target")->first()); t != 0;t=next_leaf(t))
     {
 	if (t->F("pos") < l)
 	{
